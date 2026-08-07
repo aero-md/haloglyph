@@ -1,5 +1,15 @@
 # glyphlapse — Spécifications de la préview web
 
+> **La préview a déménagé.** Elle vit maintenant dans le dépôt
+> [`glyph-portal`](https://github.com/aero-md/glyph-portal) et est servie sur
+> **[glyph.suns.red](https://glyph.suns.red)**, avec celles des autres Glyph
+> Toys et un noyau commun — une seule géométrie de hublot, mesurée dans les
+> pixels de la photo, au lieu de trois copies dont deux relevées à l'œil.
+>
+> Ce document décrit l'implémentation d'origine. Il est conservé parce qu'il
+> documente les choix de rendu, qui eux ont été portés tels quels.
+
+
 La préview reproduit le toy dans un navigateur, **posé sur une photo du dos
 d'un Nothing Phone (3)** : la Glyph Matrix est rendue à sa position et à son
 échelle réelles, et le bouton d'interaction est calé sur le Glyph Button

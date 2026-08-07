@@ -1,26 +1,43 @@
 <!doctype html>
 <html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GlyphLapse — préview interactive</title>
-<style>body { margin: 0; background: #0C0D10; }</style>
-</head>
-<body>
-<script>
-/* Charge glyph-lapse-preview.html depuis la branche main (source unique de
-   vérité) et le réécrit dans le document — son <script> inline s'exécute alors
-   normalement (document.write exécute les scripts). */
-(async () => {
-  const SRC = "https://raw.githubusercontent.com/aero-md/glyphlapse/main/glyph-lapse-preview.html";
-  const html = await (await fetch(SRC)).text();
-  document.open();
-  document.write(html);
-  document.close();
-})().catch((e) => {
-  document.body.innerHTML =
-    '<p style="color:#E4E4E1;font-family:monospace;padding:24px">Erreur de chargement : ' + e + "</p>";
-});
-</script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GlyphLapse — la préview a déménagé</title>
+    <!-- La préview vit maintenant sur glyph.suns.red, avec celles des autres
+         Glyph Toys et un noyau commun. GitHub Pages ne sait pas répondre 301 :
+         on redirige donc côté client, et le lien reste cliquable pour ceux qui
+         arrivent avec JavaScript coupé. -->
+    <meta http-equiv="refresh" content="0; url=https://glyph.suns.red/glyphlapse/" />
+    <link rel="canonical" href="https://glyph.suns.red/glyphlapse/" />
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #0c0d10;
+        color: #e4e4e1;
+        font-family: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        text-align: center;
+        padding: 2rem;
+      }
+      a {
+        color: #e4e4e1;
+        text-underline-offset: 4px;
+      }
+      p {
+        max-width: 46ch;
+      }
+    </style>
+  </head>
+  <body>
+    <p>
+      La préview de GlyphLapse a déménagé sur
+      <a href="https://glyph.suns.red/glyphlapse/">glyph.suns.red/glyphlapse</a>, avec celles des
+      autres Glyph Toys.
+    </p>
+  </body>
 </html>
