@@ -11,10 +11,11 @@ temps écoulé **depuis** une date de référence, ou restant **jusqu'à** elle
 pour passer au lapse actif suivant. Configurable via l'app (date/heure,
 format d'affichage, secondes en anneau ou sablier).
 
-**[▶ Préview interactive](https://aero-md.github.io/glyphlapse/)** — le
-prototype web ([glyph-lapse-preview.html](glyph-lapse-preview.html)) jouable
-dans le navigateur : mêmes polices, mêmes règles, même sablier que le toy,
-rendu à l'échelle réelle sur une photo du dos du Phone (3).
+**[▶ Préview interactive](https://glyph.suns.red/glyphlapse/)** — le toy jouable
+dans le navigateur : mêmes polices, mêmes règles, même sablier, rendu à
+l'échelle réelle sur une photo du dos du Phone (3). Elle vit avec celles des
+autres Glyph Toys dans
+[glyph-portal](https://github.com/aero-md/GlyphPortal), sur un noyau commun.
 
 Specs : [SPECS.md](SPECS.md) · préview : [SPECS-PREVIEW.md](SPECS-PREVIEW.md) ·
 plan : [PLAN.md](PLAN.md).

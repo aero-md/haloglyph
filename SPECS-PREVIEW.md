@@ -20,8 +20,8 @@ du toy Kotlin — voir [SPECS.md](SPECS.md).
 
 | Fichier | Rôle |
 |---|---|
-| [`glyph-lapse-preview.html`](glyph-lapse-preview.html) | Source unique de vérité — page autonome, HTML + CSS + JS inline |
-| [`docs/index.html`](docs/index.html) | Page GitHub Pages : charge le HTML depuis `main` et le réécrit via `document.write` |
+| `glyph-lapse-preview.html` | Source unique de vérité — page autonome, HTML + CSS + JS inline. **Supprimée** : le portage rend le prototype caduc, et le garder aurait laissé deux implémentations dont une morte. Récupérable dans l'historique. |
+| [`docs/index.html`](docs/index.html) | Chargeait le HTML depuis `main` et le réécrivait via `document.write`. N'est plus qu'une redirection vers la préview du portail. |
 | [`docs/phone3-back.webp`](docs/phone3-back.webp) | Photo du dos, détourée et rognée (704 × 913, ~52 Ko) |
 
 Publication : GitHub Pages en mode *legacy*, source `main` + `/docs` → **le

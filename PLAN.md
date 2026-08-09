@@ -64,7 +64,7 @@ temps écoulé depuis / restant jusqu'à une date de référence configurable.
   collapsing des unités, cap 4 lignes, bascule jusqu'à → depuis, formats.
 - Sur appareil : Settings → Glyph Interface → Glyph Toys → Glyph Lapse.
 - Préview Compose pour itérer sans le téléphone ; préview web
-  (`glyph-lapse-preview.html`) comme référence d'implémentation.
+  (glyph.suns.red/glyphlapse) comme référence d'implémentation.
 
 ## 8. Extensions (v2)
 
