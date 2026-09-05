@@ -1,0 +1,20 @@
+*.iml
+.gradle/
+.idea/
+.kotlin/
+build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+
+# SDK Nothing — téléchargé automatiquement au premier build (tâche downloadGlyphSdk)
+**/libs/GlyphMatrixSDK.aar
+**/libs/glyph-matrix-sdk-*.aar
+
+# Keystore de signature release — jamais versionné
+keystore/
+keystore.properties
+
+# Spécifications de travail — non versionnées
+specs/
