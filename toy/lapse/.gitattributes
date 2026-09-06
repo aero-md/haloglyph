@@ -1,0 +1,8 @@
+# Les scripts sh cassent en CRLF — forcer LF quel que soit l'OS de checkout
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Binaires
+*.jar binary
+*.aar binary
+*.png binary

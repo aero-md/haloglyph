@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Icone de marque GlyphLapse — concept « Grain », style Nothing :
+       fond blanc, sablier en matrice de points (rangees 7-5-3-1-3-5-7), le point
+       central de l'avant-derniere rangee en rouge #D71921 (grain qui tombe).
+       Miroir de app/src/main/res/drawable/ic_launcher.xml. -->
+
+  <!-- fond blanc, coins arrondis facon tuile Nothing -->
+  <rect width="512" height="512" rx="112" fill="#FFFFFF"/>
+
+  <!-- sablier : points noirs -->
+  <g fill="#0A0A0A">
+    <rect x="68.4" y="68.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="124.4" y="68.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="180.4" y="68.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="236.4" y="68.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="292.4" y="68.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="348.4" y="68.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="404.4" y="68.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="124.4" y="124.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="180.4" y="124.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="236.4" y="124.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="292.4" y="124.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="348.4" y="124.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="180.4" y="180.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="236.4" y="180.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="292.4" y="180.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="236.4" y="236.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="180.4" y="292.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="236.4" y="292.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="292.4" y="292.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="124.4" y="348.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="180.4" y="348.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="292.4" y="348.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="348.4" y="348.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="68.4" y="404.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="124.4" y="404.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="180.4" y="404.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="236.4" y="404.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="292.4" y="404.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="348.4" y="404.4" width="39.2" height="39.2" rx="10.27"/>
+    <rect x="404.4" y="404.4" width="39.2" height="39.2" rx="10.27"/>
+  </g>
+
+  <!-- grain rouge : point central de l'avant-derniere rangee -->
+  <rect x="236.4" y="348.4" width="39.2" height="39.2" rx="10.27" fill="#D71921"/>
+</svg>

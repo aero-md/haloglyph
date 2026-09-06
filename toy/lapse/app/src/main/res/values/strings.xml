@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Glyph Lapse</string>
+    <string name="toy_name">Glyph Lapse</string>
+    <string name="toy_summary">Temps écoulé depuis / restant jusqu\'à une date — appui long pour changer de format</string>
+</resources>
