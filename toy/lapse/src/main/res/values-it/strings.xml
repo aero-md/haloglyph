@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="toy_lapse_summary">Tempo trascorso da / mancante a una data — tieni premuto per cambiare formato</string>
+
+    <string name="lapse_enable_title">Attiva questo lapse</string>
+    <string name="lapse_enable_hint">Incluso nella rotazione (pressione lunga)</string>
+
+    <string name="card_datetime">Data e ora</string>
+    <string name="card_saved_dates">Date salvate</string>
+    <string name="card_animation">Animazione</string>
+    <string name="card_display_style">Stile di visualizzazione</string>
+    <string name="card_language">Lingua</string>
+
+    <string name="saved_date_add">Nuova data</string>
+
+    <string name="language_system">Sistema</string>
+
+    <string name="seconds_ring">Anello</string>
+    <string name="seconds_hourglass">Clessidra</string>
+
+    <string name="format_dense">Denso</string>
+    <string name="format_compact">Compatto</string>
+    <string name="format_cycle">Ciclo</string>
+    <string name="format_days">Giorni</string>
+
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Annulla</string>
+    <string name="action_next">Avanti</string>
+
+    <string name="diff_since">Dal</string>
+    <string name="diff_until">Al</string>
+
+    <string name="unit_hours_abbr">h</string>
+    <string name="unit_minutes_abbr">min</string>
+    <string name="unit_seconds_abbr">s</string>
+
+    <plurals name="diff_years">
+        <item quantity="one">%d anno</item>
+        <item quantity="other">%d anni</item>
+    </plurals>
+    <plurals name="diff_months">
+        <item quantity="one">%d mese</item>
+        <item quantity="other">%d mesi</item>
+    </plurals>
+    <plurals name="diff_days">
+        <item quantity="one">%d giorno</item>
+        <item quantity="other">%d giorni</item>
+    </plurals>
+
+</resources>

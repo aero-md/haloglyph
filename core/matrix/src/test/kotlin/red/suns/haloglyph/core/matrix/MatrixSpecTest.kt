@@ -80,6 +80,23 @@ class MatrixSpecTest {
         assertTrue("x=${spec.xOf(quarter)}", spec.xOf(quarter) > 20)
     }
 
+    /**
+     * La bande de Lapse et le contour strict ne sont pas la même chose, et la
+     * différence est visible à l'œil : 88 LEDs contre 68. Ce test fige les deux
+     * pour qu'un refactor ne remplace pas l'une par l'autre en silence.
+     */
+    @Test
+    fun `la bande de l anneau est plus large que le contour strict`() {
+        val band = spec.ringBand(11.3f)
+        assertEquals(88, band.size)
+        assertEquals(68, spec.edgeRing.size)
+        assertTrue("le contour est inclus dans la bande", spec.edgeRing.all { it in band.toSet() })
+
+        // Même convention de tri : midi d'abord.
+        assertEquals(12, spec.xOf(band.first()))
+        assertEquals(0, spec.yOf(band.first()))
+    }
+
     @Test
     fun `chaque LED du contour a un voisin direct absent`() {
         val onEdge = spec.edgeRing.toSet()

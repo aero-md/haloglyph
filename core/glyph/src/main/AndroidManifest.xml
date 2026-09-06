@@ -5,7 +5,11 @@
          que par l'app : un toy qui n'utilise pas la matrice n'aurait pas à la
          demander. AGP fusionne. -->
     <uses-permission android:name="com.nothing.ketchum.permission.ENABLE" />
-    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Pas de VIBRATE ici : ce module ne vibre pas. C'est le toy qui décide
+         d'avoir un retour haptique, donc c'est lui qui demande la permission —
+         et lint le vérifie module par module. -->
+
 
     <!--
       Visibilité des paquets (Android 11+).

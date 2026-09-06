@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/toy_lapse_summary"
+    android:initialLayout="@layout/haloglyph_matrix_widget"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:previewImage="@drawable/toy_preview"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellWidth="3"
+    android:targetCellHeight="3"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen" />
+<!--
+  updatePeriodMillis="0" : le rafraîchissement passe par les changements de
+  préférence et par MatrixWidgetRefresh (plancher système de 15 minutes). Le
+  mécanisme du manifeste est plafonné à 30 minutes et réveille l'appareil.
+-->

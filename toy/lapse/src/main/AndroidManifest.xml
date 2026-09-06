@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Le toy porte ses propres composants. AGP les fusionne dans l'app : ajouter un
+  toy ne touche pas au manifeste de `app/`. Les permissions Glyph et le bloc
+  <queries> viennent de `core:glyph`, dont ce module dépend.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Retour haptique : changement de format, changement de lapse, arrivée du
+         compte à rebours. Déclarée par le toy qui vibre, pas par `core:glyph`. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application>
+
+        <!-- Surface 1 : la matrice. Glyph Interface liste par service, pas par
+             paquet — c'est ce qui permet à une app d'exposer plusieurs toys. -->
+        <service
+            android:name="red.suns.haloglyph.lapse.toy.LapseToyService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.nothing.glyph.TOY" />
+            </intent-filter>
+            <meta-data
+                android:name="com.nothing.glyph.toy.name"
+                android:resource="@string/toy_lapse_name" />
+            <meta-data
+                android:name="com.nothing.glyph.toy.image"
+                android:resource="@drawable/toy_preview" />
+            <meta-data
+                android:name="com.nothing.glyph.toy.summary"
+                android:resource="@string/toy_lapse_summary" />
+            <!-- Appui long = lapse activé suivant -->
+            <meta-data
+                android:name="com.nothing.glyph.toy.longpress"
+                android:value="1" />
+            <!-- AOD : EVENT_AOD chaque minute, rendu statique sans anneau -->
+            <meta-data
+                android:name="com.nothing.glyph.toy.aod_support"
+                android:value="1" />
+        </service>
+
+        <!-- Surface 2 : l'émulation, sur n'importe quel Android. Non exporté :
+             seul le système lui parle, via un composant explicite. -->
+        <receiver
+            android:name="red.suns.haloglyph.lapse.widget.LapseWidget"
+            android:exported="false"
+            android:label="@string/toy_lapse_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/lapse_widget_info" />
+        </receiver>
+
+    </application>
+
+</manifest>

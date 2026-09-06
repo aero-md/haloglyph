@@ -82,18 +82,33 @@ class MatrixSpec internal constructor(
         }
         leds = present0.toIntArray()
 
-        edgeRing = leds
-            .filter { i ->
+        edgeRing = clockwise(
+            leds.filter { i ->
                 val x = i % size
                 val y = i / size
                 !isLed(x - 1, y) || !isLed(x + 1, y) || !isLed(x, y - 1) || !isLed(x, y + 1)
-            }
-            .sortedBy { i ->
-                val a = atan2((i % size - centerX).toDouble(), -(i / size - centerY).toDouble())
-                if (a < 0) a + 2 * PI else a
-            }
-            .toIntArray()
+            },
+        )
     }
+
+    /**
+     * Les LEDs à au moins [minDistance] du centre, triées dans le sens horaire
+     * depuis midi.
+     *
+     * L'anneau des secondes de Lapse est une **bande**, pas le contour strict :
+     * à 12,5 de rayon, le contour ne fait que 68 LEDs, la bande à partir de 11,3
+     * en fait 88. La différence se voit — l'épaisseur du trait, et la finesse du
+     * pas sur 60 secondes. D'où ce paramètre plutôt qu'un [edgeRing] imposé.
+     */
+    fun ringBand(minDistance: Float): IntArray =
+        clockwise(leds.filter { distance[it] >= minDistance })
+
+    /** Tri angulaire commun : midi en premier, puis sens horaire. */
+    private fun clockwise(indices: List<Int>): IntArray =
+        indices.sortedBy { i ->
+            val a = atan2((i % size - centerX).toDouble(), -(i / size - centerY).toDouble())
+            if (a < 0) a + 2 * PI else a
+        }.toIntArray()
 
     fun index(x: Int, y: Int): Int = y * size + x
 

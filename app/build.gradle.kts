@@ -25,7 +25,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
 
-    // Les toys arriveront ici, un `implementation(project(":toy:lapse"))` par
-    // toy. Chacun apporte son service, son widget et ses chaînes ; AGP fusionne
-    // les manifestes. `app/` n'a pas à changer pour en accueillir un de plus.
+    // Un toy = une ligne. Il apporte son service, son widget, son fragment de
+    // manifeste et ses chaînes ; AGP fusionne. `app/` n'a pas à changer pour en
+    // accueillir un de plus.
+    implementation(project(":toy:lapse"))
 }

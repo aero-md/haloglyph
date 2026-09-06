@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Langue par défaut : l'anglais, et non le français dans lequel l'app a été
+    écrite. C'est ce dossier non qualifié que le système sert à quiconque n'a
+    aucune des cinq langues, et l'anglais est ce que comprend le plus grand
+    nombre d'entre eux. Le français a son `values-fr/`, comme les autres.
+
+    `resources.properties` déclare cette langue à AGP, qui en déduit le
+    `localeConfig` du manifeste : ajouter une langue = ajouter un `values-xx/`,
+    rien d'autre. Même règle que le dossier `locales/` du portail web.
+-->
+<resources>
+
+    <!-- Le nom reste le nom : c'est la marque du toy, pas une phrase. « Glyph
+         Lapse » devient « Lapse » : le préfixe était utile quand le toy était
+         une app seule, il fait doublon dans un pack qui s'appelle Haloglyph. -->
+    <string name="toy_lapse_name" translatable="false">Lapse</string>
+
+    <!-- Affiché par le système dans Glyph Interface → Glyph Toys. -->
+    <string name="toy_lapse_summary">Time elapsed since / remaining until a date — long press to switch format</string>
+
+    <!-- Carte d'activation (lapse II et III) -->
+    <string name="lapse_enable_title">Enable this lapse</string>
+    <string name="lapse_enable_hint">Included in the rotation (long press)</string>
+
+    <!-- Titres de cartes -->
+    <string name="card_datetime">Date and time</string>
+    <string name="card_saved_dates">Saved dates</string>
+    <string name="card_animation">Animation</string>
+    <string name="card_display_style">Display style</string>
+    <string name="card_language">Language</string>
+
+    <string name="saved_date_add">New date</string>
+
+    <!-- Langue : rendre la main au réglage système -->
+    <string name="language_system">System</string>
+
+    <!-- Animation des secondes -->
+    <string name="seconds_ring">Ring</string>
+    <string name="seconds_hourglass">Hourglass</string>
+
+    <!-- Formats d'affichage. « Dense » et « Compact » sont les mêmes mots en
+         anglais qu'en français, ce qui est une coïncidence et non une omission. -->
+    <string name="format_dense">Dense</string>
+    <string name="format_compact">Compact</string>
+    <string name="format_cycle">Cycle</string>
+    <string name="format_days">Days</string>
+
+    <!-- Actions des dialogues -->
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_next">Next</string>
+
+    <!-- Lecture du delta, sous la préview. Suivi de la date formatée. -->
+    <string name="diff_since">Since</string>
+    <string name="diff_until">Until</string>
+
+    <!-- Unités abrégées du delta : symboles, invariables. -->
+    <string name="unit_hours_abbr">h</string>
+    <string name="unit_minutes_abbr">min</string>
+    <string name="unit_seconds_abbr">s</string>
+
+    <!-- Unités en toutes lettres. En `plurals` et non en concaténation : le
+         pluriel du français se décide à 2 (« 1 an », « 0 an »), celui de
+         l'anglais à 1 (« 0 years »), et d'autres langues ont plus de deux
+         formes. C'est exactement ce que ces règles savent faire. -->
+    <plurals name="diff_years">
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+    <plurals name="diff_months">
+        <item quantity="one">%d month</item>
+        <item quantity="other">%d months</item>
+    </plurals>
+    <plurals name="diff_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+
+</resources>

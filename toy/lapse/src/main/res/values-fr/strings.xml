@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="toy_lapse_summary">Temps écoulé depuis / restant jusqu\'à une date — appui long pour changer de format</string>
+
+    <string name="lapse_enable_title">Activer ce lapse</string>
+    <string name="lapse_enable_hint">Inclus dans la rotation (appui long)</string>
+
+    <string name="card_datetime">Date et heure</string>
+    <string name="card_saved_dates">Dates sauvegardées</string>
+    <string name="card_animation">Animation</string>
+    <string name="card_display_style">Style d\'affichage</string>
+    <string name="card_language">Langue</string>
+
+    <string name="saved_date_add">Nouvelle date</string>
+
+    <string name="language_system">Système</string>
+
+    <string name="seconds_ring">Anneau</string>
+    <string name="seconds_hourglass">Sablier</string>
+
+    <string name="format_dense">Dense</string>
+    <string name="format_compact">Compact</string>
+    <string name="format_cycle">Cycle</string>
+    <string name="format_days">Jours</string>
+
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_next">Suivant</string>
+
+    <string name="diff_since">Depuis le</string>
+    <string name="diff_until">Jusqu\'au</string>
+
+    <string name="unit_hours_abbr">h</string>
+    <string name="unit_minutes_abbr">min</string>
+    <string name="unit_seconds_abbr">s</string>
+
+    <!-- « mois » est invariable : les deux formes sont identiques, et c'est
+         bien une règle de la langue, pas un oubli de traduction. -->
+    <plurals name="diff_years">
+        <item quantity="one">%d an</item>
+        <item quantity="other">%d ans</item>
+    </plurals>
+    <plurals name="diff_months">
+        <item quantity="one">%d mois</item>
+        <item quantity="other">%d mois</item>
+    </plurals>
+    <plurals name="diff_days">
+        <item quantity="one">%d jour</item>
+        <item quantity="other">%d jours</item>
+    </plurals>
+
+</resources>

@@ -27,8 +27,13 @@ include(":core:glyph")    // SEUL module qui connaît le SDK Nothing
 include(":core:widget")   // émulation de la matrice en widget d'écran d'accueil
 include(":core:ui")       // thème + MatrixPreview Compose
 
-// app/ : le hub. Les toys arriveront en `toy:<nom>` par `git subtree` (TECHNIQUE §12),
-// chacun portant ses trois surfaces et son fragment de manifeste.
+// toy/ : un toy = ses trois surfaces + son fragment de manifeste + ses chaînes.
+// Le moteur et le renderer sont un module à part, en Kotlin pur : c'est ce qui
+// interdit mécaniquement à un moteur de dépendre d'Android.
+include(":toy:lapse")
+include(":toy:lapse:engine")
+
+// app/ : le hub, qui assemble les toys embarqués.
 include(":app")
 
 // `app-slot/` (seconde app Play, PEGI 18) est volontairement absent : Slot est mis

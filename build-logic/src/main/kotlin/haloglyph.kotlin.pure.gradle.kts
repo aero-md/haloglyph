@@ -11,6 +11,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  */
 
 plugins {
+    // `java-library` en plus du plugin Kotlin : c'est lui qui apporte la
+    // configuration `api`, dont un moteur a besoin dès qu'un type de
+    // `core:matrix` apparaît dans sa signature publique.
+    `java-library`
     id("org.jetbrains.kotlin.jvm")
 }
 

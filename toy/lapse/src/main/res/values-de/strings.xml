@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="toy_lapse_summary">Verstrichene Zeit seit / verbleibende Zeit bis zu einem Datum — lange drücken, um das Format zu wechseln</string>
+
+    <string name="lapse_enable_title">Diesen Lapse aktivieren</string>
+    <string name="lapse_enable_hint">Teil des Wechsels (langes Drücken)</string>
+
+    <string name="card_datetime">Datum und Uhrzeit</string>
+    <!-- « Datumsangaben » et non « Daten », qui veut aussi dire *données*. -->
+    <string name="card_saved_dates">Gespeicherte Datumsangaben</string>
+    <string name="card_animation">Animation</string>
+    <string name="card_display_style">Anzeigestil</string>
+    <string name="card_language">Sprache</string>
+
+    <string name="saved_date_add">Neues Datum</string>
+
+    <string name="language_system">System</string>
+
+    <string name="seconds_ring">Ring</string>
+    <string name="seconds_hourglass">Sanduhr</string>
+
+    <string name="format_dense">Dicht</string>
+    <string name="format_compact">Kompakt</string>
+    <string name="format_cycle">Zyklus</string>
+    <string name="format_days">Tage</string>
+
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_next">Weiter</string>
+
+    <string name="diff_since">Seit dem</string>
+    <string name="diff_until">Bis zum</string>
+
+    <string name="unit_hours_abbr">Std.</string>
+    <string name="unit_minutes_abbr">Min.</string>
+    <string name="unit_seconds_abbr">Sek.</string>
+
+    <plurals name="diff_years">
+        <item quantity="one">%d Jahr</item>
+        <item quantity="other">%d Jahre</item>
+    </plurals>
+    <plurals name="diff_months">
+        <item quantity="one">%d Monat</item>
+        <item quantity="other">%d Monate</item>
+    </plurals>
+    <plurals name="diff_days">
+        <item quantity="one">%d Tag</item>
+        <item quantity="other">%d Tage</item>
+    </plurals>
+
+</resources>
