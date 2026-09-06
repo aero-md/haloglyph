@@ -1,5 +1,6 @@
 plugins {
     id("haloglyph.android.library")
+    id("haloglyph.compose")
 }
 
 android {
@@ -15,5 +16,8 @@ dependencies {
     implementation(project(":core:glyph"))
     implementation(project(":core:widget"))
 
-    // `core:ui` et l'écran de réglages arrivent avec la maquette de DA.
+    // Quatrième surface : l'écran de réglages. Il vit dans le module du toy, pas
+    // dans `app` — le hub ne sait pas ce que Lapse règle, seulement où le régler.
+    implementation(project(":core:ui"))
+    implementation(libs.androidx.activity.compose)
 }

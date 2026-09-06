@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
@@ -117,12 +118,17 @@ fun AnimatedMatrixPreview(
     val state = rememberMatrixFrameState(spec)
     val frame = remember(spec) { Frame(spec) }
 
-    LaunchedEffect(spec, render) {
+    // `rememberUpdatedState` et non `LaunchedEffect(render)` : la lambda de rendu
+    // est réécrite à chaque recomposition de l'appelant, et relancer la boucle à
+    // chaque fois remettrait l'horloge de l'animation à zéro sans prévenir.
+    val current by rememberUpdatedState(render)
+
+    LaunchedEffect(spec) {
         val startedAt = withFrameNanos { it }
         while (true) {
             val now = withFrameNanos { it }
             frame.clear()
-            render(frame, (now - startedAt) / 1_000_000_000.0)
+            current(frame, (now - startedAt) / 1_000_000_000.0)
             frame.pushTo(state.sink)
         }
     }

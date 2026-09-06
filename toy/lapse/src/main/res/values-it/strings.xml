@@ -3,18 +3,15 @@
 
     <string name="toy_lapse_summary">Tempo trascorso da / mancante a una data — tieni premuto per cambiare formato</string>
 
-    <string name="lapse_enable_title">Attiva questo lapse</string>
-    <string name="lapse_enable_hint">Incluso nella rotazione (pressione lunga)</string>
+    <string name="lapse_state_active">attivo</string>
+    <string name="lapse_delete">Elimina questo lapse</string>
 
     <string name="card_datetime">Data e ora</string>
     <string name="card_saved_dates">Date salvate</string>
     <string name="card_animation">Animazione</string>
     <string name="card_display_style">Stile di visualizzazione</string>
-    <string name="card_language">Lingua</string>
 
     <string name="saved_date_add">Nuova data</string>
-
-    <string name="language_system">Sistema</string>
 
     <string name="seconds_ring">Anello</string>
     <string name="seconds_hourglass">Clessidra</string>
@@ -37,14 +34,17 @@
 
     <plurals name="diff_years">
         <item quantity="one">%d anno</item>
+        <item quantity="many">%d anni</item>
         <item quantity="other">%d anni</item>
     </plurals>
     <plurals name="diff_months">
         <item quantity="one">%d mese</item>
+        <item quantity="many">%d mesi</item>
         <item quantity="other">%d mesi</item>
     </plurals>
     <plurals name="diff_days">
         <item quantity="one">%d giorno</item>
+        <item quantity="many">%d giorni</item>
         <item quantity="other">%d giorni</item>
     </plurals>
 

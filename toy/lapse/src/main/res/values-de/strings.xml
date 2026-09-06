@@ -3,19 +3,16 @@
 
     <string name="toy_lapse_summary">Verstrichene Zeit seit / verbleibende Zeit bis zu einem Datum — lange drücken, um das Format zu wechseln</string>
 
-    <string name="lapse_enable_title">Diesen Lapse aktivieren</string>
-    <string name="lapse_enable_hint">Teil des Wechsels (langes Drücken)</string>
+    <string name="lapse_state_active">aktiv</string>
+    <string name="lapse_delete">Diesen Lapse löschen</string>
 
     <string name="card_datetime">Datum und Uhrzeit</string>
     <!-- « Datumsangaben » et non « Daten », qui veut aussi dire *données*. -->
     <string name="card_saved_dates">Gespeicherte Datumsangaben</string>
     <string name="card_animation">Animation</string>
     <string name="card_display_style">Anzeigestil</string>
-    <string name="card_language">Sprache</string>
 
     <string name="saved_date_add">Neues Datum</string>
-
-    <string name="language_system">System</string>
 
     <string name="seconds_ring">Ring</string>
     <string name="seconds_hourglass">Sanduhr</string>

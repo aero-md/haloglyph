@@ -3,18 +3,15 @@
 
     <string name="toy_lapse_summary">Tiempo transcurrido desde / restante hasta una fecha — mantén pulsado para cambiar de formato</string>
 
-    <string name="lapse_enable_title">Activar este lapso</string>
-    <string name="lapse_enable_hint">Incluido en la rotación (pulsación larga)</string>
+    <string name="lapse_state_active">activo</string>
+    <string name="lapse_delete">Eliminar este lapso</string>
 
     <string name="card_datetime">Fecha y hora</string>
     <string name="card_saved_dates">Fechas guardadas</string>
     <string name="card_animation">Animación</string>
     <string name="card_display_style">Estilo de visualización</string>
-    <string name="card_language">Idioma</string>
 
     <string name="saved_date_add">Nueva fecha</string>
-
-    <string name="language_system">Sistema</string>
 
     <string name="seconds_ring">Anillo</string>
     <string name="seconds_hourglass">Reloj de arena</string>
@@ -37,14 +34,17 @@
 
     <plurals name="diff_years">
         <item quantity="one">%d año</item>
+        <item quantity="many">%d años</item>
         <item quantity="other">%d años</item>
     </plurals>
     <plurals name="diff_months">
         <item quantity="one">%d mes</item>
+        <item quantity="many">%d meses</item>
         <item quantity="other">%d meses</item>
     </plurals>
     <plurals name="diff_days">
         <item quantity="one">%d día</item>
+        <item quantity="many">%d días</item>
         <item quantity="other">%d días</item>
     </plurals>
 

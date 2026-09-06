@@ -1,7 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="hub_matrix_probing">Buscando una Glyph Matrix…</string>
-    <string name="hub_matrix_present">Glyph Matrix conectada: los toys aparecen en Glyph Interface.</string>
-    <string name="hub_matrix_absent">No hay Glyph Matrix en este teléfono: los widgets la emulan.</string>
-    <string name="hub_no_toys">Todavía no hay ningún toy incluido. Arriba, la carta de ajuste: 489 LED, anillo de borde, máscara del disco.</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <string name="hub_section_hardware">Hardware</string>
+    <string name="hub_probe_running">buscando…</string>
+    <string name="hub_probe_done">comprobado</string>
+
+    <string name="hub_tile_widgets">Widgets</string>
+
+    <string name="hub_chip_matrix_connected">Conectada</string>
+    <string name="hub_chip_matrix_absent">Ausente</string>
+    <string name="hub_chip_matrix_probing">Buscando…</string>
+    <string name="hub_chip_leds">%1$d LED</string>
+    <string name="hub_chip_emulation">Emulación</string>
+    <plurals name="hub_chip_widgets_placed">
+        <item quantity="one">%d colocado</item>
+        <item quantity="many">%d colocados</item>
+        <item quantity="other">%d colocados</item>
+    </plurals>
+
+    <string name="hub_manage_toys">Gestionar los toys</string>
+
+    <string name="hub_section_toys">Toys incluidos</string>
+
+    <!-- « Glyph Interface » est le nom du réglage Nothing, pas une locution :
+         il ne se traduit pas, en espagnol pas plus qu'ailleurs. -->
+    <string name="hub_chip_in_glyph" tools:ignore="Typos">En Glyph Interface</string>
+    <string name="hub_chip_not_in_glyph" tools:ignore="Typos">Fuera de Glyph Interface</string>
+    <plurals name="hub_chip_widgets">
+        <item quantity="one">%d widget</item>
+        <item quantity="many">%d widgets</item>
+        <item quantity="other">%d widgets</item>
+    </plurals>
+    <string name="hub_chip_no_widget">Ningún widget</string>
+    <string name="hub_chip_soon">Próximamente</string>
+
+    <string name="hub_proto_notice">Prototipo: todavía no hay ningún toy declarado al sistema.</string>
+
+    <string name="toy_dice_summary">Dado d6 / d10 / d12 / d20, sólidos 3D seguidos por cuaterniones. Agita para tirar.</string>
+    <string name="toy_spectre_summary">25 bandas de tercio de octava, de 40 Hz a 16 kHz.</string>
+    <string name="toy_needle_name">Sono — Aguja</string>
+    <string name="toy_needle_summary">Vúmetro giratorio, nivel en dB(A).</string>
 </resources>

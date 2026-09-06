@@ -1,7 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hub_matrix_probing">Ricerca di una Glyph Matrix…</string>
-    <string name="hub_matrix_present">Glyph Matrix collegata: i toy compaiono in Glyph Interface.</string>
-    <string name="hub_matrix_absent">Nessuna Glyph Matrix su questo telefono: i widget la emulano.</string>
-    <string name="hub_no_toys">Ancora nessun toy incluso. Sopra, l\'immagine di prova: 489 LED, anello di bordo, maschera del disco.</string>
+
+    <string name="hub_section_hardware">Hardware</string>
+    <string name="hub_probe_running">ricerca…</string>
+    <string name="hub_probe_done">verificato</string>
+
+    <string name="hub_tile_widgets">Widget</string>
+
+    <string name="hub_chip_matrix_connected">Collegata</string>
+    <string name="hub_chip_matrix_absent">Assente</string>
+    <string name="hub_chip_matrix_probing">Ricerca…</string>
+    <string name="hub_chip_leds">%1$d LED</string>
+    <string name="hub_chip_emulation">Emulazione</string>
+    <plurals name="hub_chip_widgets_placed">
+        <item quantity="one">%d posato</item>
+        <item quantity="many">%d posati</item>
+        <item quantity="other">%d posati</item>
+    </plurals>
+
+    <string name="hub_manage_toys">Gestisci i toy</string>
+
+    <string name="hub_section_toys">Toy inclusi</string>
+
+    <string name="hub_chip_in_glyph">In Glyph Interface</string>
+    <string name="hub_chip_not_in_glyph">Fuori da Glyph Interface</string>
+    <plurals name="hub_chip_widgets">
+        <item quantity="one">%d widget</item>
+        <item quantity="many">%d widget</item>
+        <item quantity="other">%d widget</item>
+    </plurals>
+    <string name="hub_chip_no_widget">Nessun widget</string>
+    <string name="hub_chip_soon">In arrivo</string>
+
+    <string name="hub_proto_notice">Prototipo: nessun toy è ancora dichiarato al sistema.</string>
+
+    <string name="toy_dice_summary">Dado d6 / d10 / d12 / d20, solidi 3D seguiti con quaternioni. Scuoti per lanciare.</string>
+    <string name="toy_spectre_summary">25 bande di terzo d\'ottava, da 40 Hz a 16 kHz.</string>
+    <string name="toy_needle_name">Sono — Lancetta</string>
+    <string name="toy_needle_summary">VU-meter oscillante, livello in dB(A).</string>
 </resources>

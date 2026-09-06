@@ -1,7 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="hub_matrix_probing">Recherche d\'une Glyph Matrix…</string>
-    <string name="hub_matrix_present">Glyph Matrix connectée — les toys apparaissent dans Glyph Interface.</string>
-    <string name="hub_matrix_absent">Pas de Glyph Matrix sur ce téléphone — les widgets l\'émulent.</string>
-    <string name="hub_no_toys">Aucun toy embarqué pour l\'instant. Au-dessus, la mire de vérification : 489 LEDs, anneau de bord, masque du disque.</string>
+
+    <string name="hub_section_hardware">Matériel</string>
+    <string name="hub_probe_running">sonde…</string>
+    <string name="hub_probe_done">sondé</string>
+
+    <string name="hub_tile_widgets">Widgets</string>
+
+    <string name="hub_chip_matrix_connected">Connectée</string>
+    <string name="hub_chip_matrix_absent">Absente</string>
+    <string name="hub_chip_matrix_probing">Sonde…</string>
+    <string name="hub_chip_leds">%1$d LED</string>
+    <string name="hub_chip_emulation">Émulation</string>
+    <!-- « many » : la catégorie CLDR des grands nombres (un million de widgets
+         posés, donc jamais). Elle est requise pour le français depuis CLDR 42 ;
+         sans elle, le système n'a pas de forme à servir et lint le signale. -->
+    <plurals name="hub_chip_widgets_placed">
+        <item quantity="one">%d posé</item>
+        <item quantity="many">%d posés</item>
+        <item quantity="other">%d posés</item>
+    </plurals>
+
+    <string name="hub_manage_toys">Gérer les toys</string>
+
+    <string name="hub_section_toys">Toys embarqués</string>
+
+    <string name="hub_chip_in_glyph">Dans Glyph Interface</string>
+    <string name="hub_chip_not_in_glyph">Pas dans Glyph Interface</string>
+    <plurals name="hub_chip_widgets">
+        <item quantity="one">%d widget</item>
+        <item quantity="many">%d widgets</item>
+        <item quantity="other">%d widgets</item>
+    </plurals>
+    <string name="hub_chip_no_widget">Aucun widget</string>
+    <string name="hub_chip_soon">À venir</string>
+
+    <string name="hub_proto_notice">Prototype : aucun toy n\'est encore déclaré au système.</string>
+
+    <string name="toy_dice_summary">Dé d6 / d10 / d12 / d20, solides 3D suivis en quaternion. Secouer pour jeter.</string>
+    <string name="toy_spectre_summary">25 bandes de tiers d\'octave, 40 Hz à 16 kHz.</string>
+    <string name="toy_needle_name">Sono — Aiguille</string>
+    <string name="toy_needle_summary">VU-mètre pivotant, niveau en dB(A).</string>
 </resources>

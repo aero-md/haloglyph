@@ -1,9 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Langue par défaut : l'anglais, et non le français dans lequel l'app a été
+    écrite. C'est ce dossier non qualifié que le système sert à quiconque n'a
+    aucune des cinq langues.
+-->
 <resources>
     <string name="app_name" translatable="false">Haloglyph</string>
 
-    <string name="hub_matrix_probing">Looking for a Glyph Matrix…</string>
-    <string name="hub_matrix_present">Glyph Matrix connected — toys show up in Glyph Interface.</string>
-    <string name="hub_matrix_absent">No Glyph Matrix on this phone — the widgets emulate it.</string>
-    <string name="hub_no_toys">No toy bundled yet. Above is the plumbing check: 489 LEDs, edge ring, disc mask.</string>
+    <!-- ============ Hub ============ -->
+
+    <!-- Section « matériel » : la mention de droite dit l'état de la sonde. -->
+    <string name="hub_section_hardware">Hardware</string>
+    <string name="hub_probe_running">probing</string>
+    <string name="hub_probe_done">probed</string>
+
+    <!-- Tuiles appariées : les deux endroits où un toy peut s'afficher. -->
+    <string name="hub_tile_matrix" translatable="false">Glyph Matrix</string>
+    <string name="hub_tile_widgets">Widgets</string>
+
+    <string name="hub_chip_matrix_connected">Connected</string>
+    <string name="hub_chip_matrix_absent">Absent</string>
+    <string name="hub_chip_matrix_probing">Probing…</string>
+    <!-- Nombre de LEDs de la matrice cible. -->
+    <string name="hub_chip_leds">%1$d LEDs</string>
+    <string name="hub_chip_emulation">Emulation</string>
+    <plurals name="hub_chip_widgets_placed">
+        <item quantity="one">%d placed</item>
+        <item quantity="other">%d placed</item>
+    </plurals>
+
+    <string name="hub_manage_toys">Manage toys</string>
+
+    <!-- Liste des toys. La mention de droite est « embarqués / total ». -->
+    <string name="hub_section_toys">Bundled toys</string>
+    <string name="hub_toys_count" translatable="false">%1$d / %2$d</string>
+
+    <string name="hub_chip_in_glyph">In Glyph Interface</string>
+    <string name="hub_chip_not_in_glyph">Not in Glyph Interface</string>
+    <plurals name="hub_chip_widgets">
+        <item quantity="one">%d widget</item>
+        <item quantity="other">%d widgets</item>
+    </plurals>
+    <string name="hub_chip_no_widget">No widget</string>
+    <string name="hub_chip_soon">Coming</string>
+
+    <!-- Bandeau de prototype. Il disparaît avec la déclaration des toys : voir
+         le commentaire du manifeste de `toy:lapse`. -->
+    <string name="hub_proto_notice">Prototype: no toy is declared to the system yet.</string>
+
+    <!-- ============ Toys annoncés ============
+         Ils n'ont pas encore de module, donc pas encore de `values-xx` à eux.
+         Leurs chaînes déménageront avec eux. -->
+    <string name="toy_dice_name" translatable="false">Dice</string>
+    <string name="toy_dice_summary">d6 / d10 / d12 / d20 die, 3D solids tracked as quaternions. Shake to roll.</string>
+    <string name="toy_spectre_name" translatable="false">Sono — Spectre</string>
+    <string name="toy_spectre_summary">25 third-octave bands, 40 Hz to 16 kHz.</string>
+    <!-- Le seul des trois dont le nom soit un mot commun, et non une marque :
+         il se traduit, contrairement à « Dice » et « Spectre ». -->
+    <string name="toy_needle_name">Sono — Needle</string>
+    <string name="toy_needle_summary">Swinging VU meter, level in dB(A).</string>
 </resources>

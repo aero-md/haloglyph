@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Icone de marque Haloglyph — concept « Couronne » : la lumiere autour du
+       soleil, sans le disque. 24 rayons effilés de longueur alternée ; le quart
+       superieur droit est le meme champ de rayons echantillonne sur la matrice
+       25x25 des toys (pixels carres arrondis facon LED Nothing).
+       Miroir de app/src/main/res/drawable/ic_launcher.xml. -->
+
+  <!-- fond blanc, coins arrondis facon tuile Nothing -->
+  <rect width="512" height="512" rx="112" fill="#FFFFFF"/>
+
+  <!-- couronne : 18 rayons pleins -->
+  <g fill="#0A0A0A">
+    <path d="M252.82 160.05L234.24 162.50L222.15 44.69L234.00 43.13Z"/>
+    <path d="M228.09 164.15L210.78 171.32L187.40 102.64L196.07 99.05Z"/>
+    <path d="M205.27 174.50L190.41 185.90L121.04 89.93L130.52 82.65Z"/>
+    <path d="M185.90 190.41L174.50 205.27L119.91 157.49L125.62 150.05Z"/>
+    <path d="M171.32 210.78L164.15 228.09L56.08 179.66L60.65 168.62Z"/>
+    <path d="M162.50 234.24L160.05 252.82L88.89 238.73L90.11 229.43Z"/>
+    <path d="M160.05 259.18L162.50 277.76L44.69 289.85L43.13 278.00Z"/>
+    <path d="M164.15 283.91L171.32 301.22L102.64 324.60L99.05 315.93Z"/>
+    <path d="M174.50 306.73L185.90 321.59L89.93 390.96L82.65 381.48Z"/>
+    <path d="M190.41 326.10L205.27 337.50L157.49 392.09L150.05 386.38Z"/>
+    <path d="M210.78 340.68L228.09 347.85L179.66 455.92L168.62 451.35Z"/>
+    <path d="M234.24 349.50L252.82 351.95L238.73 423.11L229.43 421.89Z"/>
+    <path d="M259.18 351.95L277.76 349.50L289.85 467.31L278.00 468.87Z"/>
+    <path d="M283.91 347.85L301.22 340.68L324.60 409.36L315.93 412.95Z"/>
+    <path d="M306.73 337.50L321.59 326.10L390.96 422.07L381.48 429.35Z"/>
+    <path d="M326.10 321.59L337.50 306.73L392.09 354.51L386.38 361.95Z"/>
+    <path d="M340.68 301.22L347.85 283.91L455.92 332.34L451.35 343.38Z"/>
+    <path d="M349.50 277.76L351.95 259.18L423.11 273.27L421.89 282.57Z"/>
+  </g>
+
+  <!-- quart superieur droit : 31 pixels de la matrice 25x25 -->
+  <g fill="#0A0A0A">
+    <rect x="267.65" y="88.45" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="267.65" y="106.37" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="267.65" y="124.29" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="267.65" y="142.21" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="285.57" y="142.21" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="285.57" y="160.13" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="303.49" y="106.37" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="303.49" y="124.29" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="303.49" y="142.21" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="321.41" y="70.53" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="321.41" y="88.45" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="321.41" y="160.13" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="339.33" y="124.29" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="339.33" y="142.21" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="339.33" y="178.05" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="339.33" y="213.89" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="357.25" y="160.13" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="357.25" y="178.05" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="357.25" y="195.97" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="357.25" y="213.89" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="357.25" y="231.81" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="375.17" y="142.21" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="375.17" y="160.13" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="375.17" y="195.97" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="375.17" y="231.81" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="393.09" y="142.21" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="393.09" y="195.97" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="393.09" y="231.81" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="411.01" y="124.29" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="411.01" y="231.81" width="12.54" height="12.54" rx="3.29"/>
+    <rect x="428.93" y="231.81" width="12.54" height="12.54" rx="3.29"/>
+  </g>
+</svg>

@@ -3,18 +3,15 @@
 
     <string name="toy_lapse_summary">Temps écoulé depuis / restant jusqu\'à une date — appui long pour changer de format</string>
 
-    <string name="lapse_enable_title">Activer ce lapse</string>
-    <string name="lapse_enable_hint">Inclus dans la rotation (appui long)</string>
+    <string name="lapse_state_active">actif</string>
+    <string name="lapse_delete">Supprimer ce lapse</string>
 
     <string name="card_datetime">Date et heure</string>
     <string name="card_saved_dates">Dates sauvegardées</string>
     <string name="card_animation">Animation</string>
     <string name="card_display_style">Style d\'affichage</string>
-    <string name="card_language">Langue</string>
 
     <string name="saved_date_add">Nouvelle date</string>
-
-    <string name="language_system">Système</string>
 
     <string name="seconds_ring">Anneau</string>
     <string name="seconds_hourglass">Sablier</string>
@@ -39,14 +36,17 @@
          bien une règle de la langue, pas un oubli de traduction. -->
     <plurals name="diff_years">
         <item quantity="one">%d an</item>
+        <item quantity="many">%d ans</item>
         <item quantity="other">%d ans</item>
     </plurals>
     <plurals name="diff_months">
         <item quantity="one">%d mois</item>
+        <item quantity="many">%d mois</item>
         <item quantity="other">%d mois</item>
     </plurals>
     <plurals name="diff_days">
         <item quantity="one">%d jour</item>
+        <item quantity="many">%d jours</item>
         <item quantity="other">%d jours</item>
     </plurals>
 

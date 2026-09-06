@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fond de l'icone adaptative. Blanc, comme la tuile Nothing : l'icone est
+         le seul endroit de l'ecosysteme ou le noir n'est pas le fond. -->
+    <color name="ic_launcher_background">#FFFFFF</color>
+</resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Icone adaptative. Pas de variante non adaptative : `minSdk` est 34, donc ce
+  qualificatif `-v26` est toujours celui que le systeme choisit.
+
+  Trois calques :
+  - `background` : le blanc plein. C'est lui que le masque du launcher decoupe,
+    en cercle, en squircle ou en goutte selon le theme du telephone ;
+  - `foreground` : la couronne, reduite pour tenir dans le disque visible ;
+  - `monochrome` : le meme dessin, que le launcher teinte quand l'utilisateur
+    active les icones thematiques. Sans lui, Android fabrique une silhouette a
+    partir du calque complet et la couronne devient une tache.
+
+  `drawable/ic_launcher.xml` reste a cote : c'est la version pleine (fond
+  compris), miroir exact de `haloglyph-icon.svg`, celle qu'on exporte.
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+    <monochrome android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>

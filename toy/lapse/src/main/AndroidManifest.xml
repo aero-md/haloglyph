@@ -3,6 +3,19 @@
   Le toy porte ses propres composants. AGP les fusionne dans l'app : ajouter un
   toy ne touche pas au manifeste de `app/`. Les permissions Glyph et le bloc
   <queries> viennent de `core:glyph`, dont ce module dépend.
+
+  ==========================  PROTOTYPE — 06.09.2026  ==========================
+  Les deux surfaces système du toy sont **désactivées** : `android:enabled` à
+  `false` sur le service Glyph et sur le fournisseur de widget. Le toy n'apparaît
+  donc ni dans Glyph Interface, ni dans le sélecteur de widgets, et cette version
+  n'installe qu'une app de réglages.
+
+  Un attribut plutôt qu'un bloc commenté : le manifeste reste complet et relu par
+  les outils (lint voit toujours les composants, les métadonnées ne se périment
+  pas dans un commentaire), et rouvrir le toy au système est un `true` à écrire
+  deux fois. Le hub le vérifie au `PackageManager` et le dit à l'écran — il ne
+  peut pas prétendre le contraire.
+  =============================================================================
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -16,6 +29,7 @@
              paquet — c'est ce qui permet à une app d'exposer plusieurs toys. -->
         <service
             android:name="red.suns.haloglyph.lapse.toy.LapseToyService"
+            android:enabled="false"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.nothing.glyph.TOY" />
@@ -43,6 +57,7 @@
              seul le système lui parle, via un composant explicite. -->
         <receiver
             android:name="red.suns.haloglyph.lapse.widget.LapseWidget"
+            android:enabled="false"
             android:exported="false"
             android:label="@string/toy_lapse_name">
             <intent-filter>
@@ -52,6 +67,14 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/lapse_widget_info" />
         </receiver>
+
+        <!-- Surface 3 : les réglages. Lancée par le hub, jamais par le système :
+             `exported` reste faux, et il n'y a pas d'intent-filter à écrire. -->
+        <activity
+            android:name="red.suns.haloglyph.lapse.settings.LapseSettingsActivity"
+            android:exported="false"
+            android:label="@string/toy_lapse_name"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
 
     </application>
 

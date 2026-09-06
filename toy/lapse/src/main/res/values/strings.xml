@@ -19,21 +19,24 @@
     <!-- Affiché par le système dans Glyph Interface → Glyph Toys. -->
     <string name="toy_lapse_summary">Time elapsed since / remaining until a date — long press to switch format</string>
 
-    <!-- Carte d'activation (lapse II et III) -->
-    <string name="lapse_enable_title">Enable this lapse</string>
-    <string name="lapse_enable_hint">Included in the rotation (long press)</string>
+    <!-- Écran de réglages. Le nom du hub est répété ici plutôt que lu dans
+         `app` : un module de toy ne dépend pas de l'application qui l'embarque,
+         et c'est un nom propre, donc invariable. -->
+    <string name="lapse_settings_parent" translatable="false">Haloglyph</string>
+    <string name="lapse_section" translatable="false">Lapse %1$s</string>
+    <string name="lapse_state_active">active</string>
+
+    <!-- Action nue du bas. Elle sort le lapse de la rotation et remet ses
+         réglages à zéro ; l'emplacement, lui, reste — il y en a trois, fixes. -->
+    <string name="lapse_delete">Delete this lapse</string>
 
     <!-- Titres de cartes -->
     <string name="card_datetime">Date and time</string>
     <string name="card_saved_dates">Saved dates</string>
     <string name="card_animation">Animation</string>
     <string name="card_display_style">Display style</string>
-    <string name="card_language">Language</string>
 
     <string name="saved_date_add">New date</string>
-
-    <!-- Langue : rendre la main au réglage système -->
-    <string name="language_system">System</string>
 
     <!-- Animation des secondes -->
     <string name="seconds_ring">Ring</string>
