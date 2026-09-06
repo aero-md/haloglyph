@@ -45,6 +45,7 @@ import red.suns.haloglyph.core.glyph.GlyphAvailability
 import red.suns.haloglyph.core.matrix.Frame
 import red.suns.haloglyph.core.matrix.MatrixSpec
 import red.suns.haloglyph.core.ui.AnimatedMatrixPreview
+import red.suns.haloglyph.core.ui.ChipRow
 import red.suns.haloglyph.core.ui.ChipState
 import red.suns.haloglyph.core.ui.HaloCard
 import red.suns.haloglyph.core.ui.HaloControlBg
@@ -230,7 +231,7 @@ private fun ToyRow(toy: ToyEntry) {
                 lineHeight = 17.sp,
             )
             Spacer(Modifier.height(9.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            ChipRow {
                 if (toy.upcoming) {
                     StatusChip(stringResource(R.string.hub_chip_soon), ChipState.OFF)
                 } else {

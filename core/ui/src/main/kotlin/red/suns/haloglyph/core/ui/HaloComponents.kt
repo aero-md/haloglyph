@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -44,6 +46,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -485,8 +488,35 @@ fun StatusChip(text: String, state: ChipState, modifier: Modifier = Modifier) {
             fontSize = 9.5.sp,
             letterSpacing = 1.3.sp,
             fontFamily = FontFamily.Monospace,
+            // Une pastille ne se coupe pas en plein mot : elle passe à la ligne
+            // entière, ou elle s'élide. C'est [ChipRow] qui gère le passage.
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis,
         )
     }
+}
+
+/**
+ * La rangée de pastilles.
+ *
+ * Un `Row` simple laissait la dernière pastille se briser au milieu d'un mot dès
+ * que « PAS DANS GLYPH INTERFACE » et « AUCUN WIDGET » se retrouvaient côte à
+ * côte — et ces deux-là sont justement l'état par défaut du prototype. Le flux
+ * fait passer la pastille entière à la ligne suivante.
+ *
+ * Le `FlowRowScope` n'est pas exposé : il porte l'opt-in expérimental, et le
+ * laisser fuir obligerait chaque écran appelant à l'accepter pour un service
+ * qu'il n'utilise pas.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ChipRow(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) { content() }
 }
 
 /** Chevron « cette ligne ouvre un écran ». Discret : c'est une affordance. */
