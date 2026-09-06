@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Accessibilité : la bitmap n'a aucun texte, c'est la seule description
+         que TalkBack peut lire. Traduite comme le reste (de·en·es·fr·it). -->
+    <string name="haloglyph_widget_matrix_description">Glyph Matrix</string>
+</resources>

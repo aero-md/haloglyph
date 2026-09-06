@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Haloglyph</string>
+
+    <string name="hub_matrix_probing">Looking for a Glyph Matrix…</string>
+    <string name="hub_matrix_present">Glyph Matrix connected — toys show up in Glyph Interface.</string>
+    <string name="hub_matrix_absent">No Glyph Matrix on this phone — the widgets emulate it.</string>
+    <string name="hub_no_toys">No toy bundled yet. Above is the plumbing check: 489 LEDs, edge ring, disc mask.</string>
+</resources>

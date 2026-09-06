@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Layout minimal, et c'est voulu : tout ce qui est dessiné l'est dans la bitmap,
+  par le même renderer que la matrice physique. Une hiérarchie de vues qui
+  imiterait la grille serait plus lourde à transmettre et ne partagerait aucun
+  code avec le toy.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/haloglyph_matrix_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:contentDescription="@string/haloglyph_widget_matrix_description" />
+
+</FrameLayout>

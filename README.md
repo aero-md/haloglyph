@@ -8,9 +8,10 @@ la matrice arrière. Sur n'importe quel autre Android, les mêmes toys tournent
 dans des **widgets d'écran d'accueil** qui émulent la matrice au pixel près —
 mêmes moteurs, mêmes renderers, même masque de 489 LEDs.
 
-> **État : conception.** Le dépôt contient pour l'instant l'ossature et la
-> licence. Le code arrive par migration des toys existants, avec leur historique
-> (`git subtree`).
+> **État : plomberie en place, aucun toy migré.** Le dépôt contient la
+> géométrie de la matrice, les trois sinks, le socle des services Glyph et des
+> widgets, et un hub qui affiche une mire de vérification. Les toys arrivent
+> ensuite, par migration avec leur historique (`git subtree`).
 
 ## Les toys
 
@@ -24,6 +25,17 @@ mêmes moteurs, mêmes renderers, même masque de 489 LEDs.
 
 Les préviews web de chaque toy vivent dans
 [GlyphPortal](https://github.com/aero-md/GlyphPortal) → [glyph.suns.red](https://glyph.suns.red).
+
+## Construire
+
+```
+git clone git@github.com:aero-md/haloglyph.git
+cd haloglyph
+./gradlew :app:assembleDebug
+```
+
+Le GlyphMatrixSDK n'est pas versionné : il est téléchargé au premier build.
+JDK 17, SDK Android 36, aucune clé API Nothing requise (targetSdk 36).
 
 ## Langues
 

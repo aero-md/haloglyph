@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hub_matrix_probing">Suche nach einer Glyph Matrix…</string>
+    <string name="hub_matrix_present">Glyph Matrix verbunden — die Toys erscheinen im Glyph Interface.</string>
+    <string name="hub_matrix_absent">Keine Glyph Matrix auf diesem Telefon — die Widgets emulieren sie.</string>
+    <string name="hub_no_toys">Noch kein Toy enthalten. Oben das Prüfbild: 489 LEDs, Randring, Scheibenmaske.</string>
+</resources>

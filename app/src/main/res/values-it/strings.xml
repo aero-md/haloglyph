@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hub_matrix_probing">Ricerca di una Glyph Matrix…</string>
+    <string name="hub_matrix_present">Glyph Matrix collegata: i toy compaiono in Glyph Interface.</string>
+    <string name="hub_matrix_absent">Nessuna Glyph Matrix su questo telefono: i widget la emulano.</string>
+    <string name="hub_no_toys">Ancora nessun toy incluso. Sopra, l\'immagine di prova: 489 LED, anello di bordo, maschera del disco.</string>
+</resources>

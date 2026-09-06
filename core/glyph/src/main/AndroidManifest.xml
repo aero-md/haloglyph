@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Accès à la Glyph Matrix. Portée par le module qui en a besoin plutôt
+         que par l'app : un toy qui n'utilise pas la matrice n'aurait pas à la
+         demander. AGP fusionne. -->
+    <uses-permission android:name="com.nothing.ketchum.permission.ENABLE" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!--
+      Visibilité des paquets (Android 11+).
+
+      Les toys existants bindent `com.nothing.thirdparty` sans `<queries>` et
+      fonctionnent — Nothing marque très probablement son service
+      `force-queryable`. On ne touche pas à ce qui marche, mais un `<queries>`
+      est de toute façon nécessaire pour énumérer les toys installés, alors y
+      ajouter le paquet coûte une ligne et supprime le doute.
+
+      Jamais `QUERY_ALL_PACKAGES` : permission sensible, justification
+      obligatoire sur Play, pour un besoin déjà couvert ici.
+    -->
+    <queries>
+        <intent>
+            <action android:name="com.nothing.glyph.TOY" />
+        </intent>
+        <package android:name="com.nothing.thirdparty" />
+    </queries>
+
+</manifest>
