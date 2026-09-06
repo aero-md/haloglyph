@@ -4,18 +4,18 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import red.suns.haloglyph.core.matrix.MatrixLook
 import red.suns.haloglyph.core.matrix.MatrixSpec
-import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Rendu d'une frame en bitmap : la matrice, dessinée.
+ * Rendu d'une frame en bitmap : la matrice, dessinée pour un widget.
  *
- * C'est ce qui rend la promesse du produit vérifiable — mêmes moteurs, mêmes
- * renderers, même masque de 489 LEDs. Le détail qui fait toute la différence
- * entre « un widget carré de points » et « la Glyph Matrix » est le masque :
- * les cellules sans LED ne sont pas dessinées, du tout. Les coins restent vides,
- * et la silhouette circulaire apparaît d'elle-même.
+ * Même géométrie et mêmes couleurs que l'aperçu Compose des réglages — les deux
+ * lisent [MatrixLook]. C'est ce qui rend vérifiable la promesse du produit :
+ * mêmes moteurs, mêmes renderers, même dessin. Des LEDs **carrées** au tiers de
+ * gouttière, sur un champ circulaire ; le masque laisse les coins vides, et la
+ * silhouette de la matrice apparaît d'elle-même.
  *
  * ### Le budget, qui n'est pas négociable
  *
@@ -24,7 +24,8 @@ import kotlin.math.min
  * widget qui tombe, c'est le **launcher**. D'où :
  *
  * - `RGB_565` (2 octets/pixel) et non `ARGB_8888` (4) : la matrice est
- *   monochrome, la moitié du budget suffit ;
+ *   monochrome, la moitié du budget suffit. Corollaire : pas de canal alpha, donc
+ *   les opacités de [MatrixLook] sont mélangées à la main sur le champ ;
  * - la taille réelle du widget, jamais une taille fixe généreuse ;
  * - [MAX_SIDE_PX] comme garde-fou dur, quoi que demande l'appelant.
  */
@@ -36,25 +37,11 @@ object MatrixBitmap {
      */
     const val MAX_SIDE_PX = 480
 
-    /** Côté minimum : en dessous, un point de la grille ferait moins d'un pixel. */
+    /** Côté minimum : en dessous, une LED ferait moins d'un pixel. */
     const val MIN_SIDE_PX = 50
 
-    data class Style(
-        /** Diamètre d'un point rapporté au pas de la grille. */
-        val dotRatio: Float = 0.80f,
-        val background: Int = Color.BLACK,
-        /** Couleur d'une LED à pleine luminosité. */
-        val lit: Int = Color.WHITE,
-        /**
-         * Luminosité résiduelle d'une LED éteinte, 0..1. Une matrice réelle
-         * éteinte laisse deviner ses points ; à 0 le widget a l'air cassé.
-         */
-        val floor: Float = 0.10f,
-    )
-
     /** Taille effective retenue pour une taille demandée. */
-    fun clampSide(requestedPx: Int): Int =
-        requestedPx.coerceIn(MIN_SIDE_PX, MAX_SIDE_PX)
+    fun clampSide(requestedPx: Int): Int = requestedPx.coerceIn(MIN_SIDE_PX, MAX_SIDE_PX)
 
     /** Poids en octets d'une bitmap RGB_565 de ce côté — pour vérifier le budget. */
     fun byteSize(sidePx: Int): Int = sidePx * sidePx * 2
@@ -69,7 +56,8 @@ object MatrixBitmap {
         brightness: IntArray,
         spec: MatrixSpec,
         requestedSidePx: Int,
-        style: Style = Style(),
+        litArgb: Int = MatrixLook.LIT_ARGB,
+        fieldArgb: Int = MatrixLook.FIELD_ARGB,
         reuse: Bitmap? = null,
     ): Bitmap {
         require(brightness.size == spec.cellCount) {
@@ -85,20 +73,32 @@ object MatrixBitmap {
         }
 
         val canvas = Canvas(bitmap)
-        canvas.drawColor(style.background)
-
-        val pitch = side.toFloat() / spec.size
-        val radius = pitch * style.dotRatio / 2f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-        val floorLevel = (style.floor.coerceIn(0f, 1f) * 255).toInt()
+        // Hors du disque, du noir franc : le launcher pose la bitmap sur le
+        // fond d'écran, et un carré gris trahirait la silhouette.
+        canvas.drawColor(Color.BLACK)
+        paint.color = fieldArgb
+        canvas.drawCircle(side / 2f, side / 2f, side / 2f, paint)
+
+        val pitch = side.toFloat() / spec.size
+        val led = MatrixLook.ledSize(pitch)
+        val inset = MatrixLook.inset(pitch)
+
+        // Pas d'alpha en RGB_565 : les deux niveaux sont mélangés au champ.
+        val offColor = blend(fieldArgb, litArgb, MatrixLook.OFF_ALPHA)
 
         for (index in spec.leds) {
-            val level = max(floorLevel, min(255, brightness[index]))
-            paint.color = blend(style.background, style.lit, level / 255f)
-            val cx = (spec.xOf(index) + 0.5f) * pitch
-            val cy = (spec.yOf(index) + 0.5f) * pitch
-            canvas.drawCircle(cx, cy, radius, paint)
+            val left = spec.xOf(index) * pitch + inset
+            val top = spec.yOf(index) * pitch + inset
+            val value = min(255, brightness[index])
+
+            paint.color = if (value > MatrixLook.MIN_VISIBLE) {
+                blend(fieldArgb, litArgb, value / 255f)
+            } else {
+                offColor
+            }
+            canvas.drawRect(left, top, left + led, top + led, paint)
         }
         return bitmap
     }

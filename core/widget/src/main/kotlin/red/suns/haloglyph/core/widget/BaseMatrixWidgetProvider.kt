@@ -11,6 +11,7 @@ import android.os.SystemClock
 import android.util.Log
 import android.widget.RemoteViews
 import red.suns.haloglyph.core.matrix.Frame
+import red.suns.haloglyph.core.matrix.MatrixLook
 import red.suns.haloglyph.core.matrix.MatrixSpec
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.min
@@ -46,7 +47,12 @@ abstract class BaseMatrixWidgetProvider : AppWidgetProvider() {
     /** V1 : Phone (3). Les widgets tournent sur n'importe quel Android. */
     protected open val spec: MatrixSpec get() = MatrixSpec.Phone3
 
-    protected open val style: MatrixBitmap.Style get() = MatrixBitmap.Style()
+    /**
+     * Couleur d'une LED allumée. Un toy peut la teinter ; la géométrie, elle,
+     * n'est pas négociable — elle vient de `MatrixLook`, partagée avec l'aperçu
+     * des réglages, sinon les deux surfaces divergent.
+     */
+    protected open val litColor: Int get() = MatrixLook.LIT_ARGB
 
     /** ~11 fps : au-delà, le binder travaille plus que l'écran ne montre. */
     protected open val burstFrameMs: Long get() = 90L
@@ -121,7 +127,7 @@ abstract class BaseMatrixWidgetProvider : AppWidgetProvider() {
         frame: Frame,
         reuseSide: Int = sidePx(context, manager, widgetId),
     ) {
-        val bitmap = MatrixBitmap.render(frame.toBrightness(), spec, reuseSide, style)
+        val bitmap = MatrixBitmap.render(frame.toBrightness(), spec, reuseSide, litColor)
         val views = RemoteViews(context.packageName, R.layout.haloglyph_matrix_widget).apply {
             setImageViewBitmap(R.id.haloglyph_matrix_image, bitmap)
             setOnClickPendingIntent(R.id.haloglyph_matrix_image, tapIntent(context))

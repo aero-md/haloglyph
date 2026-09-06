@@ -2,62 +2,76 @@ package red.suns.haloglyph.core.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import red.suns.haloglyph.core.matrix.Frame
 import red.suns.haloglyph.core.matrix.FrameSink
+import red.suns.haloglyph.core.matrix.MatrixLook
 import red.suns.haloglyph.core.matrix.MatrixSpec
 import kotlin.math.min
 
 /**
  * La matrice, dessinée dans l'app.
  *
- * Troisième surface, même contrat que les deux autres : on reçoit des
- * luminosités 0..255 et on applique le masque. Une préview qui allumerait les
- * coins ne serait plus une préview.
+ * **C'est le moteur d'aperçu de tous les toys.** Un écran de réglages n'a pas à
+ * savoir dessiner une matrice : il fournit un rendu — la même fonction que celle
+ * qui alimente le service Glyph — et reçoit une matrice fidèle. Un toy qui
+ * dessinerait la sienne finirait par diverger, et c'est précisément ce que le
+ * produit promet de ne pas faire.
  *
- * Compose dessine ici directement sur un `Canvas` plutôt que de passer par une
- * `Bitmap` : contrairement au widget, il n'y a pas de binder à traverser, donc
- * pas de budget à tenir — et une frame de plus ne coûte qu'un tour de rendu.
+ * La fidélité tient à trois choses, toutes portées par
+ * [red.suns.haloglyph.core.matrix.MatrixLook] :
+ *
+ * - des LEDs **carrées** au tiers de gouttière, pas des points ronds ;
+ * - le masque du disque, donc des coins vides ;
+ * - un état éteint visible à 5 %, pour que la silhouette existe avant la première
+ *   LED allumée.
  */
 @Composable
 fun MatrixPreview(
     brightness: IntArray,
     modifier: Modifier = Modifier,
     spec: MatrixSpec = MatrixSpec.Phone3,
-    litColor: Color = Color.White,
-    background: Color = Color.Black,
-    /** Luminosité résiduelle d'une LED éteinte : une matrice noire a l'air cassée. */
-    floor: Float = 0.10f,
-    dotRatio: Float = 0.80f,
+    litColor: Color = Color(MatrixLook.LIT_ARGB),
+    fieldColor: Color = Color(MatrixLook.FIELD_ARGB),
 ) {
     Canvas(modifier) {
         val side = min(size.width, size.height)
-        val pitch = side / spec.size
-        val radius = pitch * dotRatio / 2f
         val originX = (size.width - side) / 2f
         val originY = (size.height - side) / 2f
 
-        drawRect(color = background)
+        // Le champ est un disque : c'est lui qui donne la silhouette.
+        drawCircle(
+            color = fieldColor,
+            radius = side / 2f,
+            center = Offset(originX + side / 2f, originY + side / 2f),
+        )
+
+        val pitch = side / spec.size
+        val led = Size(MatrixLook.ledSize(pitch), MatrixLook.ledSize(pitch))
+        val inset = MatrixLook.inset(pitch)
 
         for (index in spec.leds) {
-            val level = (brightness.getOrElse(index) { 0 } / 255f).coerceIn(floor, 1f)
-            drawCircle(
-                color = lerp(background, litColor, level),
-                radius = radius,
-                center = Offset(
-                    originX + (spec.xOf(index) + 0.5f) * pitch,
-                    originY + (spec.yOf(index) + 0.5f) * pitch,
-                ),
+            val topLeft = Offset(
+                originX + spec.xOf(index) * pitch + inset,
+                originY + spec.yOf(index) * pitch + inset,
             )
+            // Toujours l'état éteint, puis l'allumé par-dessus : une LED faible
+            // reste au moins aussi visible qu'une LED au repos.
+            drawRect(color = litColor.copy(alpha = MatrixLook.OFF_ALPHA), topLeft = topLeft, size = led)
+
+            val value = brightness.getOrElse(index) { 0 }
+            if (value > MatrixLook.MIN_VISIBLE) {
+                drawRect(color = litColor.copy(alpha = value / 255f), topLeft = topLeft, size = led)
+            }
         }
     }
 }
@@ -84,8 +98,8 @@ fun rememberMatrixFrameState(spec: MatrixSpec = MatrixSpec.Phone3): MatrixFrameS
 /**
  * Une matrice animée, cadencée par Compose.
  *
- * `withFrameNanos` accroche le rendu au vsync : la préview s'arrête d'elle-même
- * quand l'écran s'éteint ou que l'écran de réglages passe en arrière-plan. Un
+ * `withFrameNanos` accroche le rendu au vsync : l'aperçu s'arrête de lui-même
+ * quand l'écran s'éteint ou que les réglages passent en arrière-plan. Un
  * `Handler` à 33 ms, lui, continuerait de tourner dans le vide.
  *
  * @param render appelé avec un tampon déjà effacé et le temps écoulé en
@@ -96,8 +110,8 @@ fun rememberMatrixFrameState(spec: MatrixSpec = MatrixSpec.Phone3): MatrixFrameS
 fun AnimatedMatrixPreview(
     modifier: Modifier = Modifier,
     spec: MatrixSpec = MatrixSpec.Phone3,
-    litColor: Color = Color.White,
-    background: Color = Color.Black,
+    litColor: Color = Color(MatrixLook.LIT_ARGB),
+    fieldColor: Color = Color(MatrixLook.FIELD_ARGB),
     render: (frame: Frame, elapsedSeconds: Double) -> Unit,
 ) {
     val state = rememberMatrixFrameState(spec)
@@ -118,6 +132,6 @@ fun AnimatedMatrixPreview(
         modifier = modifier,
         spec = spec,
         litColor = litColor,
-        background = background,
+        fieldColor = fieldColor,
     )
 }
