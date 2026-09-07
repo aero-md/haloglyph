@@ -93,8 +93,10 @@ object MatrixBitmap {
             val top = spec.yOf(index) * pitch + inset
             val value = min(255, brightness[index])
 
+            // `perceived` et non `value / 255f` : la frame porte des rapports
+            // cycliques, l'écran compose en linéaire. Voir MatrixLook.perceived.
             paint.color = if (value > MatrixLook.MIN_VISIBLE) {
-                blend(fieldArgb, litArgb, value / 255f)
+                blend(fieldArgb, litArgb, MatrixLook.perceived(value))
             } else {
                 offColor
             }

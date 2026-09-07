@@ -12,6 +12,7 @@ import red.suns.haloglyph.dice.engine.cross
 import red.suns.haloglyph.dice.engine.dot
 import red.suns.haloglyph.dice.engine.plus
 import red.suns.haloglyph.dice.engine.revealAt
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -212,25 +213,34 @@ class DiceRenderer(private val spec: MatrixSpec = MatrixSpec.Phone3) {
         val lit = revealAt(view.cam.z).toFloat()
         if (lit > 0f) {
             val face = die.faces[best]
+
+            /* L'ancre : le centre de la face, **ramené à la cellule la plus
+               proche**. Tout ce qui suit se pose en décalages entiers depuis
+               elle, et le motif est donc un réseau rigide : ce qui est
+               symétrique dans le motif l'est encore sur la trame.
+
+               La marque n'apparaît qu'une fois la pose terminée (voir
+               `REVEAL_OFF`), l'ancre ne bouge donc pas d'une image à l'autre. */
+            project(face.c, m, view.pos, ex, ey, k)
+            val ax = px.roundToInt()
+            val ay = py.roundToInt()
+
+            /* Place disponible, en cellules : le rayon inscrit de la face,
+               mesuré dans le cadrage du **gros plan** et non dans celui de
+               l'image courante. C'est ce qui empêche la marque de changer de
+               corps ou d'écartement en cours de révélation. */
+            val room = face.inr * spec.radius / die.close
+
             if (face.pips.isNotEmpty()) {
                 for (p in face.pips) {
-                    project(p, m, view.pos, ex, ey, k)
-                    block(px, py, PIP_PX, PIP_PX, best, lit)
+                    block(ax + cells(p.u, room), ay + cells(p.v, room), PIP_PX, best, lit)
                 }
             } else {
-                /* Place disponible pour un nombre, en cellules : le rayon
-                   inscrit de la face, mesuré dans le cadrage du gros plan et non
-                   dans celui de l'image courante — c'est ce qui empêche le corps
-                   de changer en cours de révélation. Voir [STEPS]. */
-                val room = face.inr * spec.radius / die.close
                 val step = STEPS.firstOrNull {
                     it.font.height * it.scale / 2.0 <= room &&
                         it.font.textWidth(face.glyph) * it.scale / 2.0 <= room
                 }
-                if (step != null) {
-                    project(face.c, m, view.pos, ex, ey, k)
-                    text(step.font, step.scale, face.glyph, px, py, best, lit)
-                }
+                if (step != null) text(step.font, step.scale, face.glyph, ax, ay, best, lit)
             }
         }
 
@@ -269,14 +279,30 @@ class DiceRenderer(private val spec: MatrixSpec = MatrixSpec.Phone3) {
         py = spec.centerY - (w dot ey) / k
     }
 
-    /** Un rectangle plein centré, rogné à la face [f]. */
-    private fun block(sx: Double, sy: Double, w: Int, h: Int, f: Int, b: Float) {
-        val x0 = (sx - w / 2.0).roundToInt()
-        val y0 = (sy - h / 2.0).roundToInt()
-        for (dy in 0 until h) {
+    /**
+     * L'écartement d'un pip, **en cellules entières et symétrique**.
+     *
+     * La magnitude est arrondie une fois, puis reprise avec son signe. Arrondir
+     * chaque pip dans son coin — ce que faisait la projection — donnait un 4 en
+     * trapèze : les deux pips du bas tombaient une cellule plus à gauche que
+     * ceux du haut, et la puce médiane du 6 changeait de colonne d'une rangée à
+     * l'autre. Une demi-cellule d'écart suffit à faire basculer un arrondi, et
+     * un dé dont les points ne sont pas alignés a l'air cassé bien avant qu'on
+     * sache dire pourquoi.
+     */
+    private fun cells(fraction: Double, room: Double): Int {
+        val d = (abs(fraction) * room).roundToInt()
+        return if (fraction < 0) -d else d
+    }
+
+    /** Un carré plein centré sur la cellule ([cx], [cy]), rogné à la face [f]. */
+    private fun block(cx: Int, cy: Int, side: Int, f: Int, b: Float) {
+        val x0 = cx - side / 2
+        val y0 = cy - side / 2
+        for (dy in 0 until side) {
             val yy = y0 + dy
             if (yy < 0 || yy >= spec.size) continue
-            for (dx in 0 until w) {
+            for (dx in 0 until side) {
                 val xx = x0 + dx
                 if (xx < 0 || xx >= spec.size) continue
                 val j = yy * spec.size + xx
@@ -286,17 +312,17 @@ class DiceRenderer(private val spec: MatrixSpec = MatrixSpec.Phone3) {
     }
 
     /**
-     * Un nombre centré, chaque pixel de police dilaté en carré de [scale].
+     * Un nombre centré sur la cellule ([cx], [cy]), chaque pixel de police
+     * dilaté en carré de [scale].
      *
      * Un pixel de blanc entre deux chiffres, dilaté comme le reste — c'est ce
      * que mesure `textWidth`, et le centrage en dépend. Le dix est le seul
      * nombre à deux chiffres du lot, et il ne tient qu'à l'échelle 1 : cette
      * cellule d'écart est donc bien une cellule, et le `10` fait onze de large.
      */
-    private fun text(font: Font, scale: Int, s: String, sx: Double, sy: Double, f: Int, b: Float) {
-        val h = font.height * scale
-        val y0 = (sy - h / 2.0).roundToInt()
-        var x0 = (sx - font.textWidth(s) * scale / 2.0).roundToInt()
+    private fun text(font: Font, scale: Int, s: String, cx: Int, cy: Int, f: Int, b: Float) {
+        val y0 = cy - font.height * scale / 2
+        var x0 = cx - font.textWidth(s) * scale / 2
 
         for (ch in s) {
             val rows = font.glyphs[ch] ?: continue
@@ -348,6 +374,12 @@ class DiceRenderer(private val spec: MatrixSpec = MatrixSpec.Phone3) {
          * un contour d'une cellule, il n'a jamais eu besoin d'être vif pour se
          * voir. Le lavis, lui, ne descend pas plus bas : sous huit sur 255, la
          * LED s'éteint pour de bon et le solide redevient un grillage.
+         *
+         * Ces valeurs partent donc pour la matrice, qui attend un rapport
+         * cyclique. Les deux surfaces émulées refont le chemin dans l'autre sens
+         * — `MatrixLook.perceived` — et montrent ce que l'œil verrait. Sans
+         * cette conversion, l'aperçu affichait la consigne : un dé en fil de fer
+         * à 18 % sur un lavis à 3 %, c'est-à-dire à peu près rien.
          */
         const val EDGE = 0.18f
 
@@ -359,11 +391,9 @@ class DiceRenderer(private val spec: MatrixSpec = MatrixSpec.Phone3) {
          * Côté d'un pip, **en cellules d'écran**, et c'est un parti pris contre
          * la perspective.
          *
-         * Un pip n'est pas peint sur la face : son centre est projeté, puis un
-         * carré de 3 × 3 est tamponné sur la grille. Il garde donc la même
-         * taille et reste aligné sur les LEDs quelle que soit l'inclinaison de
-         * la face, et pendant que le rapprochement fait grandir le solide sous
-         * lui.
+         * Un pip n'est pas peint sur la face : c'est un carré de 3 × 3 tamponné
+         * sur la grille. Il garde donc la même taille et reste aligné sur les
+         * LEDs quelle que soit l'inclinaison de la face.
          *
          * C'est faux, et c'est exactement ce qu'on veut. La version juste — un
          * disque mesuré dans le dé, projeté avec le reste — donnait un pip d'une
@@ -373,6 +403,11 @@ class DiceRenderer(private val spec: MatrixSpec = MatrixSpec.Phone3) {
          * de côté, la quantification fait plus de dégâts que l'entorse à la
          * géométrie. Les LEDs ne sont pas un rendu, elles sont une trame : un
          * point y a une taille, pas une distance.
+         *
+         * **Et pas davantage une position.** L'argument valait pour la taille,
+         * il vaut mot pour mot pour le placement, et ne l'avoir tenu qu'à moitié
+         * a coûté un dé visiblement de travers — voir [cells]. Un pip se pose
+         * donc sur une cellule entière, à un écart entier du centre de la face.
          *
          * Impair, nécessairement : un carré centré sur une cellule a un côté
          * impair.

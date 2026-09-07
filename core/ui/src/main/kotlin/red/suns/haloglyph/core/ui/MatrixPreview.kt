@@ -71,7 +71,13 @@ fun MatrixPreview(
 
             val value = brightness.getOrElse(index) { 0 }
             if (value > MatrixLook.MIN_VISIBLE) {
-                drawRect(color = litColor.copy(alpha = value / 255f), topLeft = topLeft, size = led)
+                // `perceived` et non `value / 255f` : la frame porte des rapports
+                // cycliques, le Canvas compose en linéaire. Voir MatrixLook.
+                drawRect(
+                    color = litColor.copy(alpha = MatrixLook.perceived(value)),
+                    topLeft = topLeft,
+                    size = led,
+                )
             }
         }
     }

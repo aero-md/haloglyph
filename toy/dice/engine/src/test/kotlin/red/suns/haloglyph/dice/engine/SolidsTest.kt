@@ -4,6 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.abs
+import kotlin.math.sqrt
 
 /**
  * Les solides sont **dérivés**, pas écrits : les normales, les centres et les
@@ -142,10 +143,27 @@ class SolidsTest {
         val d6 = Dice.byKey("d6")
         for (face in d6.faces) {
             for (pip in face.pips) {
-                val offset = (pip - face.c).length
-                assertTrue("face ${face.value} : pip à $offset > ${face.inr}", offset < face.inr)
-                // Et sur le plan de la face, à un cheveu près.
-                assertTrue(abs((pip dot face.n) - face.d) < 1e-9)
+                // Fractions du rayon inscrit : dedans, c'est une norme < 1.
+                val offset = sqrt(pip.u * pip.u + pip.v * pip.v)
+                assertTrue("face ${face.value} : pip à $offset", offset < 1.0)
+            }
+        }
+    }
+
+    /**
+     * Chaque motif est symétrique par rapport au centre de la face : à tout pip
+     * répond son opposé, le pip central étant le sien. C'est ce qu'est un dé, et
+     * c'est ce que le rendu doit pouvoir supposer pour poser un motif aligné.
+     */
+    @Test
+    fun `les motifs de pips sont symetriques par rapport au centre`() {
+        val d6 = Dice.byKey("d6")
+        for (face in d6.faces) {
+            for (pip in face.pips) {
+                assertTrue(
+                    "face ${face.value} : pas d'opposé à (${pip.u}, ${pip.v})",
+                    face.pips.any { abs(it.u + pip.u) < 1e-12 && abs(it.v + pip.v) < 1e-12 },
+                )
             }
         }
     }

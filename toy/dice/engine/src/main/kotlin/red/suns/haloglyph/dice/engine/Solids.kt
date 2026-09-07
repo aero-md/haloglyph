@@ -74,10 +74,15 @@ fun Vec3.normalized(): Vec3 {
 /* ---------------------------------- pips ----------------------------------- */
 
 /**
- * Les six motifs du d6, en fractions de la demi-arête de la face.
+ * Les six motifs du d6, en fractions du rayon inscrit de la face — la
+ * demi-arête, sur un carré.
  *
  * Le 6 écarte ses rangées à 0,56 plutôt que 0,52 : à trois rangées le pas est
  * plus serré qu'à deux, et sans cet écart les taches du gros plan se touchent.
+ *
+ * Tous les motifs sont **symétriques par rapport au centre** : à chaque pip
+ * répond son opposé, le pip central étant son propre opposé. Ce n'est pas une
+ * coïncidence de dessin, c'est ce qu'est un dé, et `SolidsTest` le vérifie.
  */
 private val PIPS: Array<Array<DoubleArray>> = arrayOf(
     emptyArray(),
@@ -100,6 +105,20 @@ private val PIPS: Array<Array<DoubleArray>> = arrayOf(
 
 /* --------------------------------- le solide ------------------------------- */
 
+/**
+ * Un pip, en fractions du rayon inscrit de sa face — et **pas** un point du
+ * solide.
+ *
+ * C'est un motif, pas une géométrie. Les pips sont tamponnés sur la trame, à
+ * l'endroit et à l'échelle de la trame ; les décrire en 3D reviendrait à les
+ * faire passer par la projection, qui les rendrait à leur tour à des positions
+ * sub-cellulaires que l'arrondi casserait chacune dans son coin. Voir le
+ * renderer, qui les pose sur un réseau de cellules entières.
+ *
+ * [u] va vers la droite, [v] vers le bas, comme l'écran.
+ */
+class PipSpot(val u: Double, val v: Double)
+
 class Face(
     /** Normale unitaire, sortante. */
     val n: Vec3,
@@ -113,8 +132,8 @@ class Face(
     val value: Int,
     /** Le nombre imprimé, vide si la face porte des pips. Deux chiffres au dix. */
     val glyph: String,
-    /** Centres des pips dans le repère du dé. Vide sur une face chiffrée. */
-    val pips: List<Vec3>,
+    /** Motif de pips de la face. Vide sur une face chiffrée. */
+    val pips: List<PipSpot>,
 )
 
 /**
@@ -449,15 +468,11 @@ private fun build(
 
     val faces = raw.mapIndexed { i, r ->
         val v = value[i]
-        /* Les pips ne concernent que le d6 : sa face est un carré, donc une base
-           tangente prise sur une arête, et une demi-arête pour unité. */
-        val pips = if (count != 6) emptyList() else {
-            val e = verts[r.f[1]] - verts[r.f[0]]
-            val half = e.length / 2
-            val u = e.normalized()
-            val w = r.n cross u
-            PIPS[v].map { p -> r.c + (u * p[0] + w * p[1]) * half }
-        }
+        /* Les pips ne concernent que le d6, et ne sont qu'un motif : aucune base
+           tangente à construire, aucun point à placer dans le solide. Le rayon
+           inscrit d'une face carrée vaut sa demi-arête, donc les fractions de
+           [PIPS] sont déjà à la bonne unité. */
+        val pips = if (count != 6) emptyList() else PIPS[v].map { PipSpot(it[0], it[1]) }
         Face(
             n = r.n,
             d = r.d,

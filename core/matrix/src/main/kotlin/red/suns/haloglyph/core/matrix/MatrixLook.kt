@@ -1,5 +1,7 @@
 package red.suns.haloglyph.core.matrix
 
+import kotlin.math.pow
+
 /**
  * L'apparence d'une Glyph Matrix **émulée**, en un seul endroit.
  *
@@ -41,11 +43,48 @@ object MatrixLook {
     const val FIELD_ARGB: Int = 0xFF0B0B0D.toInt()
 
     /**
-     * En dessous de cette luminosité (sur 255), on ne peint pas la LED allumée :
-     * elle serait moins visible que l'état éteint, et l'aperçu scintillerait
-     * sur les valeurs de fond du sablier.
+     * En dessous de cette luminosité (sur 255), on ne peint pas la LED allumée.
+     *
+     * Le motif d'origine — « elle serait moins visible que l'état éteint » — a
+     * disparu avec [perceived] : une consigne de 1/255 se perçoit déjà à 8 %,
+     * au-dessus de [OFF_ALPHA]. Ce qui reste est un garde-fou contre le bruit de
+     * quantification, une ou deux marches sur 255 qu'aucun renderer ne veut
+     * vraiment allumer — le creux sombre du sablier, par exemple.
      */
     const val MIN_VISIBLE = 5
+
+    /**
+     * Gamma de l'œil. Le nombre usuel des écrans, et il vaut ici pour la même
+     * raison : c'est la réponse d'un observateur, pas celle d'un afficheur.
+     */
+    const val GAMMA = 2.2f
+
+    /**
+     * L'opacité **perçue** d'une consigne de LED, de 0 à 255.
+     *
+     * C'est la conversion qui manquait, et son absence faisait mentir la
+     * promesse du produit. La valeur poussée à une LED est un **rapport
+     * cyclique** ; l'œil, lui, ne le lit pas linéairement. Une consigne de 0,18
+     * se voit à 46 %, une de 0,03 à 20 %. Les renderers raisonnent donc en
+     * rapport cyclique — c'est ce que le matériel attend — et les deux surfaces
+     * émulées, qui composent en alpha linéaire, affichaient jusqu'ici la
+     * *consigne* au lieu du *résultat*.
+     *
+     * Concrètement : la carcasse d'un dé sortait à 18 % d'opacité au lieu de
+     * 46 %, et le lavis de ses faces à 3 % — sous le seuil de perception, donc
+     * un dé en fil de fer flottant sur rien. Le sable du sablier de Lapse
+     * souffrait du même écart, en plus discret. Sur la matrice, les deux sont
+     * parfaitement lisibles : c'était l'émulation qui était fausse.
+     *
+     * Vit ici et pas dans chaque surface, pour la raison qui a fait exister ce
+     * fichier : l'aperçu Compose et la bitmap du widget doivent afficher le même
+     * dessin, et ils ne le feront que s'ils lisent la même table.
+     */
+    fun perceived(brightness: Int): Float {
+        if (brightness <= 0) return 0f
+        val duty = (brightness.coerceAtMost(255) / 255f)
+        return duty.pow(1f / GAMMA)
+    }
 
     /** Décalage d'une LED dans sa cellule, pour un pas de [pitch]. */
     fun inset(pitch: Float): Float = pitch * (1f - LED_RATIO) / 2f

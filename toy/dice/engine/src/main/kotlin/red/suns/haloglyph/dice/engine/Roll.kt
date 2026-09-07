@@ -89,13 +89,34 @@ private const val CLOSE_ELEV = 84 * D2R
 
 private fun mix(a: Double, b: Double, t: Double) = a + (b - a) * t
 
+/**
+ * L'avancement de la **pose** : `0` cadrage de vol, `1` caméra arrivée.
+ *
+ * Ce n'est pas [zoomAt]. La caméra finit sa course à [REVEAL_OFF] et tient
+ * ensuite, là où `z` continue jusqu'à 1 — et [REVEAL_OFF] est précisément le
+ * seuil où la marque commence à s'allumer. Le rapprochement est donc **terminé
+ * avant qu'il y ait quoi que ce soit à lire**, ce qui est tout l'objet de cette
+ * fonction : voir [REVEAL_OFF].
+ *
+ * Une seule constante pour les deux, et pas deux réglages voisins qu'on
+ * finirait par désaccorder.
+ *
+ * Le `smooth` n'est pas décoratif : sans lui la caméra arriverait à pleine
+ * vitesse et s'arrêterait net, ce qui se verrait autant que la dérive qu'il
+ * s'agit de supprimer.
+ */
+private fun posed(z: Double): Double = smooth(z / REVEAL_OFF)
+
 /** `z = 0` en vol, `z = 1` posé. */
-fun camAt(z: Double, close: Double): Cam = Cam(
-    yaw = mix(WIDE_YAW, CLOSE_YAW, z),
-    elev = mix(WIDE_ELEV, CLOSE_ELEV, z),
-    half = mix(WIDE_HALF, close, z),
-    z = z,
-)
+fun camAt(z: Double, close: Double): Cam {
+    val p = posed(z)
+    return Cam(
+        yaw = mix(WIDE_YAW, CLOSE_YAW, p),
+        elev = mix(WIDE_ELEV, CLOSE_ELEV, p),
+        half = mix(WIDE_HALF, close, p),
+        z = z,
+    )
+}
 
 /**
  * **Une marque ne s'imprime qu'au gros plan**, et jamais pendant le vol — pips
@@ -118,17 +139,41 @@ fun camAt(z: Double, close: Double): Cam = Cam(
  * la face : la marque monte au milieu du zoom et vite — commencée 240 ms après
  * la pose, pleine à 380 ms, et pleine pour les 220 ms de gros plan qui restent.
  * Le départ est bien plus sec, et c'est le recul de la caméra qui le veut : à la
- * puissance cinq, `z` a franchi le seuil au bout de **vingt-cinq
+ * puissance cinq, `z` a franchi [REVEAL_FULL] au bout de **vingt-cinq
  * millisecondes**. La marque ne s'attarde pas sur un dé qui part, elle s'éteint.
  *
- * Les seuils vivent ici et non dans le renderer, parce que la caméra s'en sert
- * aussi : le recentrage de la face est réglé sur [REVEAL_FULL], et c'est ce qui
- * **fixe** la marque. Une fois le recentrage terminé, le centre de la face lue
- * tombe exactement au milieu du hublot quelle que soit l'élévation — le nombre
- * n'a donc plus une seule cellule à bouger.
+ * ### L'invariant : une marque visible ne bouge jamais
  *
- * Une seule constante pour les deux, et le rapport est le bon dans ce sens-là :
- * **la face est arrivée au milieu avant que son nombre finisse de s'allumer.**
+ * [REVEAL_OFF] ne sert pas qu'à allumer la marque, il sert aussi de **terminus à
+ * la caméra** — voir [posed]. Au moment où la première lueur apparaît, azimut,
+ * élévation, cadrage et recentrage sont arrivés et ne bougeront plus : ce qui
+ * s'allume est déjà à sa place, et n'a plus une seule cellule à parcourir.
+ *
+ * Il a fallu un bug pour l'écrire en entier. La première version n'arrêtait que
+ * le *recentrage*, et à [REVEAL_FULL], au motif qu'un nombre est tamponné au
+ * centre de la face et qu'un centre fixe suffit à le fixer. C'est vrai du nombre
+ * et faux des pips : ceux-là sont tamponnés **à côté** du centre, ils suivaient
+ * donc l'azimut et le rapprochement jusqu'à `z = 1`. Mesuré sur un d6 posé sur
+ * 5 : quatre pips sur cinq sautaient encore d'une cellule — chacun dans sa
+ * direction — à pleine luminosité. Arrêter toute la caméra à [REVEAL_FULL] les a
+ * figés, mais laissait le pip central sauter une fois à 95 %, parce que la pose
+ * n'était encore qu'à 98,8 % quand la marque est devenue visible. Un seuil plus
+ * bas, et il ne reste rien à rattraper.
+ *
+ * Un dé qui a fini de rouler et dont les points bougent encore ne dit pas son
+ * résultat, il le cherche.
+ *
+ * ### Ce que le seuil bas coûte, et pourquoi c'est le bon prix
+ *
+ * Le rapprochement se fait maintenant en 250 ms au lieu de 600, puis la caméra
+ * tient pendant que la marque monte. C'est un temps fort de plus, pas un de
+ * moins : la caméra plonge, **puis** le nombre s'allume, au lieu des deux à la
+ * fois. L'instant où le résultat devient lisible n'a pas bougé d'une image.
+ *
+ * Au jet, la même constante fait tenir le gros plan les 66 premières
+ * millisecondes — le temps que la marque finisse de s'éteindre — avant que la
+ * caméra ne décroche. Le dé n'a alors tourné que d'une vingtaine de degrés, donc
+ * rien de la bouillie que le recul brutal est là pour éviter.
  */
 const val REVEAL_OFF = 0.35
 const val REVEAL_FULL = 0.7
@@ -418,16 +463,14 @@ class Roll private constructor(
  * sur le côté, soit cinq cellules au gros plan, et le chiffre partait se coller
  * dans un coin du hublot.
  *
- * Le décalage est pesé par le rapprochement : nul en vol, où c'est le solide
- * entier qu'on regarde, entier au gros plan, où c'est la face. Mais il est
- * **terminé à [REVEAL_FULL]** et non à `z = 1`, ce qui ne change presque rien au
- * mouvement — la glissade se fait en 380 ms au lieu de 600 — et change tout à la
- * marque : une fois le décalage entier, le centre de la face tombe exactement au
- * milieu du hublot, donc le nombre est **fixe** pendant tout le temps où il est
- * plein. Réglé sur `z = 1`, il finissait sa course sous les yeux du lecteur.
+ * Le décalage est pesé par l'avancement de la pose, [posed] — le même que la
+ * caméra, et pas un réglage voisin : nul en vol, où c'est le solide entier qu'on
+ * regarde, entier une fois posé, où c'est la face. Deux progressions différentes
+ * pour un seul mouvement, c'est une face qui arrive au milieu du hublot pendant
+ * que le cadrage bouge encore.
  */
 private fun centering(die: Die, q: Quat, z: Double): Vec3 {
-    val w = smooth(z / REVEAL_FULL)
+    val w = posed(z)
     if (w <= 0) return Vec3(0.0, 0.0, 0.0)
     val m = q.toMatrix()
     return m.toWorld(die.faces[die.topIndex(m)].c) * -w
