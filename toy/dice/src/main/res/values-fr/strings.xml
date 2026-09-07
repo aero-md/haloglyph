@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="toy_dice_summary">Dé d6 / d10 / d12 / d20, solides 3D suivis en quaternion. Secouer pour jeter, appui long pour changer de solide.</string>
+</resources>

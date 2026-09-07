@@ -32,7 +32,6 @@
 
     <string name="hub_proto_notice">Prototyp: Noch ist kein Toy beim System angemeldet.</string>
 
-    <string name="toy_dice_summary">Würfel d6 / d10 / d12 / d20, 3D-Körper per Quaternion verfolgt. Zum Werfen schütteln.</string>
     <string name="toy_spectre_summary">25 Terzbänder, 40 Hz bis 16 kHz.</string>
     <string name="toy_needle_name">Sono — Zeiger</string>
     <string name="toy_needle_summary">Schwingendes VU-Meter, Pegel in dB(A).</string>

@@ -37,7 +37,6 @@
 
     <string name="hub_proto_notice">Prototype : aucun toy n\'est encore déclaré au système.</string>
 
-    <string name="toy_dice_summary">Dé d6 / d10 / d12 / d20, solides 3D suivis en quaternion. Secouer pour jeter.</string>
     <string name="toy_spectre_summary">25 bandes de tiers d\'octave, 40 Hz à 16 kHz.</string>
     <string name="toy_needle_name">Sono — Aiguille</string>
     <string name="toy_needle_summary">VU-mètre pivotant, niveau en dB(A).</string>

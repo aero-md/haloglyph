@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="toy_dice_summary">Würfel d6 / d10 / d12 / d20, 3D-Körper per Quaternion verfolgt. Zum Werfen schütteln, lang drücken für den nächsten Körper.</string>
+</resources>

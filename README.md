@@ -8,10 +8,11 @@ la matrice arrière. Sur n'importe quel autre Android, les mêmes toys tournent
 dans des **widgets d'écran d'accueil** qui émulent la matrice au pixel près —
 mêmes moteurs, mêmes renderers, même masque de 489 LEDs.
 
-> **État : plomberie en place, aucun toy migré.** Le dépôt contient la
-> géométrie de la matrice, les trois sinks, le socle des services Glyph et des
-> widgets, et un hub qui affiche une mire de vérification. Les toys arrivent
-> ensuite, par migration avec leur historique (`git subtree`).
+> **État : deux toys sur quatre.** La plomberie est en place — géométrie de la
+> matrice, les trois sinks, le socle des services Glyph et des widgets, le hub.
+> **Dice** est écrit et déclaré au système. **Lapse** est écrit mais ses deux
+> surfaces système restent désactivées, le temps du prototype ; le hub le dit de
+> lui-même, il interroge le `PackageManager` et n'écrit rien en dur. Sono suit.
 
 ## Les toys
 

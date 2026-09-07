@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Langue par défaut : l'anglais, et non le français dans lequel l'app a été
+    écrite. C'est ce dossier non qualifié que le système sert à quiconque n'a
+    aucune des cinq langues, et l'anglais est ce que comprend le plus grand
+    nombre d'entre eux. Le français a son `values-fr/`, comme les autres.
+
+    Ces deux chaînes vivaient dans `app/` tant que le toy n'était qu'annoncé.
+    Elles ont déménagé avec lui, comme prévu : un toy porte ses chaînes.
+-->
+<resources>
+
+    <!-- Le nom reste le nom : c'est la marque du toy, pas une phrase.
+         « JustADice » devient « Dice » — le jeu de mots du nom d'origine tenait
+         à ce que le toy soit une app seule. -->
+    <string name="toy_dice_name" translatable="false">Dice</string>
+
+    <!-- Affiché par le système dans Glyph Interface → Glyph Toys, et sous le
+         widget dans le sélecteur. Les deux commandes du toy y tiennent, parce
+         qu'il n'y a aucun autre endroit où les apprendre. -->
+    <string name="toy_dice_summary">d6 / d10 / d12 / d20 die, 3D solids tracked as quaternions. Shake to roll, long press to switch solid.</string>
+
+</resources>

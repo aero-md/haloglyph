@@ -36,7 +36,6 @@
 
     <string name="hub_proto_notice">Prototipo: todavía no hay ningún toy declarado al sistema.</string>
 
-    <string name="toy_dice_summary">Dado d6 / d10 / d12 / d20, sólidos 3D seguidos por cuaterniones. Agita para tirar.</string>
     <string name="toy_spectre_summary">25 bandas de tercio de octava, de 40 Hz a 16 kHz.</string>
     <string name="toy_needle_name">Sono — Aguja</string>
     <string name="toy_needle_summary">Vúmetro giratorio, nivel en dB(A).</string>

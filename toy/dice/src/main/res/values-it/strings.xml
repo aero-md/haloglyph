@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="toy_dice_summary">Dado d6 / d10 / d12 / d20, solidi 3D seguiti con quaternioni. Scuoti per lanciare, pressione lunga per cambiare solido.</string>
+</resources>

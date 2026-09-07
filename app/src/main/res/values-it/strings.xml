@@ -34,7 +34,6 @@
 
     <string name="hub_proto_notice">Prototipo: nessun toy è ancora dichiarato al sistema.</string>
 
-    <string name="toy_dice_summary">Dado d6 / d10 / d12 / d20, solidi 3D seguiti con quaternioni. Scuoti per lanciare.</string>
     <string name="toy_spectre_summary">25 bande di terzo d\'ottava, da 40 Hz a 16 kHz.</string>
     <string name="toy_needle_name">Sono — Lancetta</string>
     <string name="toy_needle_summary">VU-meter oscillante, livello in dB(A).</string>

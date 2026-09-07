@@ -50,9 +50,8 @@
 
     <!-- ============ Toys annoncés ============
          Ils n'ont pas encore de module, donc pas encore de `values-xx` à eux.
-         Leurs chaînes déménageront avec eux. -->
-    <string name="toy_dice_name" translatable="false">Dice</string>
-    <string name="toy_dice_summary">d6 / d10 / d12 / d20 die, 3D solids tracked as quaternions. Shake to roll.</string>
+         Leurs chaînes déménageront avec eux — celles de Dice l'ont déjà fait,
+         elles vivent maintenant dans `toy:dice`. -->
     <string name="toy_spectre_name" translatable="false">Sono — Spectre</string>
     <string name="toy_spectre_summary">25 third-octave bands, 40 Hz to 16 kHz.</string>
     <!-- Le seul des trois dont le nom soit un mot commun, et non une marque :

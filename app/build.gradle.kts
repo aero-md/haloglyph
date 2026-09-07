@@ -29,4 +29,5 @@ dependencies {
     // manifeste et ses chaînes ; AGP fusionne. `app/` n'a pas à changer pour en
     // accueillir un de plus.
     implementation(project(":toy:lapse"))
+    implementation(project(":toy:dice"))
 }

@@ -6,6 +6,15 @@ import red.suns.haloglyph.core.matrix.Frame
 import red.suns.haloglyph.core.matrix.drawCentered
 import red.suns.haloglyph.core.ui.ToyEntry
 import red.suns.haloglyph.core.ui.ToyPreviewRenderer
+import red.suns.haloglyph.dice.DiceConfig
+import red.suns.haloglyph.dice.engine.Die
+import red.suns.haloglyph.dice.engine.Quat
+import red.suns.haloglyph.dice.engine.Roll
+import red.suns.haloglyph.dice.engine.T_END
+import red.suns.haloglyph.dice.engine.drawValue
+import red.suns.haloglyph.dice.render.DiceRenderer
+import red.suns.haloglyph.dice.toy.DiceToyService
+import red.suns.haloglyph.dice.widget.DiceWidget
 import red.suns.haloglyph.lapse.LapseConfig
 import red.suns.haloglyph.lapse.engine.LapseEngine
 import red.suns.haloglyph.lapse.render.LapseRenderer
@@ -14,6 +23,7 @@ import red.suns.haloglyph.lapse.settings.LapseSettingsActivity
 import red.suns.haloglyph.lapse.toy.LapseToyService
 import red.suns.haloglyph.lapse.widget.LapseWidget
 import java.time.ZoneId
+import kotlin.random.Random
 
 /**
  * Les toys embarqués dans *cette* app.
@@ -43,11 +53,15 @@ object ToyCatalog {
             settingsActivity = LapseSettingsActivity::class.java,
         ),
         ToyEntry(
-            id = "dice",
-            nameRes = R.string.toy_dice_name,
-            summaryRes = R.string.toy_dice_summary,
-            preview = InitialPreview("D"),
-            upcoming = true,
+            id = DiceConfig.TOY_ID,
+            nameRes = red.suns.haloglyph.dice.R.string.toy_dice_name,
+            summaryRes = red.suns.haloglyph.dice.R.string.toy_dice_summary,
+            glyphService = DiceToyService::class.java,
+            widgetProvider = DiceWidget::class.java,
+            preview = DicePreview(context),
+            // Pas de `settingsActivity` : ce toy n'a rien à régler. La ligne du
+            // hub n'est donc pas cliquable, et n'affiche pas de chevron — ce qui
+            // est exact, il n'y a nulle part où aller.
         ),
         ToyEntry(
             id = "sono-spectre",
@@ -91,6 +105,47 @@ private class LapsePreview(context: Context) : ToyPreviewRenderer {
         renderer.render(frame, engine.update(System.currentTimeMillis(), System.nanoTime() / 1e9))
     }
 }
+
+/**
+ * L'aperçu du dé dans le hub : il **joue**, parce qu'un dé posé ne dit rien de
+ * ce que fait le toy.
+ *
+ * La vignette rejoue un jet toutes les [DICE_PERIOD] secondes, dé courant
+ * compris — celui que l'appui long a laissé sur la matrice. Chaque cycle tire sa
+ * graine de son propre numéro : le jet est donc une fonction pure du temps, il
+ * ne dépend pas de la cadence d'affichage, et deux vignettes de la même liste
+ * montrent la même chose au même instant. C'est le même parti pris que le
+ * moteur, appliqué à sa vitrine.
+ */
+private class DicePreview(context: Context) : ToyPreviewRenderer {
+
+    private val prefs = DiceConfig.prefs(context.applicationContext)
+    private val renderer = DiceRenderer()
+
+    private var cycle = Long.MIN_VALUE
+    private var die: Die = DiceConfig.die(prefs)
+    private var roll: Roll = newRoll(die.restQuat(1, 0), 0L)
+
+    override fun render(frame: Frame, elapsedSeconds: Double) {
+        val current = (elapsedSeconds / DICE_PERIOD).toLong()
+        if (current != cycle) {
+            cycle = current
+            // Relu à chaque cycle : le solide peut avoir changé sur la matrice
+            // pendant que le hub était ouvert.
+            die = DiceConfig.die(prefs)
+            roll = newRoll(roll.qEnd, current)
+        }
+        renderer.render(frame, die, roll.viewAt(elapsedSeconds - cycle * DICE_PERIOD))
+    }
+
+    private fun newRoll(from: Quat, seed: Long): Roll {
+        val rnd = Random(seed)
+        return Roll.make(die, from, drawValue(die, rnd), rnd)
+    }
+}
+
+/** Un jet, puis le temps de le lire avant le suivant. */
+private const val DICE_PERIOD = T_END + 1.4
 
 /** Aperçu d'un toy pas encore écrit : son initiale, dans la police de la matrice. */
 private class InitialPreview(private val letter: String) : ToyPreviewRenderer {
