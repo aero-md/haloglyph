@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -106,51 +104,43 @@ fun HaloCard(
 /**
  * Une paire de tuiles liées, façon Nothing X.
  *
- * Deux cartes en paysage — ratio **1,4:1**, soit plus larges que hautes — et un
- * pont central qui dit qu'elles se lisent ensemble.
+ * Deux cartes et un pont central qui dit qu'elles se lisent ensemble.
  *
  * Le pont est de la couleur des tuiles, donc invisible en tant que tel : ce
  * qu'on voit, c'est le **creux**. Ses deux bouts sont percés d'un demi-disque au
  * fond de l'écran, si bien que la fente noire qui le surmonte se referme en U et
  * celle du dessous en U retourné.
  *
- * La hauteur du ratio est une hauteur **minimale** : les deux tuiles s'égalisent
- * sur la plus haute ([IntrinsicSize.Min] + `fillMaxHeight`), pour qu'une légende
- * passée sur deux lignes ne désaligne pas les sélecteurs d'en dessous.
+ * Les tuiles n'ont pas de hauteur à elles : mêmes marges et même interligne
+ * qu'une [HaloCard] pleine largeur, donc une paire « légende + contrôle » fait
+ * exactement la hauteur de la carte « légende + contrôle » d'à côté. Un ratio
+ * imposé les rendait plus hautes que le reste de la colonne sans rien y gagner.
+ * Elles s'égalisent seulement entre elles ([IntrinsicSize.Min] +
+ * `fillMaxHeight`), pour qu'une légende passée sur deux lignes ne désaligne pas
+ * les sélecteurs d'en dessous.
+ *
+ * [contentPadding] et [spacing] ne sont là que pour une tuile qui empile plus
+ * qu'une légende et un contrôle — la tuile matérielle du hub, avec sa vignette
+ * et ses pastilles, se resserre. Une paire de réglages, elle, garde les
+ * réglages de la carte : c'est tout l'intérêt.
  */
 @Composable
 fun LinkedTiles(
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(18.dp),
+    spacing: androidx.compose.ui.unit.Dp = 14.dp,
     left: @Composable ColumnScope.() -> Unit,
     right: @Composable ColumnScope.() -> Unit,
 ) {
-    BoxWithConstraints(modifier.fillMaxWidth()) {
-        val tileMinHeight = (maxWidth - HaloGutter) / 2 / TILE_RATIO
-
+    Box(modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(HaloGutter),
         ) {
-            HaloCard(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .heightIn(min = tileMinHeight),
-                contentPadding = PaddingValues(14.dp),
-                spacing = 8.dp,
-                content = left,
-            )
-            HaloCard(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .heightIn(min = tileMinHeight),
-                contentPadding = PaddingValues(14.dp),
-                spacing = 8.dp,
-                content = right,
-            )
+            HaloCard(Modifier.weight(1f).fillMaxHeight(), contentPadding, spacing, left)
+            HaloCard(Modifier.weight(1f).fillMaxHeight(), contentPadding, spacing, right)
         }
 
         // Le pont, par-dessus l'arête partagée. Le canevas déborde de la hauteur
@@ -174,10 +164,14 @@ fun LinkedTiles(
     }
 }
 
-/** Paysage : une tuile est plus large que haute. */
-private const val TILE_RATIO = 1.4f
 private val BRIDGE_WIDTH = 10.dp
-private val BRIDGE_HEIGHT = 76.dp
+
+/**
+ * Le pont prend l'essentiel de l'arête commune d'une paire de réglages : assez
+ * pour que les deux encoches noires se lisent comme un creux, pas assez pour
+ * que la fente disparaisse dans l'arrondi des angles.
+ */
+private val BRIDGE_HEIGHT = 80.dp
 private val NOTCH_RADIUS = 3.dp
 
 // ---------------------------------------------------------------- textes

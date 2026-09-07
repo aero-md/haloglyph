@@ -281,7 +281,6 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
         LinkedTiles(
             left = {
                 Legend(stringResource(R.string.card_animation))
-                Spacer(Modifier.weight(1f))
                 HaloSelect(
                     options = LapseEngine.SecondsMode.entries.map {
                         it to when (it) {
@@ -294,7 +293,6 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
             },
             right = {
                 Legend(stringResource(R.string.card_display_style))
-                Spacer(Modifier.weight(1f))
                 HaloSelect(
                     // `when` exhaustif plutôt qu'une table à repli sur le nom de
                     // l'enum : un format ajouté sans étiquette ne compile plus,

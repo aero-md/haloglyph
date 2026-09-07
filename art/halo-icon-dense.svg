@@ -1,15 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Icone de marque Haloglyph — couronne solaire, 16 rayons capsule de
-       longueur alternee, coupes net sur un noyau vide (r=68). Le quadrant
-       haut-droit (4 rayons) porte l'accent rouge #D11A11, le reste en noir
-       plein #000000. Variante « dense », retenue comme icone officielle.
-       Miroir de app/src/main/res/drawable/ic_launcher_foreground.xml (sans
-       le fond, et sans le facteur d'agrandissement propre a la zone sure
-       adaptative). -->
-
-  <!-- fond blanc, coins arrondis facon tuile Nothing -->
-  <rect width="512" height="512" rx="112" fill="#FFFFFF"/>
-
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Haloglyph">
+  <title>Haloglyph — dense</title>
+  <!-- Couronne Haloglyph : 16 rayons, longueurs alternees, noyau vide.
+       Chaque rayon est coupe net sur le cercle interieur (r=68) et se termine
+       en demi-cercle a l'exterieur. Le quadrant haut-droit porte l'accent rouge.
+       Variante « dense » : noyau 68, fut 22, gap 4.7,
+       pointes 142 / 108. -->
   <g fill="#000000">
     <path d="M245 188L245 159A11 11 0 0 1 267 159L267 188Z"/>
     <path d="M323.03 271.86L381.24 295.97A11 11 0 0 1 372.82 316.29L314.61 292.19Z"/>

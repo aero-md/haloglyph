@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -117,6 +118,10 @@ fun HubScreen(toys: List<ToyEntry>, modifier: Modifier = Modifier) {
         )
 
         LinkedTiles(
+            // Vignette + légende + deux pastilles : quatre étages, donc plus
+            // serrés qu'une carte de réglage.
+            contentPadding = PaddingValues(14.dp),
+            spacing = 8.dp,
             left = {
                 MatrixThumb(size = 44) { frame, _ -> SelfTest.render(frame, 0.0) }
                 Legend(stringResource(R.string.hub_tile_matrix))

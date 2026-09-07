@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Haloglyph">
+  <title>Haloglyph — airy</title>
+  <!-- Couronne Haloglyph : 16 rayons, longueurs alternees, noyau vide.
+       Chaque rayon est coupe net sur le cercle interieur (r=92) et se termine
+       en demi-cercle a l'exterieur. Le quadrant haut-droit porte l'accent rouge.
+       Variante « airy » : noyau 92, fut 20, gap 16.13,
+       pointes 176 / 140. -->
+  <g fill="#000000">
+    <path d="M246 164L246 126A10 10 0 0 1 266 126L266 164Z"/>
+    <path d="M344.82 281.97L413.19 310.29A10 10 0 0 1 405.54 328.76L337.17 300.45Z"/>
+    <path d="M328.12 313.98L354.99 340.85A10 10 0 0 1 340.85 354.99L313.98 328.12Z"/>
+    <path d="M300.45 337.17L328.76 405.54A10 10 0 0 1 310.29 413.19L281.97 344.82Z"/>
+    <path d="M266 348L266 386A10 10 0 0 1 246 386L246 348Z"/>
+    <path d="M230.03 344.82L201.71 413.19A10 10 0 0 1 183.24 405.54L211.55 337.17Z"/>
+    <path d="M198.02 328.12L171.15 354.99A10 10 0 0 1 157.01 340.85L183.88 313.98Z"/>
+    <path d="M174.83 300.45L106.46 328.76A10 10 0 0 1 98.81 310.29L167.18 281.97Z"/>
+    <path d="M164 266L126 266A10 10 0 0 1 126 246L164 246Z"/>
+    <path d="M167.18 230.03L98.81 201.71A10 10 0 0 1 106.46 183.24L174.83 211.55Z"/>
+    <path d="M183.88 198.02L157.01 171.15A10 10 0 0 1 171.15 157.01L198.02 183.88Z"/>
+    <path d="M211.55 174.83L183.24 106.46A10 10 0 0 1 201.71 98.81L230.03 167.18Z"/>
+  </g>
+  <g fill="#D11A11">
+    <path d="M281.97 167.18L310.29 98.81A10 10 0 0 1 328.76 106.46L300.45 174.83Z"/>
+    <path d="M313.98 183.88L340.85 157.01A10 10 0 0 1 354.99 171.15L328.12 198.02Z"/>
+    <path d="M337.17 211.55L405.54 183.24A10 10 0 0 1 413.19 201.71L344.82 230.03Z"/>
+    <path d="M348 246L386 246A10 10 0 0 1 386 266L348 266Z"/>
+  </g>
+</svg>
