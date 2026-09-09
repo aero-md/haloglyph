@@ -35,7 +35,12 @@
     <string name="hub_chip_no_widget">Aucun widget</string>
     <string name="hub_chip_soon">À venir</string>
 
-    <string name="hub_proto_notice">Prototype : aucun toy n\'est encore déclaré au système.</string>
+    <string name="hub_section_app">Application</string>
+
+    <string name="settings_title">Réglages</string>
+    <string name="settings_section_app">Application</string>
+    <string name="settings_language">Langue</string>
+    <string name="language_system">Système</string>
 
     <string name="toy_spectre_summary">25 bandes de tiers d\'octave, 40 Hz à 16 kHz.</string>
     <string name="toy_needle_name">Sono — Aiguille</string>

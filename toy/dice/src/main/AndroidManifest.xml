@@ -4,11 +4,10 @@
   toy ne touche pas au manifeste de `app/`. Les permissions Glyph et le bloc
   <queries> viennent de `core:glyph`, dont ce module dépend.
 
-  Contrairement à `toy:lapse`, resté en prototype désactivé, **ce toy est
-  déclaré au système** : `android:enabled` vaut `true` sur les deux composants.
-  Il apparaît donc dans Glyph Interface → Glyph Toys et dans le sélecteur de
-  widgets, et le hub — qui interroge le `PackageManager` et ne lit rien en dur —
-  le dira de lui-même.
+  **Ce toy est déclaré au système** : `android:enabled` vaut `true` sur les deux
+  composants. Il apparaît donc dans Glyph Interface → Glyph Toys et dans le
+  sélecteur de widgets, et le hub — qui interroge le `PackageManager` et ne lit
+  rien en dur — le dit de lui-même.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 

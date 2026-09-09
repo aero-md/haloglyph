@@ -56,6 +56,7 @@ import red.suns.haloglyph.core.ui.HaloText
 import red.suns.haloglyph.core.ui.Legend
 import red.suns.haloglyph.core.ui.LinkedTiles
 import red.suns.haloglyph.core.ui.MonoLabel
+import red.suns.haloglyph.core.ui.MonoValue
 import red.suns.haloglyph.core.ui.OpenChevron
 import red.suns.haloglyph.core.ui.PillButton
 import red.suns.haloglyph.core.ui.ScreenTitle
@@ -72,9 +73,12 @@ import red.suns.haloglyph.core.ui.ToyEntry
  *
  * **Tous les états affichés sont mesurés, aucun n'est écrit en dur.** « Dans
  * Glyph Interface » interroge le `PackageManager`, le nombre de widgets vient de
- * l'`AppWidgetManager`, la matrice est sondée pour de vrai. C'est ce qui rend
- * l'écran utile en prototype : tant que les toys ne sont pas déclarés au
- * système, il le dit de lui-même.
+ * l'`AppWidgetManager`, la matrice est sondée pour de vrai. Ce sont les mêmes
+ * sondes qui disaient « pas dans Glyph Interface » du temps du prototype et qui
+ * disent le contraire depuis que les toys sont déclarés : rien n'a changé ici.
+ *
+ * Sous les toys, la ligne des réglages de l'application — l'étage au-dessus,
+ * celui des valeurs qui ne sont à aucun toy en particulier (PRODUIT §5.4).
  */
 @Composable
 fun HubScreen(toys: List<ToyEntry>, modifier: Modifier = Modifier) {
@@ -87,7 +91,6 @@ fun HubScreen(toys: List<ToyEntry>, modifier: Modifier = Modifier) {
         GlyphAvailability.probe(context) { matrixPresent = it }
     }
 
-    val declared = remember(context, toys) { toys.count { it.isDeclaredToGlyph(context) } }
     val widgets = remember(context, toys) { toys.sumOf { it.widgetCount(context) } }
     val bundled = toys.count { !it.upcoming }
 
@@ -171,16 +174,6 @@ fun HubScreen(toys: List<ToyEntry>, modifier: Modifier = Modifier) {
             GlyphMark { matrixPresent = null; GlyphAvailability.probe(context) { matrixPresent = it } }
         }
 
-        // Le prototype le dit lui-même : aucun toy déclaré, aucun mensonge.
-        if (declared == 0) {
-            Text(
-                text = stringResource(R.string.hub_proto_notice),
-                modifier = Modifier.padding(start = 6.dp, end = 6.dp, top = 10.dp),
-                color = HaloMuted,
-                fontSize = 12.5.sp,
-            )
-        }
-
         // ---------- les toys ----------
 
         SectionLabel(
@@ -190,6 +183,19 @@ fun HubScreen(toys: List<ToyEntry>, modifier: Modifier = Modifier) {
 
         HaloCard(spacing = 10.dp) {
             toys.forEach { toy -> ToyRow(toy) }
+        }
+
+        // ---------- l'étage au-dessus des toys ----------
+
+        SectionLabel(stringResource(R.string.hub_section_app))
+
+        HaloCard {
+            SettingsRow(
+                label = stringResource(R.string.settings_title),
+                value = AppLanguage.current(context)
+                    ?.let { AppLanguage.endonym(it) }
+                    ?: stringResource(R.string.language_system),
+            ) { context.startActivity(Intent(context, AppSettingsActivity::class.java)) }
         }
 
         Spacer(Modifier.height(48.dp))
@@ -259,6 +265,29 @@ private fun ToyRow(toy: ToyEntry) {
         }
 
         if (target != null) OpenChevron()
+    }
+}
+
+/**
+ * La ligne qui ouvre les réglages de l'application.
+ *
+ * Elle montre la valeur du seul réglage qu'il y ait — la langue — plutôt que de
+ * se contenter d'un mot et d'un chevron : le hub dit partout ailleurs un état
+ * mesuré, celui-ci ne fait pas exception.
+ */
+@Composable
+private fun SettingsRow(label: String, value: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Legend(label, modifier = Modifier.weight(1f))
+        MonoValue(value, color = HaloMuted, size = 13.sp)
+        OpenChevron()
     }
 }
 

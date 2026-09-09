@@ -30,7 +30,12 @@
     <string name="hub_chip_no_widget">Kein Widget</string>
     <string name="hub_chip_soon">Demnächst</string>
 
-    <string name="hub_proto_notice">Prototyp: Noch ist kein Toy beim System angemeldet.</string>
+    <string name="hub_section_app">Anwendung</string>
+
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_section_app">Anwendung</string>
+    <string name="settings_language">Sprache</string>
+    <string name="language_system">System</string>
 
     <string name="toy_spectre_summary">25 Terzbänder, 40 Hz bis 16 kHz.</string>
     <string name="toy_needle_name">Sono — Zeiger</string>

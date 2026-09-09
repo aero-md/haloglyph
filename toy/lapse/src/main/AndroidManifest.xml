@@ -4,18 +4,14 @@
   toy ne touche pas au manifeste de `app/`. Les permissions Glyph et le bloc
   <queries> viennent de `core:glyph`, dont ce module dépend.
 
-  ==========================  PROTOTYPE — 06.09.2026  ==========================
-  Les deux surfaces système du toy sont **désactivées** : `android:enabled` à
-  `false` sur le service Glyph et sur le fournisseur de widget. Le toy n'apparaît
-  donc ni dans Glyph Interface, ni dans le sélecteur de widgets, et cette version
-  n'installe qu'une app de réglages.
+  Les deux surfaces système sont **ouvertes** : `android:enabled` vaut `true` sur
+  le service Glyph et sur le fournisseur de widget. Le toy apparaît donc dans
+  Glyph Interface → Glyph Toys et dans le sélecteur de widgets.
 
-  Un attribut plutôt qu'un bloc commenté : le manifeste reste complet et relu par
-  les outils (lint voit toujours les composants, les métadonnées ne se périment
-  pas dans un commentaire), et rouvrir le toy au système est un `true` à écrire
-  deux fois. Le hub le vérifie au `PackageManager` et le dit à l'écran — il ne
-  peut pas prétendre le contraire.
-  =============================================================================
+  Elles ont porté `false` le temps du prototype du 06.09.2026, où l'app n'était
+  qu'un écran de réglages à regarder. L'attribut avait été préféré à un bloc
+  commenté précisément pour ça : le manifeste restait complet et relu par les
+  outils, et le rouvrir n'a été qu'un mot à changer deux fois.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -29,7 +25,7 @@
              paquet — c'est ce qui permet à une app d'exposer plusieurs toys. -->
         <service
             android:name="red.suns.haloglyph.lapse.toy.LapseToyService"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.nothing.glyph.TOY" />
@@ -57,7 +53,7 @@
              seul le système lui parle, via un composant explicite. -->
         <receiver
             android:name="red.suns.haloglyph.lapse.widget.LapseWidget"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="false"
             android:label="@string/toy_lapse_name">
             <intent-filter>

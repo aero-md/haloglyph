@@ -44,9 +44,17 @@
     <string name="hub_chip_no_widget">No widget</string>
     <string name="hub_chip_soon">Coming</string>
 
-    <!-- Bandeau de prototype. Il disparaît avec la déclaration des toys : voir
-         le commentaire du manifeste de `toy:lapse`. -->
-    <string name="hub_proto_notice">Prototype: no toy is declared to the system yet.</string>
+    <!-- Section de bas de hub : l'étage au-dessus des toys. -->
+    <string name="hub_section_app">Application</string>
+
+    <!-- ============ Réglages de l'application ============
+         Un seul réglage à date, et c'est voulu : est global ce qui a la même
+         valeur pour tous les toys (PRODUIT §5.4). -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_app">Application</string>
+    <string name="settings_language">Language</string>
+    <!-- Suivre la langue du téléphone, plutôt qu'en forcer une. -->
+    <string name="language_system">System</string>
 
     <!-- ============ Toys annoncés ============
          Ils n'ont pas encore de module, donc pas encore de `values-xx` à eux.

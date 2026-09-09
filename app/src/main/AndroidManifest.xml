@@ -32,6 +32,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Réglages de l'application, au-dessus des toys (PRODUIT §5.4).
+             Ouverte par le hub et par lui seul : `exported` reste faux. -->
+        <activity
+            android:name=".AppSettingsActivity"
+            android:exported="false"
+            android:label="@string/settings_title" />
     </application>
 
 </manifest>

@@ -34,7 +34,12 @@
     <string name="hub_chip_no_widget">Ningún widget</string>
     <string name="hub_chip_soon">Próximamente</string>
 
-    <string name="hub_proto_notice">Prototipo: todavía no hay ningún toy declarado al sistema.</string>
+    <string name="hub_section_app">Aplicación</string>
+
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_section_app">Aplicación</string>
+    <string name="settings_language">Idioma</string>
+    <string name="language_system">Sistema</string>
 
     <string name="toy_spectre_summary">25 bandas de tercio de octava, de 40 Hz a 16 kHz.</string>
     <string name="toy_needle_name">Sono — Aguja</string>
