@@ -5,72 +5,48 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import red.suns.haloglyph.core.glyph.GlyphSettings.Target
 
 /**
- * Le tri des écrans Glyph, sans téléphone.
+ * Le choix d'un chemin vers un écran Glyph, sans téléphone.
  *
- * Ce qu'on protège : ne **jamais** confondre le gestionnaire avec la liste des
- * toys actifs, et ne rien proposer plutôt que d'ouvrir un écran au hasard.
+ * Ce qu'on protège : l'action passe **avant** le composant. Le nom de classe du
+ * gestionnaire a déjà changé une fois — l'app tierce qui l'ouvre en dur vise un
+ * `ToysManagerActivity` absent du firmware d'un Phone (3) — alors que l'action
+ * a survécu au déménagement.
  */
 class GlyphSettingsTest {
 
-    private val manager = "com.nothing.thirdparty.matrix.toys.manager.ToysManagerActivity"
+    private val action = Target.Action("com.nothing.glyph.TOYS_MANAGER")
+    private val component = Target.Component(
+        "com.nothing.thirdparty",
+        "com.nothing.thirdparty.matrix.toys.manager.ToysManagerActivity",
+    )
 
     @Test
-    fun `les deux ecrans sont distingues`() {
-        val screens = GlyphSettings.pick(
-            listOf(
-                "com.nothing.thirdparty.matrix.toys.ToysActivity",
-                manager,
-            )
-        )
-        assertEquals("com.nothing.thirdparty.matrix.toys.ToysActivity", screens.active)
-        assertEquals(manager, screens.manager)
+    fun `l'action passe avant le composant`() {
+        val chosen = GlyphSettings.choose(listOf(action, component)) { true }
+        assertEquals(action, chosen)
+    }
+
+    /** Firmware sans l'action : le composant observé ailleurs sauve la mise. */
+    @Test
+    fun `le composant sert de repli`() {
+        val chosen = GlyphSettings.choose(listOf(action, component)) { it is Target.Component }
+        assertEquals(component, chosen)
+    }
+
+    /** Rien ne répond : pas de bouton, plutôt qu'un bouton qui ouvre autre chose. */
+    @Test
+    fun `aucun candidat resolvable donne null`() {
+        assertNull(GlyphSettings.choose(listOf(action, component)) { false })
+    }
+
+    @Test
+    fun `un ecran manquant n'empeche pas l'autre`() {
+        val screens = GlyphSettings.Screens(active = null, manager = action)
         assertTrue(screens.any)
-    }
 
-    /** L'entrée principale n'est pas celle qui est enfouie le plus profond. */
-    @Test
-    fun `l'ecran le moins enfoui gagne`() {
-        val screens = GlyphSettings.pick(
-            listOf(
-                "com.nothing.thirdparty.matrix.toys.detail.ToysDetailActivity",
-                "com.nothing.thirdparty.matrix.toys.ToysActivity",
-                manager,
-            )
-        )
-        assertEquals("com.nothing.thirdparty.matrix.toys.ToysActivity", screens.active)
-    }
-
-    /** Firmware renommé : le mot « Manager » suffit encore à trancher. */
-    @Test
-    fun `le gestionnaire est reconnu meme renomme`() {
-        val renamed = "com.nothing.thirdparty.matrix.toys.ToysManagerV2Activity"
-        val screens = GlyphSettings.pick(listOf(renamed))
-        assertEquals(renamed, screens.manager)
-        // Un seul écran exposé : c'est le gestionnaire, pas la liste. Pas de
-        // second bouton qui rouvrirait le même écran sous un autre nom.
-        assertNull(screens.active)
-    }
-
-    /** Téléphone sans Glyph, ou paquet invisible : aucun bouton. */
-    @Test
-    fun `rien d'exporte donne aucun ecran`() {
-        val screens = GlyphSettings.pick(emptyList())
-        assertNull(screens.active)
-        assertNull(screens.manager)
-        assertFalse(screens.any)
-    }
-
-    /** Le reste du paquet n'est pas un écran de toys. */
-    @Test
-    fun `les activites hors du sous-paquet toys sont ignorees`() {
-        val screens = GlyphSettings.pick(
-            listOf(
-                "com.nothing.thirdparty.MainActivity",
-                "com.nothing.thirdparty.matrix.wallpaper.WallpaperActivity",
-            )
-        )
-        assertFalse(screens.any)
+        assertFalse(GlyphSettings.Screens(active = null, manager = null).any)
     }
 }

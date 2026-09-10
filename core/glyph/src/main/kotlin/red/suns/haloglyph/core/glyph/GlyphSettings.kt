@@ -3,98 +3,111 @@ package red.suns.haloglyph.core.glyph
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 
 /**
- * Les écrans Glyph du téléphone, et comment y aller vraiment.
+ * Les deux écrans Glyph du téléphone, et comment y aller vraiment.
  *
- * Il y en a deux, et les confondre était le défaut : la **liste des toys
- * activés** — ceux que le bouton fait défiler, dans l'ordre — et le
- * **gestionnaire**, qui montre tous les toys installés, permet de les activer et
- * de les réordonner. Un lien vers « les réglages Glyph » en général n'ouvre ni
- * l'un ni l'autre.
+ * Les confondre était le défaut. Il y a la **liste des toys actifs** — Glyph
+ * Interface, ceux que le bouton fait défiler — et le **gestionnaire**, qui
+ * montre tous les toys installés, les active et les réordonne. Un lien vers
+ * « les réglages Glyph » en général n'ouvre ni l'un ni l'autre : c'est
+ * exactement ce que faisait le hub, qui visait `com.nothing.glyph.SETTINGS`,
+ * action qui n'existe pas, et retombait chaque fois sur les réglages système.
  *
- * ## Pourquoi on énumère au lieu de coder un nom en dur
+ * ## Ce que le téléphone expose réellement
  *
- * Nothing ne publie aucune action documentée pour ces écrans : `com.nothing.glyph.SETTINGS`
- * ne résout pas, et l'app retombait alors sur les réglages du système — d'où
- * « le bouton ne mène qu'aux paramètres du téléphone ». La seule chose vérifiée
- * est un nom de composant relevé dans une app tierce qui l'ouvre et fonctionne
- * ([MANAGER]). Coder les deux en dur, ce serait parier sur un nom jamais observé
- * et redonner un bouton mort à la première mise à jour de Nothing OS.
+ * Relevé sur un Phone (3), Nothing OS 4 — les deux actions portent
+ * `category.DEFAULT`, donc elles se résolvent normalement :
  *
- * On demande donc au système ce que le paquet expose réellement — la
- * déclaration `<queries>` de ce module le rend visible — et on ne montre que les
- * écrans qui existent sur **ce** téléphone. Un bouton absent vaut mieux qu'un
- * bouton qui ouvre autre chose.
+ * | Écran | Action | Cible |
+ * |---|---|---|
+ * | Toys actifs | `android.settings.ACTION_GLYPHS_SETTINGS` | `com.android.settings/…NtSettings$GlyphsSettingsActivity` |
+ * | Gestionnaire | `com.nothing.glyph.TOYS_MANAGER` | `com.nothing.thirdparty/.matrix.toys.preview.ToysPreviewActivity` |
+ *
+ * ## Pourquoi une action d'abord, un composant ensuite
+ *
+ * `ToysManagerActivity`, le composant qu'une app tierce ouvre en dur, **n'existe
+ * pas sur ce firmware** — le gestionnaire y vit sous `ToysPreviewActivity`. Un
+ * nom de classe est un détail d'implémentation de Nothing et il a déjà bougé ;
+ * l'action est un contrat, elle a survécu au déménagement. On tente donc
+ * l'action, puis les composants observés ailleurs pour les firmwares plus
+ * anciens, et on ne montre un bouton que s'il ouvrira quelque chose. Un bouton
+ * absent vaut mieux qu'un bouton qui ouvre autre chose.
  */
 object GlyphSettings {
 
-    /** Le paquet qui héberge les Glyph Toys. Déjà déclaré dans `<queries>`. */
-    private const val PACKAGE = "com.nothing.thirdparty"
+    /** Une façon d'atteindre un écran. */
+    sealed interface Target {
+        /** Contrat public : ce qu'on tente en premier. */
+        data class Action(val action: String) : Target
 
-    /** Gestionnaire des toys — nom observé, pas deviné. */
-    private const val MANAGER = "com.nothing.thirdparty.matrix.toys.manager.ToysManagerActivity"
+        /** Classe précise : repli pour les firmwares qui n'ont pas l'action. */
+        data class Component(val pkg: String, val cls: String) : Target
+    }
 
-    /** Le sous-paquet des toys de la matrice : tout ce qui nous intéresse est là. */
-    private const val TOYS = ".matrix.toys."
-
-    /**
-     * Ce que ce téléphone-ci sait ouvrir. `null` = l'écran n'existe pas ici, donc
-     * pas de bouton.
-     */
-    data class Screens(val active: String?, val manager: String?) {
+    /** Ce que **ce** téléphone sait ouvrir. `null` = pas de bouton. */
+    data class Screens(val active: Target?, val manager: Target?) {
         val any: Boolean get() = active != null || manager != null
     }
 
-    fun screens(context: Context): Screens = pick(exportedActivities(context))
+    /** Glyph Interface : les toys actifs, dans l'ordre où le bouton les fait défiler. */
+    private val ACTIVE = listOf(
+        Target.Action("android.settings.ACTION_GLYPHS_SETTINGS"),
+        Target.Component(
+            "com.android.settings",
+            "com.nothing.settings.NtSettings\$GlyphsSettingsActivity",
+        ),
+    )
+
+    /** Le gestionnaire : tous les toys installés, activation et ordre. */
+    private val MANAGER = listOf(
+        Target.Action("com.nothing.glyph.TOYS_MANAGER"),
+        // Firmwares où le gestionnaire n'a pas encore déménagé sous `preview`.
+        Target.Component(
+            "com.nothing.thirdparty",
+            "com.nothing.thirdparty.matrix.toys.manager.ToysManagerActivity",
+        ),
+    )
+
+    fun screens(context: Context): Screens {
+        val resolves: (Target) -> Boolean = { context.resolves(it) }
+        return Screens(
+            active = choose(ACTIVE, resolves),
+            manager = choose(MANAGER, resolves),
+        )
+    }
 
     /**
      * Ouvre un écran renvoyé par [screens].
      *
-     * @return `false` si le lancement échoue — composant retiré entre-temps,
-     * activité finalement non exportée. L'appelant décide quoi en faire ; ici on
-     * ne fait pas semblant d'avoir réussi.
+     * @return `false` si le lancement échoue — composant désactivé entre la
+     * résolution et le clic, activité finalement non exportée. L'appelant décide
+     * quoi en faire ; on ne fait pas semblant d'avoir réussi.
      */
-    fun open(context: Context, activity: String): Boolean = runCatching {
-        context.startActivity(Intent().setComponent(ComponentName(PACKAGE, activity)))
-    }.isSuccess
+    fun open(context: Context, target: Target): Boolean =
+        runCatching { context.startActivity(intentFor(target)) }.isSuccess
 
     /**
-     * Le tri, isolé du framework pour être testable.
+     * Le premier candidat que le téléphone sait ouvrir, dans l'ordre donné.
      *
-     * Le gestionnaire d'abord, par son nom exact quand il est là ; à défaut par
-     * « Manager », parce que c'est le mot que Nothing utilise et qu'un
-     * renommage complet reste plus probable qu'un renommage de ce mot-là. La
-     * liste des toys actifs est l'autre écran de `.matrix.toys.` — celui qui
-     * reste une fois le gestionnaire mis de côté, le moins enfoui d'abord :
-     * l'entrée principale d'un paquet vit rarement trois sous-dossiers plus bas.
+     * Isolé du framework pour être testable : c'est ici que se joue « action
+     * d'abord, composant ensuite », et c'est la règle qu'on ne veut pas voir
+     * s'inverser à la faveur d'une refonte.
      */
-    internal fun pick(activities: List<String>): Screens {
-        val toys = activities.filter { it.contains(TOYS) }
-        val manager = toys.firstOrNull { it == MANAGER }
-            ?: toys.firstOrNull { it.simpleName().contains("Manager") }
-        val active = toys
-            .filter { it != manager && it.simpleName().contains("Toys") }
-            .minByOrNull { it.count { c -> c == '.' } }
-        return Screens(active = active, manager = manager)
+    internal fun choose(candidates: List<Target>, resolves: (Target) -> Boolean): Target? =
+        candidates.firstOrNull(resolves)
+
+    internal fun intentFor(target: Target): Intent = when (target) {
+        is Target.Action -> Intent(target.action)
+        is Target.Component -> Intent().setComponent(ComponentName(target.pkg, target.cls))
     }
 
-    private fun String.simpleName(): String = substringAfterLast('.')
-
     /**
-     * Les activités exportées du paquet Glyph.
-     *
-     * `enabled` compte autant que `exported` : Nothing désactive des composants
-     * selon le modèle, et un composant désactivé lève au lancement au lieu de
-     * s'ouvrir.
+     * `resolveActivity` et non un `startActivity` optimiste : le hub doit savoir
+     * **avant** d'afficher le bouton. La visibilité des paquets (Android 11+) est
+     * couverte par le `<queries>` de ce module, qui déclare les deux actions.
      */
-    private fun exportedActivities(context: Context): List<String> = runCatching {
-        context.packageManager
-            .getPackageInfo(PACKAGE, PackageManager.GET_ACTIVITIES)
-            .activities
-            ?.filter { it.exported && it.enabled }
-            ?.map { it.name }
-            .orEmpty()
-    }.getOrDefault(emptyList())
+    private fun Context.resolves(target: Target): Boolean = runCatching {
+        packageManager.resolveActivity(intentFor(target), 0) != null
+    }.getOrDefault(false)
 }

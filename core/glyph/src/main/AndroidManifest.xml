@@ -27,7 +27,21 @@
         <intent>
             <action android:name="com.nothing.glyph.TOY" />
         </intent>
+
+        <!-- Les deux écrans que le hub propose (`GlyphSettings`). Sans ces
+             déclarations, `resolveActivity` répond « rien » pour des activités
+             qui existent : le hub cacherait les boutons sur le seul téléphone
+             où ils servent. -->
+        <intent>
+            <action android:name="android.settings.ACTION_GLYPHS_SETTINGS" />
+        </intent>
+        <intent>
+            <action android:name="com.nothing.glyph.TOYS_MANAGER" />
+        </intent>
+
         <package android:name="com.nothing.thirdparty" />
+        <!-- Pour le repli par composant de l'écran des toys actifs. -->
+        <package android:name="com.android.settings" />
     </queries>
 
 </manifest>
