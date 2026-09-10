@@ -84,9 +84,29 @@ abstract class MatrixToyService(tag: String) : GlyphMatrixService(tag) {
         handler.removeCallbacks(tick)
     }
 
-    /** Force une frame hors boucle — après un changement de réglage, par exemple. */
+    /**
+     * Force une frame hors boucle — après un changement de réglage, par exemple
+     * — **et réaligne la cadence sur maintenant**.
+     *
+     * Le réalignement n'est pas un détail. [frameIntervalMs] est relu à la fin de
+     * chaque tour : un toy au repos programme son prochain tour jusqu'à une
+     * seconde plus tard. Si un réglage démarre une animation entre-temps, rendre
+     * une image sans toucher au tour en attente donne exactement ce qu'on a
+     * observé sur Lapse — la première image de la transition, puis un gel jusqu'à
+     * la seconde suivante, puis l'état final. L'animation n'a jamais joué.
+     *
+     * On retire donc le tour en attente et on en poste un immédiatement : la
+     * frame part maintenant, et le suivant sera programmé avec l'intervalle que
+     * l'animation vient d'imposer. `startedAt` ne bouge pas — la base de temps
+     * d'un toy ne doit pas sauter parce qu'un réglage a changé.
+     */
     protected fun renderNow() {
-        renderAndPush(animated = running)
+        if (!running) {
+            renderAndPush(animated = false)
+            return
+        }
+        handler.removeCallbacks(tick)
+        handler.post(tick)
     }
 
     private fun renderAndPush(animated: Boolean) {

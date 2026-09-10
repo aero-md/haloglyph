@@ -13,21 +13,25 @@ import red.suns.haloglyph.core.widget.MatrixWidgetRefresh
 import red.suns.haloglyph.lapse.LapseConfig
 import red.suns.haloglyph.lapse.engine.LapseEngine
 import red.suns.haloglyph.lapse.render.LapseRenderer
+import red.suns.haloglyph.lapse.render.LapseSlide
 import red.suns.haloglyph.lapse.render.MatrixLabels
 import red.suns.haloglyph.lapse.widget.LapseWidget
 import java.time.ZoneId
-import kotlin.math.pow
-import kotlin.math.roundToInt
 
 /**
  * Glyph Toy « compteur temporel ».
  *
  * Repos : un tick par seconde, aligné sur la frontière de seconde pour que
  * l'anneau avance pile au tic. 30 fps pendant les animations — slide de format,
- * format Cycle, arrivée, changement de lapse.
+ * format Cycle, arrivée, sablier, changement de lapse.
  *
- * Appui long = lapse activé suivant, avec un slide horizontal : le lapse courant
- * sort par la gauche, le suivant entre par la droite.
+ * Appui long = lapse suivant, avec un glissement horizontal : le lapse courant
+ * sort par la gauche, le suivant entre par la droite ([LapseSlide]).
+ *
+ * **Une transition démarre par [renderNow], jamais par un simple rendu.** Un
+ * lapse en mode anneau laisse la boucle dormir jusqu'à la frontière de seconde ;
+ * partir de là sans réarmer donnait une première image, un gel, puis l'état
+ * final — l'animation ne jouait pas du tout.
  *
  * Ce qui a disparu à la migration : le bind du SDK, la boucle `Handler`, le
  * tampon ×16 et le masque du disque. Tout ça vit dans `core:glyph` et
@@ -46,11 +50,17 @@ class LapseToyService : MatrixToyService(TAG) {
     private var activeIndex = 0
     private var animating = false
 
-    /** Frame sortante du lapse précédent, gardée le temps du slide. */
-    private val outgoing by lazy { Frame(spec) }
+    /** Dernière frame réellement affichée, composite de transition compris. */
+    private val lastShown by lazy { Frame(spec) }
+
+    /** Copie figée de [lastShown] à l'instant de la bascule : ce qui sort. */
+    private val slideFrom by lazy { Frame(spec) }
+
+    /** Rendu du nouveau lapse à l'instant courant : ce qui entre. */
     private val incoming by lazy { Frame(spec) }
+
     private var lapseSlideStart: Double? = null
-    private var hasOutgoing = false
+    private var hasShown = false
 
     private val vibrator: Vibrator by lazy {
         (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
@@ -80,16 +90,26 @@ class LapseToyService : MatrixToyService(TAG) {
         watcher?.stop()
         watcher = null
         lapseSlideStart = null
-        hasOutgoing = false
+        hasShown = false
         super.onGlyphDisconnected(context)
     }
 
+    /**
+     * Bascule, **puis** persiste — dans cet ordre.
+     *
+     * L'écriture réveille [PrefsWatcher] sur le fil principal, donc `onPrefsChanged`
+     * s'exécute avant que cette méthode ne rende la main. Persister d'abord
+     * faisait basculer le watcher, puis basculer une seconde fois ici : deux
+     * vibrations et une transition relancée quelques millisecondes après son
+     * départ. En basculant d'abord, `activeIndex` est déjà à jour quand le
+     * watcher regarde, et il se contente de relire la config.
+     */
     override fun onTouchPointLongPress() {
         val next = nextIndex()
         if (next == activeIndex) return
+        beginLapseSwitch(next)
         // Persiste : c'est ce qui synchronise l'app et le widget avec la matrice.
         LapseConfig.setActiveIndex(prefs, next)
-        beginLapseSwitch(next)
     }
 
     override fun renderFrame(frame: Frame, elapsedSeconds: Double, animated: Boolean) {
@@ -104,21 +124,25 @@ class LapseToyService : MatrixToyService(TAG) {
         }
 
         val start = lapseSlideStart
-        val progress = start?.let { (now() - it) / LAPSE_SLIDE }
-        val sliding = hasOutgoing && progress != null && progress < 1.0
+        val progress = start?.let { (now() - it) / LapseSlide.DURATION }
+        val sliding = progress != null && progress < 1.0
 
         if (sliding) {
             incoming.clear()
             renderer.render(incoming, snap)
-            slide(frame, outgoing, incoming, progress)
+            // `slideFrom` reste **figée** pour toute la durée : le glissement
+            // translate la frame de départ, pas la translation précédente. La
+            // réécrire ferait s'additionner les décalages — voir `LapseSlide`.
+            LapseSlide.compose(frame, slideFrom, incoming, progress)
         } else {
             if (start != null) lapseSlideStart = null
             renderer.render(frame, snap)
         }
 
-        // La frame affichée devient la sortante du prochain changement de lapse.
-        outgoing.copyFrom(frame)
-        hasOutgoing = true
+        // Ce qui part vraiment à l'écran, transition comprise : c'est de là que
+        // partira la prochaine bascule, même déclenchée en plein glissement.
+        lastShown.copyFrom(frame)
+        hasShown = true
         animating = snap.animating || sliding
     }
 
@@ -160,17 +184,22 @@ class LapseToyService : MatrixToyService(TAG) {
         return (activeIndex + 1) % count
     }
 
-    /** Reconfigure l'engine sur [newIndex] et démarre le slide de transition. */
+    /** Reconfigure l'engine sur [newIndex] et démarre le glissement. */
     private fun beginLapseSwitch(newIndex: Int) {
         activeIndex = newIndex
         val cfg = LapseConfig.readLapse(prefs, newIndex, zone)
         engine.setRef(cfg.ref)
         engine.setFormatQuiet(cfg.format)
         engine.secondsMode = cfg.seconds
-        // `outgoing` porte déjà la dernière frame affichée : le slide démarre
-        // sur ce qui est à l'écran, pas sur un rendu refait après coup.
-        lapseSlideStart = now()
+        if (hasShown) {
+            // Le glissement part de ce qui est à l'écran, pas d'un rendu refait
+            // après coup — et la copie le fige pour les 350 ms qui viennent.
+            slideFrom.copyFrom(lastShown)
+            lapseSlideStart = now()
+        }
         tick(VibrationEffect.EFFECT_TICK)
+        // Rend **et réarme la boucle** : au repos elle dort jusqu'à la prochaine
+        // frontière de seconde, et sans ce réveil la transition ne jouerait pas.
         renderNow()
     }
 
@@ -189,37 +218,11 @@ class LapseToyService : MatrixToyService(TAG) {
         runCatching { vibrator.vibrate(VibrationEffect.createPredefined(effect)) }
     }
 
-    /** Composite : [old] sort vers la gauche, [new] entre par la droite. */
-    private fun slide(target: Frame, old: Frame, new: Frame, progress: Double) {
-        val e = 1 - (1 - progress.coerceIn(0.0, 1.0)).pow(3)
-        val dx = (e * spec.size).roundToInt()
-        for (y in 0 until spec.size) {
-            for (x in 0 until spec.size) {
-                val at = spec.index(x, y)
-                val fromOld = x + dx
-                if (fromOld in 0 until spec.size) {
-                    target.put(at, old.values[spec.index(fromOld, y)])
-                }
-                // Le nouveau lapse écrase l'ancien là où il écrit : composition
-                // autoritaire et non par maximum, sinon un pixel vif du lapse
-                // sortant traverserait le suivant.
-                val fromNew = x + dx - spec.size
-                if (fromNew in 0 until spec.size) {
-                    val b = new.values[spec.index(fromNew, y)]
-                    if (b > 0f) target.put(at, b)
-                }
-            }
-        }
-    }
-
     private companion object {
         const val TAG = "LapseToy"
 
         /** ~30 fps pendant les animations. */
         const val ANIMATED_FRAME_MS = 33L
-
-        /** Durée du slide de changement de lapse (s). */
-        const val LAPSE_SLIDE = 0.35
 
         /** Vibration d'arrivée : trois coups qui s'allongent. */
         val ARRIVAL_PATTERN = longArrayOf(0, 90, 60, 90, 60, 220, 80, 350)
