@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="toy_sono_summary">El micrófono en la matriz: espectro, aguja VU, espectrograma. Pulsación larga para cambiar de modo.</string>
+
+    <string name="sono_mic_channel">Micrófono en uso</string>
+    <string name="sono_mic_notice">Sono está escuchando en la Glyph Matrix</string>
+
+    <string name="sono_section_display">Visualización</string>
+    <string name="sono_mode">Modo</string>
+    <string name="sono_mode_hint">Pulsación larga en el Glyph Button para cambiar</string>
+    <string name="sono_mode_spectrum">Espectro</string>
+    <string name="sono_mode_needle">Aguja VU</string>
+    <string name="sono_mode_spectrogram">Espectrograma</string>
+
+    <string name="sono_preview_simulated">Vista previa simulada — el micro sigue apagado</string>
+
+    <string name="sono_section_mic">Micrófono</string>
+    <string name="sono_permission">Permiso</string>
+    <string name="sono_permission_granted">Concedido</string>
+    <string name="sono_permission_denied">Denegado</string>
+    <string name="sono_permission_action">Permitir</string>
+    <string name="sono_permission_note">El audio se analiza al vuelo, nunca se graba ni se envía.</string>
+    <string name="sono_permission_missing">Sin él, Sono no tiene nada que mostrar.</string>
+
+</resources>

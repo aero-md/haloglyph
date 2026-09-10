@@ -36,6 +36,8 @@
     </plurals>
     <string name="hub_chip_no_widget">Aucun widget</string>
     <string name="hub_chip_soon">À venir</string>
+    <string name="hub_chip_mic_denied">Micro refusé</string>
+    <string name="hub_chip_fix_here">Ouvrir pour corriger</string>
 
     <string name="hub_section_app">Application</string>
 
@@ -44,7 +46,4 @@
     <string name="settings_language">Langue</string>
     <string name="language_system">Système</string>
 
-    <string name="toy_spectre_summary">25 bandes de tiers d\'octave, 40 Hz à 16 kHz.</string>
-    <string name="toy_needle_name">Sono — Aiguille</string>
-    <string name="toy_needle_summary">VU-mètre pivotant, niveau en dB(A).</string>
 </resources>

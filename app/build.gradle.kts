@@ -30,4 +30,5 @@ dependencies {
     // accueillir un de plus.
     implementation(project(":toy:lapse"))
     implementation(project(":toy:dice"))
+    implementation(project(":toy:sono"))
 }

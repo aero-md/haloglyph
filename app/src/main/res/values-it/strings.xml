@@ -33,6 +33,8 @@
     </plurals>
     <string name="hub_chip_no_widget">Nessun widget</string>
     <string name="hub_chip_soon">In arrivo</string>
+    <string name="hub_chip_mic_denied">Microfono negato</string>
+    <string name="hub_chip_fix_here">Apri per correggere</string>
 
     <string name="hub_section_app">Applicazione</string>
 
@@ -41,7 +43,4 @@
     <string name="settings_language">Lingua</string>
     <string name="language_system">Sistema</string>
 
-    <string name="toy_spectre_summary">25 bande di terzo d\'ottava, da 40 Hz a 16 kHz.</string>
-    <string name="toy_needle_name">Sono — Lancetta</string>
-    <string name="toy_needle_summary">VU-meter oscillante, livello in dB(A).</string>
 </resources>

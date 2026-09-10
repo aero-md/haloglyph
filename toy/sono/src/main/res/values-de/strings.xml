@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="toy_sono_summary">Mikrofon auf der Matrix: Spektrum, VU-Zeiger, Spektrogramm. Lange drücken zum Wechseln.</string>
+
+    <string name="sono_mic_channel">Mikrofon aktiv</string>
+    <string name="sono_mic_notice">Sono hört auf der Glyph Matrix mit</string>
+
+    <string name="sono_section_display">Anzeige</string>
+    <string name="sono_mode">Modus</string>
+    <string name="sono_mode_hint">Glyph Button lange drücken zum Wechseln</string>
+    <string name="sono_mode_spectrum">Spektrum</string>
+    <string name="sono_mode_needle">VU-Zeiger</string>
+    <string name="sono_mode_spectrogram">Spektrogramm</string>
+
+    <string name="sono_preview_simulated">Simulierte Vorschau — das Mikrofon bleibt aus</string>
+
+    <string name="sono_section_mic">Mikrofon</string>
+    <string name="sono_permission">Berechtigung</string>
+    <string name="sono_permission_granted">Erteilt</string>
+    <string name="sono_permission_denied">Verweigert</string>
+    <string name="sono_permission_action">Erlauben</string>
+    <string name="sono_permission_note">Der Ton wird sofort ausgewertet, nie aufgezeichnet oder gesendet.</string>
+    <string name="sono_permission_missing">Ohne sie hat Sono nichts anzuzeigen.</string>
+
+</resources>

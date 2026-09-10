@@ -1,9 +1,7 @@
 package red.suns.haloglyph
 
 import android.content.Context
-import red.suns.haloglyph.core.matrix.Fonts
 import red.suns.haloglyph.core.matrix.Frame
-import red.suns.haloglyph.core.matrix.drawCentered
 import red.suns.haloglyph.core.ui.ToyEntry
 import red.suns.haloglyph.core.ui.ToyPreviewRenderer
 import red.suns.haloglyph.dice.DiceConfig
@@ -22,6 +20,12 @@ import red.suns.haloglyph.lapse.render.MatrixLabels
 import red.suns.haloglyph.lapse.settings.LapseSettingsActivity
 import red.suns.haloglyph.lapse.toy.LapseToyService
 import red.suns.haloglyph.lapse.widget.LapseWidget
+import red.suns.haloglyph.sono.MicPermission
+import red.suns.haloglyph.sono.SonoConfig
+import red.suns.haloglyph.sono.engine.SonoDemo
+import red.suns.haloglyph.sono.render.SonoRenderer
+import red.suns.haloglyph.sono.settings.SonoSettingsActivity
+import red.suns.haloglyph.sono.toy.SonoToyService
 import java.time.ZoneId
 import kotlin.random.Random
 
@@ -63,19 +67,21 @@ object ToyCatalog {
             // hub n'est donc pas cliquable, et n'affiche pas de chevron — ce qui
             // est exact, il n'y a nulle part où aller.
         ),
+        // Sonoglyph exposait « Spectre » et « Aiguille » comme deux toys ; ils
+        // n'en font plus qu'un, à trois modes, cyclés à l'appui long. Une seule
+        // ligne ici, donc, et une seule entrée dans Glyph Interface — pour un
+        // micro qui ne s'ouvre qu'une fois.
         ToyEntry(
-            id = "sono-spectre",
-            nameRes = R.string.toy_spectre_name,
-            summaryRes = R.string.toy_spectre_summary,
-            preview = InitialPreview("S"),
-            upcoming = true,
-        ),
-        ToyEntry(
-            id = "sono-needle",
-            nameRes = R.string.toy_needle_name,
-            summaryRes = R.string.toy_needle_summary,
-            preview = InitialPreview("A"),
-            upcoming = true,
+            id = SonoConfig.TOY_ID,
+            nameRes = red.suns.haloglyph.sono.R.string.toy_sono_name,
+            summaryRes = red.suns.haloglyph.sono.R.string.toy_sono_summary,
+            glyphService = SonoToyService::class.java,
+            // Pas de `widgetProvider` : un widget qui écoute le micro en
+            // permanence est indéfendable, et un widget qui ne l'écoute pas
+            // n'aurait rien à afficher.
+            preview = SonoPreview(context),
+            settingsActivity = SonoSettingsActivity::class.java,
+            requiredPermission = MicPermission.NAME,
         ),
     )
 }
@@ -147,9 +153,26 @@ private class DicePreview(context: Context) : ToyPreviewRenderer {
 /** Un jet, puis le temps de le lire avant le suivant. */
 private const val DICE_PERIOD = T_END + 1.4
 
-/** Aperçu d'un toy pas encore écrit : son initiale, dans la police de la matrice. */
-private class InitialPreview(private val letter: String) : ToyPreviewRenderer {
+/**
+ * L'aperçu de Sono dans le hub : le vrai renderer, sur une scène **inventée**.
+ *
+ * C'est la seule vignette du pack qui n'exécute pas le toy de bout en bout, et
+ * c'est délibéré : **ouvrir le hub ne doit pas allumer le micro**. Un aperçu
+ * branché sur la capture ferait apparaître la pastille micro d'Android à chaque
+ * passage dans la liste, pour une vignette de 72 dp. Le mode montré est celui
+ * qui est réellement réglé — ça, ce n'est pas simulé.
+ *
+ * L'histoire du spectrogramme n'est pas alimentée ici : la vignette n'est
+ * composée que par intermittence, et une histoire trouée serait pire que pas
+ * d'histoire. Le renderer la remplit tout seul à partir de la scène simulée.
+ */
+private class SonoPreview(context: Context) : ToyPreviewRenderer {
+
+    private val prefs = SonoConfig.prefs(context.applicationContext)
+    private val demo = SonoDemo()
+    private val renderer = SonoRenderer()
+
     override fun render(frame: Frame, elapsedSeconds: Double) {
-        frame.drawCentered(Fonts.F5, letter, frame.spec.centerY, 0.7f)
+        renderer.render(frame, demo.snapshotAt(elapsedSeconds), SonoConfig.mode(prefs))
     }
 }

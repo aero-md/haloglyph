@@ -48,6 +48,11 @@
     </plurals>
     <string name="hub_chip_no_widget">No widget</string>
     <string name="hub_chip_soon">Coming</string>
+    <!-- Toy présent et déclaré, mais privé de l'autorisation dont il vit. Dire
+         « pas dans Glyph Interface » serait faux et enverrait chercher au
+         mauvais endroit — d'où ces deux pastilles, dont la seconde dit où aller. -->
+    <string name="hub_chip_mic_denied">Microphone denied</string>
+    <string name="hub_chip_fix_here">Open to fix</string>
 
     <!-- Section de bas de hub : l'étage au-dessus des toys. -->
     <string name="hub_section_app">Application</string>
@@ -61,14 +66,8 @@
     <!-- Suivre la langue du téléphone, plutôt qu'en forcer une. -->
     <string name="language_system">System</string>
 
-    <!-- ============ Toys annoncés ============
-         Ils n'ont pas encore de module, donc pas encore de `values-xx` à eux.
-         Leurs chaînes déménageront avec eux — celles de Dice l'ont déjà fait,
-         elles vivent maintenant dans `toy:dice`. -->
-    <string name="toy_spectre_name" translatable="false">Sono — Spectre</string>
-    <string name="toy_spectre_summary">25 third-octave bands, 40 Hz to 16 kHz.</string>
-    <!-- Le seul des trois dont le nom soit un mot commun, et non une marque :
-         il se traduit, contrairement à « Dice » et « Spectre ». -->
-    <string name="toy_needle_name">Sono — Needle</string>
-    <string name="toy_needle_summary">Swinging VU meter, level in dB(A).</string>
+    <!-- Plus aucun toy annoncé : les trois du pack sont écrits, et chacun porte
+         ses chaînes dans son module. « Sono — Spectre » et « Sono — Aiguille »
+         ont disparu d'ici en même temps qu'ils ont fusionné en un seul toy à
+         trois modes. -->
 </resources>

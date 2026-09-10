@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Langue par défaut : l'anglais, et non le français dans lequel l'app a été
+    écrite. C'est ce dossier non qualifié que le système sert à quiconque n'a
+    aucune des cinq langues.
+-->
+<resources>
+
+    <!-- Le nom reste le nom : c'est la marque du toy. « Sonoglyph » devient
+         « Sono » — le suffixe tenait à ce que le toy soit une app seule. -->
+    <string name="toy_sono_name" translatable="false">Sono</string>
+
+    <!-- Affiché par le système dans Glyph Interface → Glyph Toys. La commande du
+         toy y tient, parce qu'il n'y a aucun autre endroit où l'apprendre. -->
+    <string name="toy_sono_summary">Microphone on the matrix: spectrum, VU needle, spectrogram. Long press to switch mode.</string>
+
+    <!-- Le nom de l'app, tel qu'il apparaît dans le fil d'Ariane. -->
+    <string name="sono_settings_parent" translatable="false">Haloglyph</string>
+
+    <!-- Service de premier plan : Android impose une notification visible dès
+         qu'un processus en arrière-plan écoute le micro. Autant qu'elle dise
+         quelque chose d'utile. -->
+    <string name="sono_mic_channel">Microphone in use</string>
+    <string name="sono_mic_notice">Sono is listening on the Glyph Matrix</string>
+
+    <string name="sono_section_display">Display</string>
+    <string name="sono_mode">Mode</string>
+    <string name="sono_mode_hint">Long press the Glyph Button to switch</string>
+    <string name="sono_mode_spectrum">Spectrum</string>
+    <string name="sono_mode_needle">VU needle</string>
+    <string name="sono_mode_spectrogram">Spectrogram</string>
+
+    <!-- Dit à l'écran ce que le code fait : cet aperçu n'écoute rien. -->
+    <string name="sono_preview_simulated">Simulated preview — the mic stays off</string>
+
+    <string name="sono_section_mic">Microphone</string>
+    <string name="sono_permission">Permission</string>
+    <string name="sono_permission_granted">Granted</string>
+    <string name="sono_permission_denied">Denied</string>
+    <string name="sono_permission_action">Allow</string>
+    <string name="sono_permission_note">Audio is analysed on the fly, never recorded or sent.</string>
+    <string name="sono_permission_missing">Without it, Sono has nothing to show.</string>
+
+</resources>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Le toy porte ses propres composants et ses propres permissions. AGP les
+  fusionne dans l'app : ajouter un toy ne touche pas au manifeste de `app/`.
+  Les permissions Glyph et le bloc <queries> viennent de `core:glyph`.
+
+  **Ce module apporte `RECORD_AUDIO` à toute l'application**, et c'est le coût
+  produit assumé de Sono. Rien d'autre dans le pack n'écoute quoi que ce soit,
+  et la fiche Play doit le dire : audio traité en local, jamais enregistré,
+  jamais transmis.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Retour haptique : changement de mode. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Le toy mesure du son : sans micro il n'a rien à afficher. -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Un toy est un service *lié* par Glyph Interface : le process est en
+         arrière-plan, et depuis Android 11 l'accès micro y est coupé (silence,
+         pas d'erreur). Il faut donc se promouvoir en service de premier plan de
+         type « microphone » le temps de la mesure. D'où la notification. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- `required="false"` : le pack embarque trois toys et deux n'écoutent
+         rien. Exiger un micro retirerait Lapse et Dice du Play Store sur les
+         appareils qui n'en ont pas, pour un toy qu'ils n'auraient pas utilisé. -->
+    <uses-feature
+        android:name="android.hardware.microphone"
+        android:required="false" />
+
+    <application>
+
+        <!-- Surface 1 : la matrice. Un seul service pour les trois modes —
+             Glyph Interface liste par service, et trois entrées pour un micro
+             qu'on n'ouvre qu'une fois ne se défendaient pas. -->
+        <service
+            android:name="red.suns.haloglyph.sono.toy.SonoToyService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="microphone">
+            <intent-filter>
+                <action android:name="com.nothing.glyph.TOY" />
+            </intent-filter>
+            <meta-data
+                android:name="com.nothing.glyph.toy.name"
+                android:resource="@string/toy_sono_name" />
+            <meta-data
+                android:name="com.nothing.glyph.toy.image"
+                android:resource="@drawable/sono_toy_preview" />
+            <meta-data
+                android:name="com.nothing.glyph.toy.summary"
+                android:resource="@string/toy_sono_summary" />
+            <!-- Appui long = mode suivant : spectre → aiguille → spectrogramme -->
+            <meta-data
+                android:name="com.nothing.glyph.toy.longpress"
+                android:value="1" />
+            <!-- Pas d'`aod_support`, délibérément. L'Always-On ne redemande une
+                 image qu'à la minute : garder le micro ouvert entre deux ne
+                 montrerait rien et coûterait tout — batterie, et l'indicateur
+                 micro allumé en permanence sur un écran éteint. -->
+        </service>
+
+        <!-- Pas de widget. Un widget qui écoute le micro en permanence est
+             indéfendable, et un widget qui ne l'écoute pas n'aurait rien à
+             afficher. Sono est le seul toy du pack sans seconde surface, et
+             c'est une conséquence de ce qu'il fait. -->
+
+        <!-- Surface 2 : l'écran de réglages. Il porte le mode courant et, seul
+             de toute l'app, le bouton qui redemande l'autorisation micro — un
+             service ne peut pas la demander lui-même. -->
+        <activity
+            android:name="red.suns.haloglyph.sono.settings.SonoSettingsActivity"
+            android:enabled="true"
+            android:exported="false"
+            android:label="@string/toy_sono_name" />
+
+    </application>
+
+</manifest>

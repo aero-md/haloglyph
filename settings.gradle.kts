@@ -34,6 +34,8 @@ include(":toy:lapse")
 include(":toy:lapse:engine")
 include(":toy:dice")
 include(":toy:dice:engine")
+include(":toy:sono")
+include(":toy:sono:engine")
 
 // app/ : le hub, qui assemble les toys embarqués.
 include(":app")

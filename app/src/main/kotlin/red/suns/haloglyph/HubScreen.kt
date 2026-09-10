@@ -4,6 +4,7 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.provider.Settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,8 +28,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,6 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -209,8 +216,23 @@ fun HubScreen(toys: List<ToyEntry>, modifier: Modifier = Modifier) {
             trailing = stringResource(R.string.hub_toys_count, bundled, toys.size),
         )
 
+        // Une permission peut avoir été accordée pendant qu'on regardait
+        // ailleurs — l'écran de réglages du toy, ou ceux du système. On relit au
+        // retour au premier plan plutôt que d'inventer un canal de notification.
+        var epoch by remember { mutableIntStateOf(0) }
+        val lifecycleOwner = LocalLifecycleOwner.current
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                if (event == Lifecycle.Event.ON_RESUME) epoch++
+            }
+            lifecycleOwner.lifecycle.addObserver(observer)
+            onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+        }
+
         HaloCard(spacing = 10.dp) {
-            toys.forEach { toy -> ToyRow(toy) }
+            toys.forEach { toy ->
+                ToyRow(toy, blocked = remember(epoch, toy) { toy.isBlocked(context) })
+            }
         }
 
         // ---------- l'étage au-dessus des toys ----------
@@ -235,9 +257,14 @@ fun HubScreen(toys: List<ToyEntry>, modifier: Modifier = Modifier) {
  *
  * L'aperçu est un **vrai rendu de matrice**, pas une icône — c'est l'objet
  * signature de l'app, et un toy se reconnaît à ce qu'il dessine.
+ *
+ * [blocked] atténue la ligne comme un toy à venir, mais **sans la désactiver** :
+ * un toy empêché par une permission refusée est précisément celui qu'on veut
+ * pouvoir ouvrir, puisque son écran de réglages est l'endroit où le refus se
+ * défait. Griser et rendre inerte enfermerait l'utilisateur dehors.
  */
 @Composable
-private fun ToyRow(toy: ToyEntry) {
+private fun ToyRow(toy: ToyEntry, blocked: Boolean) {
     val context = LocalContext.current
     val target = toy.settingsActivity
     Row(
@@ -250,7 +277,7 @@ private fun ToyRow(toy: ToyEntry) {
                     context.startActivity(Intent(context, target))
                 }
             )
-            .alpha(if (toy.upcoming) 0.42f else 1f),
+            .alpha(if (toy.upcoming || blocked) 0.42f else 1f),
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         MatrixThumb(size = 72) { frame, seconds -> toy.preview?.render(frame, seconds) }
@@ -273,6 +300,13 @@ private fun ToyRow(toy: ToyEntry) {
             ChipRow {
                 if (toy.upcoming) {
                     StatusChip(stringResource(R.string.hub_chip_soon), ChipState.OFF)
+                } else if (blocked) {
+                    // Le toy est bien là et bien déclaré ; ce qui manque est une
+                    // autorisation. Le dire ainsi plutôt que « pas dans Glyph
+                    // Interface », qui serait faux et enverrait chercher au
+                    // mauvais endroit.
+                    StatusChip(stringResource(R.string.hub_chip_mic_denied), ChipState.OFF)
+                    StatusChip(stringResource(R.string.hub_chip_fix_here), ChipState.OFF)
                 } else {
                     val declared = toy.isDeclaredToGlyph(context)
                     StatusChip(
@@ -362,6 +396,19 @@ private fun ToyEntry.isDeclaredToGlyph(context: Context): Boolean {
     val intent = Intent(GLYPH_TOY_ACTION).setPackage(context.packageName)
     return context.packageManager.queryIntentServices(intent, 0)
         .any { it.serviceInfo?.name == service.name }
+}
+
+/**
+ * Le toy est-il empêché par une permission refusée ?
+ *
+ * Mesuré comme tout le reste du hub, et relu à chaque retour au premier plan :
+ * la réponse change pendant que l'écran existe.
+ */
+private fun ToyEntry.isBlocked(context: Context): Boolean {
+    val permission = requiredPermission ?: return false
+    if (upcoming) return false
+    return ContextCompat.checkSelfPermission(context, permission) !=
+        PackageManager.PERMISSION_GRANTED
 }
 
 /** Combien d'instances de ce widget sont réellement posées sur un écran. */

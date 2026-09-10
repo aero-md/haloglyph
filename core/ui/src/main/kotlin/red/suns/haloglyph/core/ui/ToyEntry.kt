@@ -40,6 +40,19 @@ data class ToyEntry(
 
     /** Toy annoncé mais pas encore là : ligne visible, atténuée, sans chevron. */
     val upcoming: Boolean = false,
+
+    /**
+     * La permission d'exécution sans laquelle ce toy ne peut rien afficher.
+     *
+     * Déclarée plutôt que testée par le hub au cas par cas : le hub n'a pas à
+     * savoir que Sono écoute, seulement qu'un toy peut être empêché. Une chaîne
+     * et non un `Boolean` calculé, parce que l'état change pendant que l'écran
+     * est ouvert — on revient des réglages du système avec la réponse — et
+     * qu'une valeur figée à la construction du catalogue mentirait.
+     *
+     * `null` = rien à demander, ce qui est le cas de tous les autres toys.
+     */
+    val requiredPermission: String? = null,
 )
 
 /** Rend l'aperçu d'un toy — `(frame vierge, secondes écoulées)`. */
