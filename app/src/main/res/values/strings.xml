@@ -29,7 +29,12 @@
         <item quantity="other">%d placed</item>
     </plurals>
 
-    <string name="hub_manage_toys">Manage toys</string>
+    <!-- Les deux écrans Glyph du système. Côte à côte sur une seule ligne :
+         garder ces libellés courts, une pilule ne coupe pas son texte. -->
+    <string name="hub_active_toys">Active toys</string>
+    <string name="hub_manage_toys">Manage all</string>
+    <!-- Repli quand le téléphone n'expose aucun des deux. -->
+    <string name="hub_open_settings">Settings</string>
 
     <!-- Liste des toys. La mention de droite est « embarqués / total ». -->
     <string name="hub_section_toys">Bundled toys</string>

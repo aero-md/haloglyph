@@ -17,7 +17,9 @@
         <item quantity="other">%d platziert</item>
     </plurals>
 
-    <string name="hub_manage_toys">Toys verwalten</string>
+    <string name="hub_active_toys">Aktive Toys</string>
+    <string name="hub_manage_toys">Verwalten</string>
+    <string name="hub_open_settings">Einstellungen</string>
 
     <string name="hub_section_toys">Enthaltene Toys</string>
 

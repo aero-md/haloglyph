@@ -40,6 +40,12 @@ une vraie connexion, « dans Glyph Interface » est une requête au
 ouvre son écran de réglages, qui vit dans le module du toy — Lapse en a un, Dice
 n'en a pas parce qu'il n'a rien à régler.
 
+Il mène aussi aux deux écrans Glyph du système : la liste des toys actifs et le
+gestionnaire, où on active et réordonne. Nothing ne publie d'action documentée
+pour ni l'un ni l'autre, alors `GlyphSettings` énumère ce que
+`com.nothing.thirdparty` expose vraiment et ne montre que les boutons qui
+ouvriront quelque chose.
+
 Au-dessus des toys, un étage de réglages d'application : ce qui a la même valeur
 pour tout le pack. La langue y est, et pour l'instant elle y est seule.
 

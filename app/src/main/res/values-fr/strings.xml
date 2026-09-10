@@ -21,7 +21,9 @@
         <item quantity="other">%d posés</item>
     </plurals>
 
-    <string name="hub_manage_toys">Gérer les toys</string>
+    <string name="hub_active_toys">Toys actifs</string>
+    <string name="hub_manage_toys">Tout gérer</string>
+    <string name="hub_open_settings">Réglages</string>
 
     <string name="hub_section_toys">Toys embarqués</string>
 

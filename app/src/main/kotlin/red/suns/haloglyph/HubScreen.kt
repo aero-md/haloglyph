@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import red.suns.haloglyph.core.glyph.GlyphAvailability
+import red.suns.haloglyph.core.glyph.GlyphSettings
 import red.suns.haloglyph.core.matrix.Frame
 import red.suns.haloglyph.core.matrix.MatrixSpec
 import red.suns.haloglyph.core.ui.AnimatedMatrixPreview
@@ -159,6 +160,11 @@ fun HubScreen(toys: List<ToyEntry>, modifier: Modifier = Modifier) {
             },
         )
 
+        // Les deux écrans Glyph du téléphone, quand ils existent : la liste des
+        // toys actifs et le gestionnaire. Résolu une fois — le paquet système
+        // n'apparaît pas en cours de session.
+        val screens = remember(context) { GlyphSettings.screens(context) }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -166,11 +172,33 @@ fun HubScreen(toys: List<ToyEntry>, modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            PillButton(
-                text = stringResource(R.string.hub_manage_toys),
-                modifier = Modifier.weight(1f),
-                primary = true,
-            ) { context.openGlyphSettings() }
+            if (screens.any) {
+                screens.active?.let { target ->
+                    PillButton(
+                        text = stringResource(R.string.hub_active_toys),
+                        modifier = Modifier.weight(1f),
+                        primary = true,
+                    ) { GlyphSettings.open(context, target) }
+                }
+                screens.manager?.let { target ->
+                    PillButton(
+                        text = stringResource(R.string.hub_manage_toys),
+                        modifier = Modifier.weight(1f),
+                        // Le gestionnaire est le second geste : on y va pour
+                        // ranger, pas pour regarder.
+                        primary = screens.active == null,
+                    ) { GlyphSettings.open(context, target) }
+                }
+            } else {
+                // Firmware qui n'expose rien, ou téléphone qui n'est pas un
+                // Nothing : les réglages du système, faute de mieux — mais dit
+                // comme tel, pas déguisé en « gérer les toys ».
+                PillButton(
+                    text = stringResource(R.string.hub_open_settings),
+                    modifier = Modifier.weight(1f),
+                    primary = true,
+                ) { context.openGlyphSettings() }
+            }
             GlyphMark { matrixPresent = null; GlyphAvailability.probe(context) { matrixPresent = it } }
         }
 
@@ -347,12 +375,13 @@ private fun ToyEntry.widgetCount(context: Context): Int {
 }
 
 /**
- * Ouvre les réglages Glyph du téléphone, au mieux.
+ * Le dernier recours, quand aucun écran Glyph ne se laisse résoudre.
  *
- * Nothing ne publie pas d'action documentée pour l'écran « Glyph Toys » ; on
- * tente l'action propriétaire, puis on retombe sur les réglages du système. Le
- * vrai test est sur l'appareil — c'est précisément ce que ce prototype sert à
- * vérifier.
+ * Ce chemin **était** le comportement normal du bouton, et c'était le défaut :
+ * `com.nothing.glyph.SETTINGS` n'existe pas, donc on tombait chaque fois dans
+ * les réglages du téléphone. Depuis, [GlyphSettings] résout les vrais écrans et
+ * on n'arrive plus ici que sur un appareil qui n'en expose aucun — auquel cas le
+ * bouton le dit, au lieu de promettre une gestion des toys.
  */
 private fun Context.openGlyphSettings() {
     // `startActivity` sous `runCatching` plutôt qu'un `resolveActivity` préalable :
