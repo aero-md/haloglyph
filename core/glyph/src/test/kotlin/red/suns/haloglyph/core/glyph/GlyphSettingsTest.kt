@@ -10,43 +10,47 @@ import red.suns.haloglyph.core.glyph.GlyphSettings.Target
 /**
  * Le choix d'un chemin vers un écran Glyph, sans téléphone.
  *
- * Ce qu'on protège : l'action passe **avant** le composant. Le nom de classe du
- * gestionnaire a déjà changé une fois — l'app tierce qui l'ouvre en dur vise un
- * `ToysManagerActivity` absent du firmware d'un Phone (3) — alors que l'action
- * a survécu au déménagement.
+ * Ce qu'on protège : l'ordre des candidats. Il porte tout le sens, et se lit mal
+ * — rien dans une liste ne crie que son dernier élément ouvre un **autre**
+ * écran. Ces tests le disent à voix haute.
  */
 class GlyphSettingsTest {
 
-    private val action = Target.Action("com.nothing.glyph.TOYS_MANAGER")
-    private val component = Target.Component(
+    /** Le gestionnaire : exporté, sans filtre, donc joignable par composant seul. */
+    private val manager = Target.Component(
         "com.nothing.thirdparty",
         "com.nothing.thirdparty.matrix.toys.manager.ToysManagerActivity",
     )
 
+    /** La vitrine Glyph Toys : un écran voisin, acceptable en dernier recours. */
+    private val showcase = Target.Action("com.nothing.glyph.TOYS_MANAGER")
+
     @Test
-    fun `l'action passe avant le composant`() {
-        val chosen = GlyphSettings.choose(listOf(action, component)) { true }
-        assertEquals(action, chosen)
+    fun `le meilleur chemin est pris quand il repond`() {
+        val chosen = GlyphSettings.choose(listOf(manager, showcase)) { true }
+        assertEquals(manager, chosen)
     }
 
-    /** Firmware sans l'action : le composant observé ailleurs sauve la mise. */
+    /**
+     * Le repli n'est pas un synonyme : il n'a le droit de servir que si le
+     * gestionnaire est introuvable. S'il passait devant, le bouton « Tout gérer »
+     * ouvrirait une vitrine sans rien à gérer.
+     */
     @Test
-    fun `le composant sert de repli`() {
-        val chosen = GlyphSettings.choose(listOf(action, component)) { it is Target.Component }
-        assertEquals(component, chosen)
+    fun `la vitrine ne sert que si le gestionnaire manque`() {
+        val chosen = GlyphSettings.choose(listOf(manager, showcase)) { it != manager }
+        assertEquals(showcase, chosen)
     }
 
     /** Rien ne répond : pas de bouton, plutôt qu'un bouton qui ouvre autre chose. */
     @Test
     fun `aucun candidat resolvable donne null`() {
-        assertNull(GlyphSettings.choose(listOf(action, component)) { false })
+        assertNull(GlyphSettings.choose(listOf(manager, showcase)) { false })
     }
 
     @Test
     fun `un ecran manquant n'empeche pas l'autre`() {
-        val screens = GlyphSettings.Screens(active = null, manager = action)
-        assertTrue(screens.any)
-
+        assertTrue(GlyphSettings.Screens(active = null, manager = manager).any)
         assertFalse(GlyphSettings.Screens(active = null, manager = null).any)
     }
 }
