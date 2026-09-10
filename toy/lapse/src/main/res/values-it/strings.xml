@@ -3,8 +3,9 @@
 
     <string name="toy_lapse_summary">Tempo trascorso da / mancante a una data — tieni premuto per cambiare formato</string>
 
-    <string name="lapse_state_active">attivo</string>
-    <string name="lapse_delete">Elimina questo lapse</string>
+
+    <string name="lapse_manage_title">Gestisci i lapse</string>
+    <string name="lapse_add">Nuovo lapse</string>
 
     <string name="card_datetime">Data e ora</string>
     <string name="card_saved_dates">Date salvate</string>

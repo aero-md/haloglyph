@@ -1,5 +1,6 @@
 package red.suns.haloglyph.lapse.settings
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,14 +29,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -48,26 +50,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import red.suns.haloglyph.core.matrix.Frame
 import red.suns.haloglyph.core.matrix.MatrixSpec
-import red.suns.haloglyph.core.ui.BackBar
-import red.suns.haloglyph.core.ui.BareAction
+import red.suns.haloglyph.core.ui.Breadcrumb
 import red.suns.haloglyph.core.ui.DashedAddRow
 import red.suns.haloglyph.core.ui.HaloCard
+import red.suns.haloglyph.core.ui.HaloCardBg
+import red.suns.haloglyph.core.ui.HaloCardRadius
 import red.suns.haloglyph.core.ui.HaloControlBg
 import red.suns.haloglyph.core.ui.HaloFaint
 import red.suns.haloglyph.core.ui.HaloField
 import red.suns.haloglyph.core.ui.HaloGutter
+import red.suns.haloglyph.core.ui.HaloHair
+import red.suns.haloglyph.core.ui.HaloMenu
+import red.suns.haloglyph.core.ui.HaloMenuItem
 import red.suns.haloglyph.core.ui.HaloMuted
 import red.suns.haloglyph.core.ui.HaloRed
 import red.suns.haloglyph.core.ui.HaloScreen
@@ -78,8 +84,9 @@ import red.suns.haloglyph.core.ui.Legend
 import red.suns.haloglyph.core.ui.LinkedTiles
 import red.suns.haloglyph.core.ui.MatrixPreview
 import red.suns.haloglyph.core.ui.MonoValue
+import red.suns.haloglyph.core.ui.PillButton
 import red.suns.haloglyph.core.ui.ScreenTitle
-import red.suns.haloglyph.core.ui.SectionLabel
+import red.suns.haloglyph.core.ui.SelectChevron
 import red.suns.haloglyph.lapse.LapseConfig
 import red.suns.haloglyph.lapse.R
 import red.suns.haloglyph.lapse.engine.LapseEngine
@@ -87,6 +94,7 @@ import red.suns.haloglyph.lapse.engine.TimeBreakdown
 import red.suns.haloglyph.lapse.render.LapseRenderer
 import red.suns.haloglyph.lapse.render.MatrixLabels
 import java.time.Instant
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -100,7 +108,7 @@ import java.util.Locale
  * quatre surfaces (matrice, widget, vignette, réglages) dans son propre module,
  * et `app` ne fait que la lancer. Ajouter un toy n'ajoute pas une ligne au hub.
  *
- * Porté de l'app de réglages de GlyphLapse, dont il garde la mécanique — trois
+ * Porté de l'app de réglages de GlyphLapse, dont il garde la mécanique — des
  * lapse indépendants, aperçu live partageant moteur et renderer avec la matrice,
  * dates favorites communes — et dont il abandonne le style : cartes sans
  * bordure, contrôles de la maquette Haloglyph, aucune glose sous un réglage.
@@ -109,7 +117,10 @@ import java.util.Locale
  *
  * - **la langue** remonte dans les réglages de l'application (PRODUIT §5.4) :
  *   une valeur pour toute l'app, la matrice comprise ;
- * - **la bascule « activer ce lapse »**, remplacée par l'action nue du bas ;
+ * - **le rail de sabliers**, remplacé par le titre — le nom du lapse actif,
+ *   chevron vers le bas — qui ouvre un quick switch (sélection seule) ;
+ * - **la suppression nue du bas**, centralisée dans [LapseManageActivity], seul
+ *   endroit qui réordonne, renomme et supprime ;
  * - **le repli des dates sauvegardées** : cinq entrées au maximum, ça tient ;
  * - **tous les paragraphes d'explication**.
  */
@@ -128,9 +139,6 @@ class LapseSettingsActivity : ComponentActivity() {
 
 /** L'heure : `HH:mm` partout, le sélecteur d'heure étant lui aussi en 24 h. */
 private val TIME_FMT = DateTimeFormatter.ofPattern("HH:mm")
-
-/** Le rail nomme les trois lapse en chiffres romains, comme la matrice. */
-private val ROMAN = listOf("I", "II", "III")
 
 /**
  * Une date dans la langue courante — « 23 juil. 2026 », « Jul 23, 2026 ».
@@ -152,11 +160,25 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
     val engine = remember { LapseEngine(zone) }
     val renderer = remember { LapseRenderer(spec) }
 
-    var lapses by remember {
-        mutableStateOf((0 until LapseConfig.LAPSE_COUNT).map { LapseConfig.readLapse(prefs, it, zone) })
-    }
+    var lapses by remember { mutableStateOf(LapseConfig.readAll(prefs, zone)) }
     var selected by remember { mutableIntStateOf(LapseConfig.activeIndex(prefs)) }
     val current = lapses[selected]
+
+    // La liste de gestion vit dans sa propre Activity, mais partage les mêmes
+    // préférences : au retour, on relit tout plutôt que d'attendre un résultat
+    // — un ajout, une suppression ou un réordonnancement s'y sont peut-être
+    // produits, et cet écran n'a aucune raison de les rejouer lui-même.
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                lapses = LapseConfig.readAll(prefs, zone)
+                selected = LapseConfig.activeIndex(prefs)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     var brightness by remember { mutableStateOf(IntArray(spec.cellCount)) }
     var diff by remember { mutableStateOf<TimeBreakdown.Diff?>(null) }
@@ -173,39 +195,12 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
         LapseConfig.writeLapse(prefs, selected, cfg)
     }
 
-    /**
-     * Choisir un lapse le rend **actif sur la matrice**, comme le rail de
-     * GlyphLapse, et le réactive s'il avait été supprimé.
-     *
-     * La réactivation n'est pas une commodité : le service ne fait tourner que
-     * les lapse activés (`nextEnabledIndex`), donc rendre actif un lapse
-     * désactivé mettrait la matrice et l'app en désaccord. Ouvrir un lapse
-     * supprimé, c'est le recréer — la question « supprimer ou désactiver ? »
-     * reste ouverte côté produit, mais le code, lui, reste cohérent.
-     */
+    /** Choisir un lapse le rend **actif sur la matrice**. Rien d'autre : toute
+     *  la mécanique de renommage, réordonnancement et suppression vit dans
+     *  [LapseManageActivity], que le quick switch atteint en dernière ligne. */
     fun select(index: Int) {
         selected = index
-        if (!lapses[index].enabled) {
-            val revived = lapses[index].copy(enabled = true)
-            lapses = lapses.toMutableList().also { it[index] = revived }
-            LapseConfig.writeLapse(prefs, index, revived)
-        }
         LapseConfig.setActiveIndex(prefs, index)
-    }
-
-    /** Sort le lapse de la rotation et remet ses réglages à zéro. L'emplacement reste. */
-    fun deleteCurrent() {
-        val blank = LapseConfig.Lapse(
-            ref = LapseConfig.defaultRef(selected, zone),
-            format = LapseEngine.Format.DETAIL2,
-            seconds = LapseEngine.SecondsMode.RING,
-            enabled = false,
-        )
-        lapses = lapses.toMutableList().also { it[selected] = blank }
-        LapseConfig.writeLapse(prefs, selected, blank)
-        // Le lapse I est toujours actif : c'est vers lui qu'on retombe.
-        selected = 0
-        LapseConfig.setActiveIndex(prefs, 0)
     }
 
     fun persistSaved(list: List<Long>) {
@@ -213,10 +208,21 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
         LapseConfig.setSavedDates(prefs, list)
     }
 
-    // L'aperçu tourne pour de vrai : même moteur, même renderer, mêmes
-    // préférences que le service Glyph. Cadencé par `withFrameNanos`, donc
-    // arrêté de lui-même dès que l'écran s'éteint.
-    LaunchedEffect(Unit) {
+    /**
+     * L'aperçu tourne pour de vrai : même moteur, même renderer, mêmes
+     * préférences que le service Glyph. Cadencé par `withFrameNanos`, donc
+     * arrêté de lui-même dès que l'écran s'éteint.
+     *
+     * **Et arrêté aussi tant qu'un sélecteur est ouvert.** La boucle republie
+     * `brightness` à chaque vsync, ce qui recompose tout le corps de l'écran —
+     * dialogue compris. Un sélecteur d'heure encaissait ; le sélecteur de date,
+     * qui recompose une grille de 42 jours, sautait des images à chaque
+     * changement de mois. L'aperçu est de toute façon caché derrière le
+     * dialogue : le faire tourner ne servait qu'à ralentir ce qu'on regarde.
+     */
+    val pickerOpen = showDate || showTime || showAddDate || showAddTime
+    LaunchedEffect(pickerOpen) {
+        if (pickerOpen) return@LaunchedEffect
         val frame = Frame(spec)
         while (true) {
             withFrameNanos { }
@@ -242,14 +248,16 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(horizontal = 16.dp),
     ) {
-        BackBar(stringResource(R.string.lapse_settings_parent), onBack = onBack)
-        ScreenTitle(
-            stringResource(R.string.toy_lapse_name),
-            modifier = Modifier.padding(start = 6.dp, bottom = 8.dp),
-            small = true,
+        Breadcrumb(
+            listOf(stringResource(R.string.lapse_settings_parent), stringResource(R.string.toy_lapse_name)),
+            onBack = onBack,
         )
-
-        LapseRail(selected = selected, lapses = lapses, onSelect = { select(it) })
+        LapseTitle(
+            lapses = lapses,
+            selected = selected,
+            onSelect = { select(it) },
+            onManage = { context.startActivity(Intent(context, LapseManageActivity::class.java)) },
+        )
 
         // ---------- l'aperçu, en tête ----------
 
@@ -264,10 +272,10 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
             DiffReadout(current.ref, diff, zone)
         }
 
-        SectionLabel(
-            text = stringResource(R.string.lapse_section, ROMAN[selected]),
-            trailing = stringResource(R.string.lapse_state_active),
-        )
+        // Pas de label de section entre la lecture et les réglages : le titre de
+        // l'écran nomme déjà le lapse, et « ACTIF » redisait ce que le point
+        // rouge du quick switch dit mieux. Il ne reste que la respiration.
+        Spacer(Modifier.height(18.dp))
 
         // ---------- appariées : les deux décident de ce que la matrice montre ----------
 
@@ -352,17 +360,6 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
             }
         }
 
-        // Le lapse I est toujours actif : il n'a pas de bouton de suppression.
-        if (selected != 0) {
-            BareAction(
-                text = stringResource(R.string.lapse_delete),
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 18.dp),
-                onClick = { deleteCurrent() },
-            )
-        }
-
         Spacer(Modifier.height(48.dp))
     }
 
@@ -370,57 +367,35 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
 
     if (showDate) {
         val base = LocalDateTime.ofInstant(Instant.ofEpochMilli(current.ref), zone)
-        val state = rememberDatePickerState(
-            initialSelectedDateMillis = base.toLocalDate()
-                .atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+        HaloDatePicker(
+            initial = base,
+            zone = zone,
+            confirmLabel = stringResource(R.string.action_ok),
+            onDismiss = { showDate = false },
+            onConfirm = { date ->
+                updateCurrent(
+                    current.copy(
+                        ref = date.atTime(base.toLocalTime()).atZone(zone).toInstant().toEpochMilli(),
+                    ),
+                )
+                showDate = false
+            },
         )
-        DatePickerDialog(
-            onDismissRequest = { showDate = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    state.selectedDateMillis?.let { utc ->
-                        val date = Instant.ofEpochMilli(utc).atZone(ZoneId.of("UTC")).toLocalDate()
-                        updateCurrent(
-                            current.copy(
-                                ref = date.atTime(base.toLocalTime()).atZone(zone)
-                                    .toInstant().toEpochMilli()
-                            )
-                        )
-                    }
-                    showDate = false
-                }) { Text(stringResource(R.string.action_ok)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDate = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            },
-        ) { DatePicker(state) }
     }
 
     if (showTime) {
         val base = LocalDateTime.ofInstant(Instant.ofEpochMilli(current.ref), zone)
-        val state = rememberTimePickerState(base.hour, base.minute, is24Hour = true)
-        AlertDialog(
-            onDismissRequest = { showTime = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    updateCurrent(
-                        current.copy(
-                            ref = base.toLocalDate().atTime(state.hour, state.minute)
-                                .atZone(zone).toInstant().toEpochMilli()
-                        )
-                    )
-                    showTime = false
-                }) { Text(stringResource(R.string.action_ok)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showTime = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            },
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) { TimePicker(state) }
+        HaloTimePicker(
+            initial = base,
+            onDismiss = { showTime = false },
+            onConfirm = { hour, minute ->
+                updateCurrent(
+                    current.copy(
+                        ref = base.toLocalDate().atTime(hour, minute)
+                            .atZone(zone).toInstant().toEpochMilli(),
+                    ),
+                )
+                showTime = false
             },
         )
     }
@@ -428,135 +403,188 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
     // Ajout d'une date favorite : date, puis heure, puis append (max SAVED_MAX).
     if (showAddDate) {
         val base = LocalDateTime.ofInstant(Instant.ofEpochMilli(addDraftMillis), zone)
-        val state = rememberDatePickerState(
-            initialSelectedDateMillis = base.toLocalDate()
-                .atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli()
+        HaloDatePicker(
+            initial = base,
+            zone = zone,
+            confirmLabel = stringResource(R.string.action_next),
+            onDismiss = { showAddDate = false },
+            onConfirm = { date ->
+                addDraftMillis = date.atTime(base.toLocalTime()).atZone(zone)
+                    .toInstant().toEpochMilli()
+                showAddDate = false
+                showAddTime = true
+            },
         )
-        DatePickerDialog(
-            onDismissRequest = { showAddDate = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    state.selectedDateMillis?.let { utc ->
-                        val date = Instant.ofEpochMilli(utc).atZone(ZoneId.of("UTC")).toLocalDate()
-                        addDraftMillis = date.atTime(base.toLocalTime()).atZone(zone)
-                            .toInstant().toEpochMilli()
-                    }
-                    showAddDate = false
-                    showAddTime = true
-                }) { Text(stringResource(R.string.action_next)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showAddDate = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            },
-        ) { DatePicker(state) }
     }
 
     if (showAddTime) {
         val draft = LocalDateTime.ofInstant(Instant.ofEpochMilli(addDraftMillis), zone)
-        val state = rememberTimePickerState(draft.hour, draft.minute, is24Hour = true)
-        AlertDialog(
-            onDismissRequest = { showAddTime = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    val millis = draft.toLocalDate().atTime(state.hour, state.minute)
-                        .atZone(zone).toInstant().toEpochMilli()
-                    if (savedDates.size < LapseConfig.SAVED_MAX) persistSaved(savedDates + millis)
-                    showAddTime = false
-                }) { Text(stringResource(R.string.action_ok)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showAddTime = false }) {
-                    Text(stringResource(R.string.action_cancel))
-                }
-            },
-            text = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) { TimePicker(state) }
+        HaloTimePicker(
+            initial = draft,
+            onDismiss = { showAddTime = false },
+            onConfirm = { hour, minute ->
+                val millis = draft.toLocalDate().atTime(hour, minute)
+                    .atZone(zone).toInstant().toEpochMilli()
+                if (savedDates.size < LapseConfig.SAVED_MAX) persistSaved(savedDates + millis)
+                showAddTime = false
             },
         )
     }
 }
 
+// ---------------------------------------------------------------- sélecteurs
+
 /**
- * Le rail des trois lapse : des sabliers filaires posés sur une ligne de points.
+ * Le calendrier de Material, habillé pour l'app.
  *
- * Le sablier n'est pas une décoration : c'est le même objet que le mode
- * « sablier » de la matrice, et il dit qu'on parle de temps qui passe. L'actif
- * est en accent, un lapse supprimé est atténué — la lecture de l'état est dans
- * la couleur, pas dans un texte.
+ * Ce qui change par rapport au dialogue nu :
+ *
+ * - **les actions sont des pilules**, la même forme que partout ailleurs. Les
+ *   `TextButton` de Material étaient deux mots bleuâtres dans un coin ;
+ * - **ni titre ni en-tête** : « Sélectionner une date » et la date en gros au-
+ *   dessus du calendrier répétaient ce que le champ qu'on vient de toucher dit
+ *   déjà, et l'en-tête se recompose à chaque changement de mois ;
+ * - **l'amplitude d'années est bornée** au lieu des deux siècles par défaut. Un
+ *   lapse pointe une date de vie, pas une date d'archive.
+ *
+ * L'état est confiné ici : le dialogue est **le seul** à se recomposer quand on
+ * change de mois, plutôt que d'entraîner l'écran entier avec lui.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HaloDatePicker(
+    initial: LocalDateTime,
+    zone: ZoneId,
+    confirmLabel: String,
+    onDismiss: () -> Unit,
+    onConfirm: (LocalDate) -> Unit,
+) {
+    val thisYear = remember(zone) { LocalDate.now(zone).year }
+    val state = rememberDatePickerState(
+        // Le sélecteur raisonne en UTC : une date locale convertie dans le
+        // fuseau du téléphone tomberait la veille à l'ouest de Greenwich.
+        initialSelectedDateMillis = initial.toLocalDate()
+            .atStartOfDay(ZoneId.of("UTC")).toInstant().toEpochMilli(),
+        yearRange = IntRange(thisYear - YEARS_BACK, thisYear + YEARS_AHEAD),
+    )
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            PillButton(text = confirmLabel, primary = true, small = true) {
+                state.selectedDateMillis?.let { utc ->
+                    onConfirm(Instant.ofEpochMilli(utc).atZone(ZoneId.of("UTC")).toLocalDate())
+                } ?: onDismiss()
+            }
+        },
+        dismissButton = {
+            PillButton(text = stringResource(R.string.action_cancel), small = true, onClick = onDismiss)
+        },
+        shape = RoundedCornerShape(HaloCardRadius),
+        colors = DatePickerDefaults.colors(containerColor = HaloCardBg),
+    ) {
+        DatePicker(
+            state = state,
+            title = null,
+            headline = null,
+            showModeToggle = false,
+            colors = DatePickerDefaults.colors(containerColor = HaloCardBg),
+        )
+    }
+}
+
+/** Un anniversaire tient dedans, une échéance aussi. Au-delà, c'est de l'archive. */
+private const val YEARS_BACK = 80
+private const val YEARS_AHEAD = 30
+
+/** L'horloge de Material, mêmes pilules que le calendrier. En 24 h, comme l'app. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HaloTimePicker(
+    initial: LocalDateTime,
+    onDismiss: () -> Unit,
+    onConfirm: (hour: Int, minute: Int) -> Unit,
+) {
+    val state = rememberTimePickerState(initial.hour, initial.minute, is24Hour = true)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            PillButton(text = stringResource(R.string.action_ok), primary = true, small = true) {
+                onConfirm(state.hour, state.minute)
+            }
+        },
+        dismissButton = {
+            PillButton(text = stringResource(R.string.action_cancel), small = true, onClick = onDismiss)
+        },
+        shape = RoundedCornerShape(HaloCardRadius),
+        containerColor = HaloCardBg,
+        text = { Column(horizontalAlignment = Alignment.CenterHorizontally) { TimePicker(state) } },
+    )
+}
+
+/**
+ * Le titre, devenu sélecteur : le nom du lapse actif, chevron vers le bas.
+ *
+ * Remplace le rail de sabliers — plus de sens à un rail une fois le nombre de
+ * lapse variable. Un tap ouvre un quick switch **de sélection seule** : choisir
+ * y rend un lapse actif sur la matrice, rien de plus. Sa dernière ligne, seule
+ * à porter l'accent, mène à [LapseManageActivity] pour tout le reste.
  */
 @Composable
-private fun LapseRail(
-    selected: Int,
+private fun LapseTitle(
     lapses: List<LapseConfig.Lapse>,
+    selected: Int,
     onSelect: (Int) -> Unit,
+    onManage: () -> Unit,
 ) {
-    // Grille : points ('d'), sabliers ('h'), respiration ('') autour des sabliers.
-    val pattern = listOf(
-        "d", "d", "", "h", "", "d", "d", "d", "", "h", "", "d", "d", "d", "", "h", "", "d", "d",
-    )
-    var next = 0
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        pattern.forEach { kind ->
-            when (kind) {
-                "d" -> Box(
-                    Modifier.width(16.dp).height(56.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Canvas(Modifier.size(3.dp)) { drawCircle(HaloMuted, size.minDimension / 2f) }
-                }
-
-                "h" -> {
-                    val index = next++
-                    val color = when {
-                        index == selected -> HaloRed
-                        lapses[index].enabled -> HaloText
-                        else -> HaloFaint
-                    }
-                    Box(
-                        modifier = Modifier
-                            .width(26.dp)
-                            .height(56.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .clickable { onSelect(index) },
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Canvas(Modifier.size(width = 15.dp, height = 26.dp)) {
-                            val w = size.width
-                            val h = size.height
-                            val mid = h / 2f
-                            val path = Path().apply {
-                                moveTo(0f, 0f); lineTo(w, 0f); lineTo(w / 2f, mid); close()
-                                moveTo(0f, h); lineTo(w, h); lineTo(w / 2f, mid); close()
-                            }
-                            drawPath(
-                                path,
-                                color,
-                                style = Stroke(width = 1.7.dp.toPx(), join = StrokeJoin.Round),
-                            )
+    var expanded by remember { mutableStateOf(false) }
+    Box(modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)) {
+        Row(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .clickable { expanded = true }
+                .padding(end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(9.dp),
+        ) {
+            ScreenTitle(lapses[selected].name, small = true)
+            // Le même triangle que les sélecteurs des cartes, à l'échelle d'un
+            // titre. Décalé vers le bas : il s'aligne sur la ligne de base du
+            // texte, pas sur le milieu de sa boîte, qui inclut les jambages.
+            SelectChevron(
+                color = HaloFaint,
+                width = 14.dp,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+        HaloMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            lapses.forEachIndexed { index, lapse ->
+                HaloMenuItem(
+                    label = lapse.name,
+                    size = MENU_TITLE_SIZE,
+                    leading = {
+                        // La pastille garde sa place même vide : les noms
+                        // s'alignent, actif ou non.
+                        if (index == selected) {
+                            Canvas(Modifier.size(6.dp)) { drawCircle(HaloRed, size.minDimension / 2f) }
+                        } else {
+                            Spacer(Modifier.size(6.dp))
                         }
-                        Text(
-                            ROMAN[index],
-                            color = color,
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily.Serif,
-                            modifier = Modifier.align(Alignment.TopCenter),
-                        )
-                    }
-                }
-
-                else -> Spacer(Modifier.width(10.dp))
+                    },
+                ) { onSelect(index); expanded = false }
             }
+            Box(Modifier.fillMaxWidth().height(1.dp).padding(horizontal = 10.dp).background(HaloHair))
+            HaloMenuItem(
+                label = stringResource(R.string.lapse_manage_title),
+                size = MENU_TITLE_SIZE,
+                color = HaloRed,
+                leading = { Spacer(Modifier.size(6.dp)) },
+            ) { expanded = false; onManage() }
         }
     }
 }
+
+/** Les options du titre se lisent à la taille d'un titre, pas d'un réglage. */
+private val MENU_TITLE_SIZE = 16.sp
 
 /**
  * Une date favorite : la ligne entière applique, la croix supprime.

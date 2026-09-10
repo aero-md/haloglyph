@@ -3,8 +3,9 @@
 
     <string name="toy_lapse_summary">Temps écoulé depuis / restant jusqu\'à une date — appui long pour changer de format</string>
 
-    <string name="lapse_state_active">actif</string>
-    <string name="lapse_delete">Supprimer ce lapse</string>
+
+    <string name="lapse_manage_title">Gérer les lapses</string>
+    <string name="lapse_add">Nouveau lapse</string>
 
     <string name="card_datetime">Date et heure</string>
     <string name="card_saved_dates">Dates sauvegardées</string>

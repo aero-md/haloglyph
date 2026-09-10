@@ -23,12 +23,11 @@
          `app` : un module de toy ne dépend pas de l'application qui l'embarque,
          et c'est un nom propre, donc invariable. -->
     <string name="lapse_settings_parent" translatable="false">Haloglyph</string>
-    <string name="lapse_section" translatable="false">Lapse %1$s</string>
-    <string name="lapse_state_active">active</string>
 
-    <!-- Action nue du bas. Elle sort le lapse de la rotation et remet ses
-         réglages à zéro ; l'emplacement, lui, reste — il y en a trois, fixes. -->
-    <string name="lapse_delete">Delete this lapse</string>
+    <!-- Écran de gestion : sert à la fois de titre et de dernière ligne du
+         quick switch du titre — un seul mot pour les deux. -->
+    <string name="lapse_manage_title">Manage lapses</string>
+    <string name="lapse_add">New lapse</string>
 
     <!-- Titres de cartes -->
     <string name="card_datetime">Date and time</string>

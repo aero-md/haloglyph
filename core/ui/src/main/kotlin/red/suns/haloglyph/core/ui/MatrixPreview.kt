@@ -45,18 +45,22 @@ fun MatrixPreview(
     fieldColor: Color = Color(MatrixLook.FIELD_ARGB),
 ) {
     Canvas(modifier) {
-        val side = min(size.width, size.height)
-        val originX = (size.width - side) / 2f
-        val originY = (size.height - side) / 2f
+        val disc = min(size.width, size.height)
+        val centerX = size.width / 2f
+        val centerY = size.height / 2f
 
         // Le champ est un disque : c'est lui qui donne la silhouette.
-        drawCircle(
-            color = fieldColor,
-            radius = side / 2f,
-            center = Offset(originX + side / 2f, originY + side / 2f),
-        )
+        drawCircle(color = fieldColor, radius = disc / 2f, center = Offset(centerX, centerY))
 
-        val pitch = side / spec.size
+        // La grille est rentrée dans le disque : sur la vraie matrice, aucune LED
+        // ne touche le bord du hublot — il reste une couronne de noir tout autour.
+        // Une grille à ras bord donnait un disque qui semblait trop petit pour ce
+        // qu'il porte, et les LEDs des extrémités mordaient sur la découpe.
+        val grid = disc * GRID_SCALE
+        val originX = centerX - grid / 2f
+        val originY = centerY - grid / 2f
+
+        val pitch = grid / spec.size
         val led = Size(MatrixLook.ledSize(pitch), MatrixLook.ledSize(pitch))
         val inset = MatrixLook.inset(pitch)
 
@@ -82,6 +86,13 @@ fun MatrixPreview(
         }
     }
 }
+
+/**
+ * Part du disque occupée par la grille de LEDs. Le reste est la couronne de
+ * fond qui dépasse — c'est elle qui fait lire le hublot comme un objet, et non
+ * comme un carré de points qu'on aurait arrondi.
+ */
+private const val GRID_SCALE = 0.93f
 
 /**
  * Frame observable par Compose, plus le [FrameSink] qui l'alimente.

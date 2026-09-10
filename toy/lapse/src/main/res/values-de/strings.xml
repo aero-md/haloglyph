@@ -3,8 +3,9 @@
 
     <string name="toy_lapse_summary">Verstrichene Zeit seit / verbleibende Zeit bis zu einem Datum — lange drücken, um das Format zu wechseln</string>
 
-    <string name="lapse_state_active">aktiv</string>
-    <string name="lapse_delete">Diesen Lapse löschen</string>
+
+    <string name="lapse_manage_title">Lapses verwalten</string>
+    <string name="lapse_add">Neuer Lapse</string>
 
     <string name="card_datetime">Datum und Uhrzeit</string>
     <!-- « Datumsangaben » et non « Daten », qui veut aussi dire *données*. -->

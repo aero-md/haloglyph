@@ -75,8 +75,13 @@ import androidx.compose.ui.unit.sp
 /** Gouttière unique entre deux blocs, tuiles comprises. */
 val HaloGutter = 6.dp
 
-/** Rayon d'une carte. Entre le 22 de Nothing X et les angles vifs de suns.red. */
-private val CardRadius = 16.dp
+/**
+ * Rayon d'une carte. Entre le 22 de Nothing X et les angles vifs de suns.red.
+ *
+ * Public parce que la liste déroulante d'un sélecteur le reprend : la pop-in est
+ * une carte qui s'ouvre par-dessus les autres, pas une surface d'un autre monde.
+ */
+val HaloCardRadius = 16.dp
 
 /** Rayon d'un contrôle porteur de valeur. */
 private val FieldRadius = 12.dp
@@ -93,7 +98,7 @@ fun HaloCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(CardRadius))
+            .clip(RoundedCornerShape(HaloCardRadius))
             .background(HaloCardBg)
             .padding(contentPadding),
         verticalArrangement = Arrangement.spacedBy(spacing),
@@ -269,17 +274,90 @@ fun MonoValue(
 // ---------------------------------------------------------------- contrôles
 
 /**
- * Sélecteur : rectangle arrondi bordé, valeur à gauche, chevron à droite.
+ * La liste déroulante d'un sélecteur — la « pop-in ».
  *
- * Le chevron est **de la couleur du texte**. Il n'indique pas une action
+ * Une **carte qui s'ouvre par-dessus les autres** : même rayon ([HaloCardRadius])
+ * et même famille de fond que les blocs de réglages, aucune ombre portée, aucune
+ * teinte d'élévation. La liste des options de Material arrive autrement avec ses
+ * angles à 4 dp et son gris tonal, qui n'appartiennent à rien d'autre dans
+ * l'app.
+ *
+ * Ce composant n'est qu'une enveloppe : ce sont [HaloMenuItem] et le sélecteur
+ * qui décident du contenu.
+ */
+@Composable
+fun HaloMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier,
+        shape = RoundedCornerShape(HaloCardRadius),
+        containerColor = HaloControlBg,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        content = content,
+    )
+}
+
+/**
+ * Une option de liste déroulante.
+ *
+ * En **linéale**, comme les descriptions de toys du hub, et non en monospace :
+ * une option est un mot à lire, pas une donnée à comparer colonne par colonne.
+ * La famille n'est pas nommée — celle du thème est déjà la bonne, et l'imposer
+ * ferait diverger cette ligne du reste des phrases de l'app.
+ *
+ * [size] vient du sélecteur qui ouvre la liste : les options d'un réglage de
+ * carte se lisent à la taille de sa valeur, celles d'un titre à la taille d'un
+ * titre. Le rembourrage suit, pour qu'une petite liste reste dense et qu'une
+ * grande ne colle pas.
+ */
+@Composable
+fun HaloMenuItem(
+    label: String,
+    modifier: Modifier = Modifier,
+    size: androidx.compose.ui.unit.TextUnit = 13.sp,
+    color: Color = HaloText,
+    leading: (@Composable () -> Unit)? = null,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = MENU_ITEM_PADDING),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        leading?.invoke()
+        Text(label, color = color, fontSize = size, maxLines = 1)
+    }
+}
+
+/** Serré : la liste doit se lire d'un coup d'œil, pas se parcourir au pouce. */
+private val MENU_ITEM_PADDING = 8.dp
+
+/**
+ * Sélecteur : rectangle arrondi bordé, valeur à gauche, triangle à droite.
+ *
+ * Le triangle est **de la couleur du texte**. Il n'indique pas une action
  * dangereuse ni un état particulier : le teindre en accent dépenserait la seule
  * couleur qui porte du sens sur une décoration.
+ *
+ * La valeur affichée est en linéale, comme les options qu'elle ouvre : c'est le
+ * même texte, il change juste de place quand on choisit.
  */
 @Composable
 fun <T> HaloSelect(
     options: List<Pair<T, String>>,
     selected: T,
     modifier: Modifier = Modifier,
+    textSize: androidx.compose.ui.unit.TextUnit = 13.sp,
     onSelect: (T) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -295,25 +373,16 @@ fun <T> HaloSelect(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            MonoValue(label, size = 13.sp)
-            Text("▼", color = HaloText, fontSize = 9.sp)
+            Text(label, color = HaloText, fontSize = textSize, maxLines = 1)
+            SelectChevron(color = HaloText, width = 9.dp)
         }
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(HaloControlBg),
-        ) {
+        HaloMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { (value, text) ->
-                DropdownMenuItem(
-                    text = {
-                        MonoValue(
-                            text,
-                            color = if (value == selected) HaloRed else HaloText,
-                            size = 14.sp,
-                        )
-                    },
-                    onClick = { onSelect(value); expanded = false },
-                )
+                HaloMenuItem(
+                    label = text,
+                    size = textSize,
+                    color = if (value == selected) HaloRed else HaloText,
+                ) { onSelect(value); expanded = false }
             }
         }
     }
@@ -422,9 +491,9 @@ fun DashedAddRow(text: String, modifier: Modifier = Modifier, onClick: () -> Uni
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Le « + » est de la couleur du texte : c'est le mot qui porte l'action,
-        // pas le signe.
-        MonoValue("+", size = 13.sp)
+        // La croix est de la couleur du texte : c'est le mot qui porte l'action,
+        // pas le signe. Dessinée et non tapée — voir `Glyphs.kt`.
+        PlusGlyph(color = HaloText)
         Spacer(Modifier.width(8.dp))
         MonoValue(text, size = 13.sp)
     }
@@ -548,5 +617,50 @@ fun BackBar(label: String, modifier: Modifier = Modifier, onBack: () -> Unit) {
             drawLine(HaloText, Offset(0f, midY), Offset(size.width, midY), sw, StrokeCap.Round)
         }
         MonoLabel(label, color = HaloText)
+    }
+}
+
+/**
+ * Fil d'ariane : la même flèche que [BackBar], suivie de la trace des écrans
+ * jusqu'ici plutôt que du seul parent.
+ *
+ * Tous les segments remontent d'un cran — comme la flèche, ils appellent
+ * [onBack] — sauf le dernier : c'est l'écran courant, il est inerte. Un écran
+ * à deux niveaux de profondeur n'a donc besoin que d'un seul retour, pas d'une
+ * pile : la maquette n'en a jamais demandé plus.
+ */
+@Composable
+fun Breadcrumb(segments: List<String>, modifier: Modifier = Modifier, onBack: () -> Unit) {
+    Row(
+        modifier = modifier.padding(start = 6.dp, end = 10.dp, top = 4.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .clickable(onClick = onBack)
+                .padding(2.dp),
+        ) {
+            Canvas(Modifier.size(width = 16.dp, height = 10.dp)) {
+                val sw = 1.4.dp.toPx()
+                val midY = size.height / 2f
+                drawLine(HaloText, Offset(size.width * 0.34f, 0f), Offset(0f, midY), sw, StrokeCap.Round)
+                drawLine(HaloText, Offset(0f, midY), Offset(size.width * 0.34f, size.height), sw, StrokeCap.Round)
+                drawLine(HaloText, Offset(0f, midY), Offset(size.width, midY), sw, StrokeCap.Round)
+            }
+        }
+        segments.forEachIndexed { i, label ->
+            if (i > 0) MonoLabel("/", color = HaloFaint)
+            val last = i == segments.lastIndex
+            MonoLabel(
+                label,
+                color = if (last) HaloText else HaloMuted,
+                modifier = if (last) Modifier else Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .clickable(onClick = onBack)
+                    .padding(vertical = 2.dp, horizontal = 1.dp),
+            )
+        }
     }
 }

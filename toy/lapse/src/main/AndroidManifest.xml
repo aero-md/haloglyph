@@ -72,6 +72,14 @@
             android:label="@string/toy_lapse_name"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
 
+        <!-- Gérer les lapses : atteinte depuis le quick switch de la surface 3,
+             jamais directement — mêmes conditions d'exposition. -->
+        <activity
+            android:name="red.suns.haloglyph.lapse.settings.LapseManageActivity"
+            android:exported="false"
+            android:label="@string/lapse_manage_title"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
+
     </application>
 
 </manifest>

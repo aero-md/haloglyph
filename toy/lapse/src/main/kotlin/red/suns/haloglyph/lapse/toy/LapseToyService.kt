@@ -85,7 +85,7 @@ class LapseToyService : MatrixToyService(TAG) {
     }
 
     override fun onTouchPointLongPress() {
-        val next = nextEnabledIndex()
+        val next = nextIndex()
         if (next == activeIndex) return
         // Persiste : c'est ce qui synchronise l'app et le widget avec la matrice.
         LapseConfig.setActiveIndex(prefs, next)
@@ -147,16 +147,17 @@ class LapseToyService : MatrixToyService(TAG) {
         MatrixWidgetRefresh.requestUpdate(this, LapseWidget::class.java)
     }
 
-    private fun isEnabled(i: Int): Boolean =
-        i == 0 || LapseConfig.readLapse(prefs, i, zone).enabled
-
-    /** Prochain lapse activé après l'actif (rotation), ou l'actif s'il est seul. */
-    private fun nextEnabledIndex(): Int {
-        for (k in 1 until LapseConfig.LAPSE_COUNT) {
-            val candidate = (activeIndex + k) % LapseConfig.LAPSE_COUNT
-            if (isEnabled(candidate)) return candidate
-        }
-        return activeIndex
+    /**
+     * Prochain lapse dans la rotation (appui long).
+     *
+     * Tous les lapse configurés y sont éligibles : il n'y a plus de lapse
+     * « défini mais désactivé » depuis que la liste de gestion retire un lapse
+     * plutôt que de l'éteindre — [LapseConfig.lapseCount] dit à lui seul
+     * combien il y en a.
+     */
+    private fun nextIndex(): Int {
+        val count = LapseConfig.lapseCount(prefs)
+        return (activeIndex + 1) % count
     }
 
     /** Reconfigure l'engine sur [newIndex] et démarre le slide de transition. */

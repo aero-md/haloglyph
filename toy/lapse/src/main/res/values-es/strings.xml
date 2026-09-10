@@ -3,8 +3,9 @@
 
     <string name="toy_lapse_summary">Tiempo transcurrido desde / restante hasta una fecha — mantén pulsado para cambiar de formato</string>
 
-    <string name="lapse_state_active">activo</string>
-    <string name="lapse_delete">Eliminar este lapso</string>
+
+    <string name="lapse_manage_title">Gestionar lapsos</string>
+    <string name="lapse_add">Nuevo lapso</string>
 
     <string name="card_datetime">Fecha y hora</string>
     <string name="card_saved_dates">Fechas guardadas</string>
