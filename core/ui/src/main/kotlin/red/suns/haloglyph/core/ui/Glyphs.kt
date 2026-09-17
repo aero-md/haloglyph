@@ -3,6 +3,7 @@ package red.suns.haloglyph.core.ui
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -10,15 +11,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 /**
  * Les signes dessinés de l'interface.
@@ -116,90 +117,62 @@ fun PlusGlyph(
 /**
  * L'engrenage : « cette entrée mène à un écran de réglages ».
  *
- * Un anneau et des dents radiales, et non une silhouette découpée. À la taille où
- * il sert — la hauteur d'une ligne de liste déroulante — une roue pleine à
- * créneaux devient une tache : ses dents et son moyeu se rejoignent dès que la
- * forme descend sous la vingtaine de pixels.
- *
- * Les dents sont tracées **plus épaisses que l'anneau** : au même trait que lui,
- * huit rayons fins autour d'un cercle se lisaient comme un soleil, pas comme une
- * roue. Un trait plus large les rapproche d'une vraie dent — courte et large
- * plutôt que longue et fine — sans aller jusqu'à la silhouette pleine que la
- * petite taille écraserait.
- *
- * Huit dents : six font une étoile, douze font un disque.
- *
- * Les dents sont des **trapèzes évasés**, pas des rectangles à bout carré : à
- * largeur constante, huit rayons identiques autour d'un centre se lisaient
- * encore comme une fleur (un rectangle qui s'élargit brusquement au bord de
- * l'anneau est déjà la moitié d'un pétale). Étroite à la racine et large au
- * sommet, une dent dessine un coin droit à sa pointe — la marque d'une roue —
- * là où un pétale s'arrondit ou se referme.
+ * Tracé importé tel quel d'un dessin fait à la main dans un éditeur SVG
+ * ([gear-icon.svg]) plutôt que reconstruit en primitives ([Canvas.drawCircle],
+ * [Canvas.drawLine]) — les dents à bout rond et à flancs galbés qu'un vrai
+ * dessin donne ne se laissent pas approcher par des rectangles ou des
+ * trapèzes composés à la main, comme les tentatives précédentes l'ont montré.
+ * [GEAR_PATH] est le contenu du `d=` de ce SVG, [GEAR_VIEWBOX_SIZE] son
+ * `viewBox` — la mise à l'échelle vers [side] se fait au dessin, une fois le
+ * chemin analysé.
  *
  * La couleur se pose en une seule fois, sur l'ensemble déjà opaque
- * ([graphicsLayer] + [CompositingStrategy.Offscreen]), plutôt que traît par
- * traît : [color] est souvent translucide (l'icône au repos du dock), et
- * l'anneau et les dents se chevauchent à leur jonction — les recomposer
- * séparément y aurait doublé l'opacité, une tache plus dense que le reste du
- * signe au lieu d'une teinte unie.
+ * ([graphicsLayer] + [CompositingStrategy.Offscreen]), plutôt que sur le
+ * chemin directement : [color] est souvent translucide (l'icône au repos du
+ * dock), et le remplissage `evenodd` du SVG — le disque central est un second
+ * sous-tracé soustrait, pas un trou réellement absent — recouperait deux fois
+ * la même zone si l'alpha se posait avant la découpe plutôt qu'après.
  */
 @Composable
 fun GearGlyph(
     color: Color,
     modifier: Modifier = Modifier,
-    side: Dp = 14.dp,
-    stroke: Dp = 1.6.dp,
+    // Même taille par défaut que ToysGlyph/CastGlyph : les trois signes du
+    // dock doivent occuper la même place, pas juste la même hauteur de boîte.
+    side: Dp = 17.dp,
 ) {
     val solid = color.copy(alpha = 1f)
+    val path = remember {
+        PathParser().parsePathString(GEAR_PATH).toPath().apply { fillType = PathFillType.EvenOdd }
+    }
     Canvas(
         modifier
             .size(side)
             .graphicsLayer(alpha = color.alpha, compositingStrategy = CompositingStrategy.Offscreen),
     ) {
-        val sw = stroke.toPx()
-        val rootHalfWidth = sw * TOOTH_ROOT_RATIO / 2f
-        val tipHalfWidth = sw * TOOTH_TIP_RATIO / 2f
-        val center = Offset(size.width / 2f, size.height / 2f)
-        val tooth = size.minDimension * TOOTH_LENGTH
-        // La marge tient compte du coin le plus large — celui de la pointe.
-        val radius = size.minDimension / 2f - tooth - tipHalfWidth
-        drawCircle(solid, radius, center, style = Stroke(sw))
-        for (i in 0 until GEAR_TEETH) {
-            val angle = (i * 2.0 * PI / GEAR_TEETH).toFloat()
-            val dir = Offset(cos(angle), sin(angle))
-            val perp = Offset(-dir.y, dir.x)
-            // La dent part de l'anneau lui-même, pas de son bord extérieur :
-            // elles se soudent au lieu de flotter autour.
-            val root = center + dir * radius
-            val tip = center + dir * (radius + tooth)
-            val path = Path().apply {
-                moveTo(root.x + perp.x * rootHalfWidth, root.y + perp.y * rootHalfWidth)
-                lineTo(tip.x + perp.x * tipHalfWidth, tip.y + perp.y * tipHalfWidth)
-                lineTo(tip.x - perp.x * tipHalfWidth, tip.y - perp.y * tipHalfWidth)
-                lineTo(root.x - perp.x * rootHalfWidth, root.y - perp.y * rootHalfWidth)
-                close()
-            }
+        val scale = size.minDimension / GEAR_VIEWBOX_SIZE
+        scale(scale, pivot = Offset.Zero) {
             drawPath(path, solid)
         }
     }
 }
 
-private const val GEAR_TEETH = 8
+/** `viewBox="0 0 16 16"` du SVG source. */
+private const val GEAR_VIEWBOX_SIZE = 16f
 
-/** Longueur d'une dent, en fraction du côté. */
-private const val TOOTH_LENGTH = 0.15f
-
-/**
- * Largeur d'une dent à sa racine (contre l'anneau), en multiple du trait de
- * l'anneau. Assez étroite pour qu'un espace net sépare chaque dent de ses
- * voisines — à huit dents sur un si petit cercle, une pointe trop large les
- * fait se toucher et referme le pourtour en un octogone plein, sans dents du
- * tout.
- */
-private const val TOOTH_ROOT_RATIO = 1.0f
-
-/** Largeur d'une dent à sa pointe, en multiple du trait de l'anneau — plus large que la racine : l'évasement. */
-private const val TOOTH_TIP_RATIO = 1.7f
+/** Le `d=` de [gear-icon.svg], recopié tel quel. */
+private const val GEAR_PATH =
+    "M5.98,3.87 Q6.2,3.77 6.19,3.32 L6.14,1.91 Q6.13,1.46 6.53,1.26 Q8,0.5 9.47,1.26 Q9.87,1.46 9.86,1.91 " +
+        "L9.81,3.32 Q9.8,3.77 10.02,3.87 A4.6,4.6 0 0 1 10.57,4.19 Q10.77,4.33 11.15,4.09 L12.34,3.35 " +
+        "Q12.72,3.11 13.1,3.35 Q14.5,4.25 14.58,5.91 Q14.6,6.35 14.2,6.57 L12.96,7.23 Q12.57,7.44 12.59,7.68 " +
+        "A4.6,4.6 0 0 1 12.59,8.32 Q12.57,8.56 12.96,8.77 L14.2,9.43 Q14.6,9.65 14.58,10.09 Q14.5,11.75 13.1,12.65 " +
+        "Q12.72,12.89 12.34,12.65 L11.15,11.91 Q10.77,11.67 10.57,11.81 A4.6,4.6 0 0 1 10.02,12.13 " +
+        "Q9.8,12.23 9.81,12.68 L9.86,14.09 Q9.87,14.54 9.47,14.74 Q8,15.5 6.53,14.74 Q6.13,14.54 6.14,14.09 " +
+        "L6.19,12.68 Q6.2,12.23 5.98,12.13 A4.6,4.6 0 0 1 5.43,11.81 Q5.23,11.67 4.85,11.91 L3.66,12.65 " +
+        "Q3.28,12.89 2.9,12.65 Q1.5,11.75 1.42,10.09 Q1.4,9.65 1.8,9.43 L3.04,8.77 Q3.43,8.56 3.41,8.32 " +
+        "A4.6,4.6 0 0 1 3.41,7.68 Q3.43,7.44 3.04,7.23 L1.8,6.57 Q1.4,6.35 1.42,5.91 Q1.5,4.25 2.9,3.35 " +
+        "Q3.28,3.11 3.66,3.35 L4.85,4.09 Q5.23,4.33 5.43,4.19 A4.6,4.6 0 0 1 5.98,3.87 Z " +
+        "M9.8,8 A1.8,1.8 0 1 0 6.2,8 A1.8,1.8 0 1 0 9.8,8 Z"
 
 /**
  * La mini matrice : disque et neuf pixels — l'onglet qui mène aux toys.

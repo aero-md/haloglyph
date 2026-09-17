@@ -105,8 +105,8 @@ object ToyCatalog {
         // qu'il portait seul. Reste fixe à `FloatRange.DEFAULT`.
         ToyEntry(
             id = FloatConfig.TOY_ID,
-            nameRes = red.suns.haloglyph.float.R.string.toy_float_name,
-            summaryRes = red.suns.haloglyph.float.R.string.toy_float_summary,
+            nameRes = red.suns.haloglyph.toyfloat.R.string.toy_float_name,
+            summaryRes = red.suns.haloglyph.toyfloat.R.string.toy_float_summary,
             glyphService = FloatToyService::class.java,
             widgetProviders = HALO_WIDGETS,
             preview = FloatPreview(context),

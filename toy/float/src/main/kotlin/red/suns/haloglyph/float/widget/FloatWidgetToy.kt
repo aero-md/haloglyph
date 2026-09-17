@@ -4,11 +4,11 @@ import android.content.Context
 import red.suns.haloglyph.core.matrix.Frame
 import red.suns.haloglyph.core.widget.WidgetToy
 import red.suns.haloglyph.float.FloatConfig
-import red.suns.haloglyph.float.R
 import red.suns.haloglyph.float.engine.FloatEngine
 import red.suns.haloglyph.float.engine.FloatMode
 import red.suns.haloglyph.float.render.FloatRenderer
 import red.suns.haloglyph.float.toy.FloatSensors
+import red.suns.haloglyph.toyfloat.R
 import java.util.concurrent.ConcurrentHashMap
 
 /**

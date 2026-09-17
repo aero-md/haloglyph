@@ -4,7 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "red.suns.haloglyph.float"
+    // `float` seul est un mot-clé Java : invalide comme namespace AGP (même si
+    // Kotlin l'accepte très bien comme segment de package, d'où
+    // `red.suns.haloglyph.float.*` dans les sources de ce module). Le
+    // namespace n'a pas besoin de correspondre au package Kotlin réel — seule
+    // la classe R générée en dépend, réimportée dans FloatWidgetToy.kt.
+    namespace = "red.suns.haloglyph.toyfloat"
 }
 
 dependencies {
