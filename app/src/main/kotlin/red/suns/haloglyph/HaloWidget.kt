@@ -9,7 +9,7 @@ import red.suns.haloglyph.core.widget.WidgetToy
 import red.suns.haloglyph.dice.widget.DiceWidgetToy
 import red.suns.haloglyph.gforce.widget.GForceWidgetToy
 import red.suns.haloglyph.lapse.widget.LapseWidgetToy
-import red.suns.haloglyph.plumb.widget.PlumbWidgetToy
+import red.suns.haloglyph.float.widget.FloatWidgetToy
 import red.suns.haloglyph.sono.widget.SonoWidgetToy
 
 /**
@@ -28,7 +28,7 @@ import red.suns.haloglyph.sono.widget.SonoWidgetToy
  * vivent ici, dans le processus, et survivent aux diffusions comme aux rafales.
  *
  * L'ordre est celui du hub, et il est aussi celui du double tap : Lapse, Dice,
- * Sono, Plumb, G-Forces, puis Lapse à nouveau.
+ * Sono, Float, G-Forces, puis Lapse à nouveau.
  */
 object HaloToys {
     val list: List<WidgetToy> by lazy {
@@ -36,7 +36,7 @@ object HaloToys {
             LapseWidgetToy(),
             DiceWidgetToy(),
             SonoWidgetToy(),
-            PlumbWidgetToy(),
+            FloatWidgetToy(),
             GForceWidgetToy(),
         )
     }

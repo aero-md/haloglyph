@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * G-Forces dans le hublot d'écran d'accueil — et c'est **la** surface du toy.
  *
- * Le raisonnement est le même que pour Plumb, en plus tranché : dans un support de
+ * Le raisonnement est le même que pour Float, en plus tranché : dans un support de
  * voiture, le téléphone regarde le conducteur, donc la matrice regarde la route.
  * Celui qui conduit lit l'écran, pas le dos. La matrice reste juste et reste
  * offerte, mais elle s'adresse au passager qui se penche.
@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap
  * ## Le tap change de face
  *
  * Tant que rien ne mesure, il réveille ; dès que ça mesure, il passe de la bille
- * aux pics. Exactement la grammaire de Sono et de Plumb, et pour la même raison :
+ * aux pics. Exactement la grammaire de Sono et de Float, et pour la même raison :
  * un hublot n'a pas d'appui long, le launcher le garde.
  */
 class GForceWidgetToy : WidgetToy {

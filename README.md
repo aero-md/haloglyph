@@ -40,7 +40,7 @@ le faire retirer. C'est pour ça que cet écran s'ouvre désormais à la pose.
 
 > **État : les cinq toys sont écrits et déclarés au système.** La plomberie est
 > en place — géométrie de la matrice, les trois sinks, le socle des services
-> Glyph et du hublot, le hub. **Lapse**, **Dice**, **Sono**, **Plumb** et
+> Glyph et du hublot, le hub. **Lapse**, **Dice**, **Sono**, **Float** et
 > **G-Forces** apparaissent dans Glyph Interface, et tous les cinq tournent dans
 > le hublot d'écran d'accueil. Le hub ne l'écrit nulle part en dur, il interroge le
 > `PackageManager`.
@@ -52,7 +52,7 @@ le faire retirer. C'est pour ça que cet écran s'ouvre désormais à la pose.
 | **Lapse** | [glyphlapse](https://github.com/aero-md/glyphlapse) | Compteur temporel : temps écoulé depuis / restant jusqu'à une date. Jusqu'à 5 lapse, anneau ou sablier. |
 | **Dice** | [justadice](https://github.com/aero-md/justadice) | Dé d6/d10/d12/d20, solides 3D suivis en quaternion, secouer pour jeter. |
 | **Sono** | [sonoglyph](https://github.com/aero-md/sonoglyph) | Le micro sur la matrice, en trois modes : spectre 25 bandes, VU-mètre à aiguille en dB(A), forme d'onde qui défile. |
-| **Plumb** | écrit ici | Niveau à bulle à **échelle logarithmique**, et boussole en second instrument. |
+| **Float** | écrit ici | Niveau à bulle à **échelle logarithmique**, et boussole en second instrument. |
 | **G-Forces** | écrit ici | Accéléromètre de bord : une bille pour ce qu'on subit, les quatre pics du trajet en second. |
 
 Chacun se change à l'**appui long** sur le Glyph Button : le lapse suivant, le
@@ -62,9 +62,9 @@ Dans un widget, ce geste-là est le **tap** — un appui long y appartient au
 launcher, qui en fait son menu « déplacer, supprimer, régler », et aucune
 application ne peut le lui prendre. Le tap fait donc ce que le Glyph Button
 fait : il avance d'un lapse, il relance le dé, il passe au mode de Sono ou à
-l'instrument de Plumb suivant.
+l'instrument de Float suivant.
 
-### Plumb, et pourquoi son échelle n'est pas proportionnelle
+### Float, et pourquoi son échelle n'est pas proportionnelle
 
 C'est le seul toy du pack qui ne vienne pas d'une app existante, et il existe
 pour corriger un défaut qu'ont tous les niveaux d'écran : leur bulle se déplace
@@ -198,7 +198,7 @@ droit au passage : `111/101/111` donnait un rectangle plein en haut, qui se lisa
 comme un bloc et non comme une lettre.
 
 La marque, elle, est le toy en miniature : la fiole et sa bulle ou la rose pour
-Plumb, la bille entre ses quatre graduations pour G-Forces, l'onde pour Sono — qui
+Float, la bille entre ses quatre graduations pour G-Forces, l'onde pour Sono — qui
 montrait déjà la sienne entre ses deux mots, et à qui les deux autres empruntent
 la grammaire. Rien de ce qui est dessiné n'est une mesure : aucun capteur n'écoute
 entre deux rafales, et un niveau qui afficherait l'horizontale d'hier serait pire
@@ -209,7 +209,7 @@ au-dessus d'elle, donc tout l'ensemble trop haut — puis la **marque seule desc
 de deux lignes**. Au milieu pile, une image se lit comme la mesure qu'elle n'est
 pas ; deux lignes plus bas, le mot et le dessin se séparent franchement.
 
-Chez Plumb, la marque **suit le mode** : la rose pour la boussole, la fiole pour
+Chez Float, la marque **suit le mode** : la rose pour la boussole, la fiole pour
 le niveau, même boîte de neuf cellules et même place. Les deux ont partagé la même
 image, au motif qu'un hublot au repos dit quel *toy* on va réveiller et pas ce
 qu'il affichera. C'était vrai tant qu'il n'y avait qu'une question à poser : le tap
@@ -260,7 +260,7 @@ millisecondes ; sans filtre, le premier trou de la route devient le pic de la
 journée. Il divise sans effacer — une secousse d'un échantillon passe au tiers —
 parce que couper plus bas abîmerait la montée d'un vrai freinage.
 
-L'échelle, elle, est **linéaire**, à l'exact opposé de Plumb : toute la plage est
+L'échelle, elle, est **linéaire**, à l'exact opposé de Float : toute la plage est
 intéressante, il n'y a aucune zone où l'on regarderait de plus près. Les deux
 graduations par côté valent **0,5 g et 1,0 g** — un freinage franc, et la limite
 d'adhérence d'un pneu de route sur bitume sec. Ce ne sont pas des tiers de pleine
@@ -268,7 +268,7 @@ d'adhérence d'un pneu de route sur bitume sec. Ce ne sont pas des tiers de plei
 découle.
 
 Les quatre pics s'écrivent en **4×5 arrondie**, une police née pour ce cadran et
-que la boussole de Plumb a reprise depuis : la 5×7 ne laisse la place qu'à deux
+que la boussole de Float a reprise depuis : la 5×7 ne laisse la place qu'à deux
 valeurs, et les deux polices étroites dessinent des chiffres où `0` et `8` ne
 diffèrent que d'une cellule — pas assez pour un coup d'œil en conduisant. Elle
 n'a pas de virgule et ne peut pas en avoir ; le renderer la dessine d'un **seul
@@ -437,7 +437,7 @@ L'onde de ce repos a été **dessinée par le renderer du toy**, pas imitée : m
 médian plein, mêmes barres symétriques, même conversion d'un niveau en pixels — à
 qui on poussait des niveaux inventés, faute de pouvoir les emprunter à une scène
 qui, stationnaire, finit par devenir son propre fond et donc parfaitement plate.
-Elle est maintenant posée cellule par cellule, comme la rose de Plumb et le cadran
+Elle est maintenant posée cellule par cellule, comme la rose de Float et le cadran
 de G-Forces : une **vignette d'identité**, qui n'a jamais prétendu mesurer quoi que
 ce soit. Un repos qui ferait croire à une mesure serait pire qu'un repos vide. Le
 dessin a d'ailleurs été retouché à la main depuis, et ses deux grandes crêtes

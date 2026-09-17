@@ -10,7 +10,7 @@ import kotlin.math.sin
  * La vignette du hub est composée dans une liste qu'on fait défiler, et elle n'a
  * aucun endroit où arrêter ce qu'elle a démarré : un aperçu branché sur
  * l'accéléromètre laisserait un écouteur derrière lui à chaque passage. Même
- * arbitrage que Plumb et Sono — une surface qui ne peut pas fermer ne doit pas
+ * arbitrage que Float et Sono — une surface qui ne peut pas fermer ne doit pas
  * ouvrir.
  *
  * ## Un tour, pas un métronome

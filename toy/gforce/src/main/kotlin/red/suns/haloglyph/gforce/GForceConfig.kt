@@ -17,7 +17,7 @@ import red.suns.haloglyph.gforce.engine.GForceMode
  *
  * ## Pas de portée non plus
  *
- * Contrairement à Plumb, l'échelle est fixe : les deux graduations valent 0,5 g et
+ * Contrairement à Float, l'échelle est fixe : les deux graduations valent 0,5 g et
  * 1,0 g, qui sont les deux nombres qu'un conducteur reconnaît. Un réglage ne
  * changerait que l'endroit où tombent deux traits qui, eux, ont une valeur. Voir
  * `GForceScale`.

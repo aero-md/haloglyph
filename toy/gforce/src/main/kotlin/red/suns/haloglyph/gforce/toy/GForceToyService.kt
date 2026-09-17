@@ -36,7 +36,7 @@ import red.suns.haloglyph.gforce.render.GForceRenderer
  *
  * ## Cadence
  *
- * Quarante images par seconde, comme Plumb et pour la même raison : chaque image
+ * Quarante images par seconde, comme Float et pour la même raison : chaque image
  * est une **mesure**, pas l'interpolation d'une animation déjà écrite. C'est la
  * seule chose qui distingue une bille qui suit la voiture d'une bille qui la
  * rattrape.
@@ -89,7 +89,7 @@ class GForceToyService : MatrixToyService(TAG) {
     }
 
     override fun renderFrame(frame: Frame, elapsedSeconds: Double, animated: Boolean) {
-        // Relu à chaque image, comme Lapse, Dice et Plumb : la face se change
+        // Relu à chaque image, comme Lapse, Dice et Float : la face se change
         // depuis un hublot pendant que la matrice affiche autre chose.
         mode = GForceConfig.mode(prefs)
         // `animated` est ignoré : ce toy ne déclare pas d'Always-On, donc le

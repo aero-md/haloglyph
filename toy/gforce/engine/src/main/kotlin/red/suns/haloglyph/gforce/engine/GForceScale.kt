@@ -3,7 +3,7 @@ package red.suns.haloglyph.gforce.engine
 /**
  * L'échelle du cadran, et **pourquoi elle est linéaire**.
  *
- * Plumb dépense toute sa dynamique près de zéro, parce qu'un niveau sert à
+ * Float dépense toute sa dynamique près de zéro, parce qu'un niveau sert à
  * distinguer un dixième de degré d'un autre et que le reste sature. Ici c'est
  * l'inverse : **toute la plage est intéressante**. Un demi-g de freinage se
  * distingue d'un g comme 0,1 se distingue de 0,2, et il n'y a aucune zone où l'on
@@ -22,7 +22,7 @@ package red.suns.haloglyph.gforce.engine
  * route sur bitume sec. Au-delà on ne mesure plus, on raconte — d'où la bille qui
  * sort du champ plutôt qu'un cadran qui s'étire.
  *
- * Il n'y a donc **pas de réglage de portée**, contrairement à Plumb. Une portée
+ * Il n'y a donc **pas de réglage de portée**, contrairement à Float. Une portée
  * n'a de sens que si le choix change ce qu'on regarde ; ici il ne changerait que
  * l'endroit où tombent deux traits qui, eux, ont une valeur.
  */

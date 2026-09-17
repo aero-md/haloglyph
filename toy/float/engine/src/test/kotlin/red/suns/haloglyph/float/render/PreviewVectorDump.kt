@@ -1,25 +1,21 @@
-package red.suns.haloglyph.gforce.render
+package red.suns.haloglyph.float.render
 
 import org.junit.Test
 import red.suns.haloglyph.core.matrix.Frame
 import red.suns.haloglyph.core.matrix.MatrixLook
 import red.suns.haloglyph.core.matrix.MatrixSpec
-import red.suns.haloglyph.gforce.engine.GForceEngine
-import red.suns.haloglyph.gforce.engine.GForceMode
+import red.suns.haloglyph.float.engine.FloatEngine
+import red.suns.haloglyph.float.engine.FloatMode
+import red.suns.haloglyph.float.engine.FloatRange
 import java.io.File
 import java.util.Locale
 
 /**
- * Générateur de `gforce_toy_preview.xml` — l'icône du toy dans Glyph Interface.
+ * Générateur de `float_toy_preview.xml` — l'icône du toy dans Glyph Interface.
  *
- * Elle est **produite par le renderer**, comme celles de Lapse, Dice, Sono et
- * Float : une icône dessinée à la main finirait par ne plus ressembler au toy. Ce
+ * Elle est **produite par le renderer**, comme celles de Lapse, Dice et Sono :
+ * une icône dessinée à la main finirait par ne plus ressembler au toy. Ce
  * fichier n'est pas un test, c'est un outil qu'on relance quand le dessin change.
- *
- * La pose retenue est un freinage appuyé en sortie de virage à gauche : la bille
- * haute et à droite, entre les deux graduations. C'est la silhouette la plus
- * reconnaissable du toy — au centre elle ne dirait rien, au bord elle sortirait du
- * champ.
  */
 class PreviewVectorDump {
 
@@ -27,21 +23,27 @@ class PreviewVectorDump {
     fun dump() {
         val spec = MatrixSpec.Phone3
         val frame = Frame(spec)
-        GForceRenderer(spec, fromBack = true).render(
+        FloatRenderer(spec, fromBack = true).render(
             frame,
-            GForceEngine.Reading(
-                towardFront = 0.85f,
-                towardRight = -0.55f,
-                hasFix = true,
-                front = 0f,
-                rear = 0f,
-                left = 0f,
-                right = 0f,
+            FloatEngine.Reading(
+                tiltDegrees = 1.6f,
+                dirX = -0.42f,
+                dirY = 0.91f,
+                hasTilt = true,
+                vertical = false,
+                alongX = true,
+                level = false,
+                moving = false,
+                heading = 0f,
+                hasHeading = false,
+                headingTrusted = true,
             ),
-            GForceMode.VIF,
+            FloatMode.NIVEAU,
+            FloatRange.NORMALE,
+            0.0,
         )
 
-        val out = File("build/gforce_toy_preview.xml")
+        val out = File("build/float_toy_preview.xml")
         out.parentFile.mkdirs()
         out.writeText(vector(spec, frame))
         println("écrit : ${out.absolutePath}")
@@ -96,10 +98,9 @@ class PreviewVectorDump {
         val HEADER = """
             <?xml version="1.0" encoding="utf-8"?>
             <!-- Apercu du toy pour Glyph Interface et pour le selecteur de widgets : le
-                 cadran vif, bille haute et a droite entre les deux graduations, rendu par
-                 GForceRenderer a la geometrie du Phone (3). Genere par PreviewVectorDump,
-                 donc pas edite a la main — c'est la vraie sortie du renderer, pas un
-                 dessin qui lui ressemble.
+                 niveau, bulle legerement hors de la couronne, rendu par FloatRenderer a la
+                 geometrie du Phone (3). Genere par PreviewVectorDump, donc pas edite a la
+                 main — c'est la vraie sortie du renderer, pas un dessin qui lui ressemble.
 
                  Les niveaux passent par MatrixLook.alphaOf, comme les deux surfaces
                  emulees : la frame porte des rapports cycliques, et une icone qui montrerait

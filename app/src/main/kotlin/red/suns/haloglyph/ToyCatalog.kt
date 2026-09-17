@@ -23,11 +23,11 @@ import red.suns.haloglyph.lapse.render.LapseRenderer
 import red.suns.haloglyph.lapse.render.MatrixLabels
 import red.suns.haloglyph.lapse.settings.LapseSettingsActivity
 import red.suns.haloglyph.lapse.toy.LapseToyService
-import red.suns.haloglyph.plumb.PlumbConfig
-import red.suns.haloglyph.plumb.engine.PlumbDemo
-import red.suns.haloglyph.plumb.engine.PlumbMode
-import red.suns.haloglyph.plumb.render.PlumbRenderer
-import red.suns.haloglyph.plumb.toy.PlumbToyService
+import red.suns.haloglyph.float.FloatConfig
+import red.suns.haloglyph.float.engine.FloatDemo
+import red.suns.haloglyph.float.engine.FloatMode
+import red.suns.haloglyph.float.render.FloatRenderer
+import red.suns.haloglyph.float.toy.FloatToyService
 import red.suns.haloglyph.sono.MicPermission
 import red.suns.haloglyph.sono.SonoConfig
 import red.suns.haloglyph.sono.engine.SonoDemo
@@ -99,17 +99,17 @@ object ToyCatalog {
         // Le seul toy du pack qui ait deux instruments **et** un hublot : sur la
         // matrice, l'appui long passe du niveau à la boussole ; dans un hublot,
         // le choix descend dans les réglages du hublot, ce qui permet d'en poser
-        // un de chaque côté. Voir `PlumbWidgetToy`.
+        // un de chaque côté. Voir `FloatWidgetToy`.
         //
         // Pas d'écran de réglages : supprimé le 2026-09-16, avec la portée
-        // qu'il portait seul. Reste fixe à `PlumbRange.DEFAULT`.
+        // qu'il portait seul. Reste fixe à `FloatRange.DEFAULT`.
         ToyEntry(
-            id = PlumbConfig.TOY_ID,
-            nameRes = red.suns.haloglyph.plumb.R.string.toy_plumb_name,
-            summaryRes = red.suns.haloglyph.plumb.R.string.toy_plumb_summary,
-            glyphService = PlumbToyService::class.java,
+            id = FloatConfig.TOY_ID,
+            nameRes = red.suns.haloglyph.float.R.string.toy_float_name,
+            summaryRes = red.suns.haloglyph.float.R.string.toy_float_summary,
+            glyphService = FloatToyService::class.java,
             widgetProviders = HALO_WIDGETS,
-            preview = PlumbPreview(context),
+            preview = FloatPreview(context),
         ),
         // Le premier toy du pack dont la **matrice n'est pas la surface
         // principale** : dans un support de voiture, le téléphone regarde le
@@ -253,27 +253,27 @@ private class SonoPreview : ToyPreviewRenderer {
  *
  * Ce qui est simulé est la **pose du téléphone**, rien d'autre : l'échelle, la
  * couronne, la tolérance et le miroir sont ceux du toy — la portée est celle du
- * réglage, `PlumbRange.DEFAULT` depuis que rien ne la change plus.
+ * réglage, `FloatRange.DEFAULT` depuis que rien ne la change plus.
  *
  * **L'instrument alterne**, depuis le 2026-09-16 : niveau, puis boussole, calé
- * sur le cycle de [PlumbDemo] pour changer entre deux poses plutôt qu'en pleine
+ * sur le cycle de [FloatDemo] pour changer entre deux poses plutôt qu'en pleine
  * inclinaison.
  *
  * Le miroir est celui d'un hublot et non celui de la matrice : une vignette se
- * regarde sur un écran, donc de face. Voir `PlumbRenderer`.
+ * regarde sur un écran, donc de face. Voir `FloatRenderer`.
  */
-private class PlumbPreview(context: Context) : ToyPreviewRenderer {
+private class FloatPreview(context: Context) : ToyPreviewRenderer {
 
-    private val prefs = PlumbConfig.prefs(context.applicationContext)
-    private val renderer = PlumbRenderer(fromBack = false)
+    private val prefs = FloatConfig.prefs(context.applicationContext)
+    private val renderer = FloatRenderer(fromBack = false)
 
     override fun render(frame: Frame, elapsedSeconds: Double) {
-        val range = PlumbConfig.range(prefs)
-        val cycle = (elapsedSeconds / PlumbDemo.PERIOD).toLong()
-        val mode = if (cycle % 2 == 0L) PlumbMode.NIVEAU else PlumbMode.BOUSSOLE
+        val range = FloatConfig.range(prefs)
+        val cycle = (elapsedSeconds / FloatDemo.PERIOD).toLong()
+        val mode = if (cycle % 2 == 0L) FloatMode.NIVEAU else FloatMode.BOUSSOLE
         renderer.render(
             frame,
-            PlumbDemo.at(elapsedSeconds, range),
+            FloatDemo.at(elapsedSeconds, range),
             mode,
             range,
             elapsedSeconds,

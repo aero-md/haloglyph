@@ -78,7 +78,7 @@ class GForceRenderer(
         val top = (spec.size - Fonts.F4.height - TAP_GAP - BADGE.size + 1) / 2
         frame.drawLine(Fonts.F4, TAP, top, 1f)
         // La marque descend de deux lignes sous le bloc centré — le mot, lui, ne
-        // bouge pas. Même règle que chez Plumb : au milieu pile, une image se lit
+        // bouge pas. Même règle que chez Float : au milieu pile, une image se lit
         // comme la mesure qu'elle n'est pas.
         frame.badge(top + Fonts.F4.height + TAP_GAP + BADGE_DROP)
     }
@@ -187,7 +187,7 @@ class GForceRenderer(
 
     private companion object {
         /**
-         * La bille, dessinée une fois pour toutes — le motif de la bulle de Plumb.
+         * La bille, dessinée une fois pour toutes — le motif de la bulle de Float.
          *
          * Même raison là-bas qu'ici : un disque calculé au rayon change de
          * silhouette en se déplaçant, et sur vingt-cinq LEDs cette respiration se

@@ -16,7 +16,7 @@
          secondes, et un toy qui réclame l'attention au volant est un défaut. -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- `required="false"`, comme pour Plumb : le pack embarque cinq toys et
+    <!-- `required="false"`, comme pour Float : le pack embarque cinq toys et
          trois n'ont besoin d'aucun capteur de pose. Les exiger retirerait Lapse,
          Dice et Sono du Play Store sur les appareils concernés, pour un toy
          qu'ils n'auraient pas utilisé.
@@ -63,7 +63,7 @@
             <!-- Pas d'`aod_support`, délibérément. L'Always-On ne redemande une
                  image qu'à la minute : un accéléromètre qui affiche le virage
                  d'il y a cinquante secondes n'est pas lent, il est faux. Même
-                 raisonnement que Plumb. -->
+                 raisonnement que Float. -->
         </service>
 
         <!-- Surface 2 : le hublot d'écran d'accueil, et c'est **celle-là** qu'on

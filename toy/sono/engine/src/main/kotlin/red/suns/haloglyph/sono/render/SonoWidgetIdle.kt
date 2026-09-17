@@ -30,7 +30,7 @@ import red.suns.haloglyph.core.matrix.drawLine
  *
  * Ce qui reste est la grammaire commune à tous les hublots du pack : le **mot**
  * en haut, la **marque** en dessous, même police 3×4, même ligne. Voir
- * `PlumbRenderer.renderIdle` et `GForceRenderer.renderIdle` — ce qui distingue
+ * `FloatRenderer.renderIdle` et `GForceRenderer.renderIdle` — ce qui distingue
  * les hublots est leur marque, pas leur façon d'écrire « tape-moi ».
  *
  * ## L'onde est un **dessin**, et c'est un renoncement assumé
@@ -43,7 +43,7 @@ import red.suns.haloglyph.core.matrix.drawLine
  *
  * Elle est maintenant posée cellule par cellule, dans [WAVE]. Ce n'est plus une
  * onde rendue, c'est une **vignette d'identité** — au même titre que la rose de
- * Plumb ou le cadran de G-Forces, qui n'ont jamais prétendu mesurer quoi que ce
+ * Float ou le cadran de G-Forces, qui n'ont jamais prétendu mesurer quoi que ce
  * soit. Un repos qui ferait croire à une mesure serait pire qu'un repos vide.
  */
 object SonoWidgetIdle {

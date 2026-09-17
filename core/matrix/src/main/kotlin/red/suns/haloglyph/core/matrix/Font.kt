@@ -72,7 +72,7 @@ object Fonts {
             // « MI » sans que rien ne le signale.
             'P' to arrayOf("111", "101", "111", "100", "100"),
             'C' to arrayOf("111", "100", "100", "100", "111"),
-            // Les points cardinaux de Plumb. `N` et `S` étaient déjà là pour
+            // Les points cardinaux de Float. `N` et `S` étaient déjà là pour
             // d'autres raisons ; ces deux-là manquaient, et un caractère absent a
             // une largeur nulle — « NE » se serait affiché « N » sans que rien ne
             // le signale. `W` est large de cinq comme `M`, dont il est le miroir :
@@ -118,7 +118,7 @@ object Fonts {
             'P' to arrayOf("110", "101", "110", "100"),
             'I' to arrayOf("111", "010", "010", "111"),
             'C' to arrayOf("111", "100", "100", "111"),
-            // Les points cardinaux de Plumb, une seconde fois : la boussole les
+            // Les points cardinaux de Float, une seconde fois : la boussole les
             // écrit **sous** le cap chiffré, donc dans la police courte, pour que
             // les degrés puissent occuper le centre du disque.
             'N' to arrayOf("1001", "1101", "1011", "1001"),
@@ -130,7 +130,7 @@ object Fonts {
     )
 
     /**
-     * 4×5 arrondie — les chiffres de G-Forces et de la boussole de Plumb, et les
+     * 4×5 arrondie — les chiffres de G-Forces et de la boussole de Float, et les
      * points cardinaux en bas de casse.
      *
      * ## Pourquoi une quatrième police
