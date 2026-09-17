@@ -25,18 +25,7 @@ Chacun se change à l'appui long sur le Glyph Button (au tap, dans un hublot).
 Les préviews web de chaque toy vivent dans
 [GlyphPortal](https://github.com/aero-md/GlyphPortal) → [glyph.suns.red](https://glyph.suns.red).
 
-Le détail produit (pourquoi chaque toy est fait ainsi) et technique (rendu,
-performance, permissions) vit dans [`specs/PRODUIT.md`](specs/PRODUIT.md) et
-[`specs/TECHNIQUE.md`](specs/TECHNIQUE.md), pas ici.
-
-## L'app
-
-Un dock flottant en bas de l'écran, trois onglets : **Toys** (le pack, une
-carte par toy, chacune ouvrant ses réglages), **Cast** (réservé, sans écran
-derrière pour l'instant) et **Réglages** (la langue, et sur un Phone (3) les
-deux écrans Glyph du système).
-
-## Construire
+## Build
 
 ```
 git clone git@github.com:aero-md/haloglyph.git
@@ -55,4 +44,4 @@ JDK 17, SDK Android 36, aucune clé API Nothing requise (targetSdk 36).
 
 ## Licence
 
-MIT — voir [LICENSE](LICENSE).
+GPL-3.0 — voir [LICENSE](LICENSE).
