@@ -15,7 +15,7 @@ import kotlin.math.roundToInt
  * défendable il faudrait un banc IIR décimé.
  *
  * FFT de 4096 points : c'est la taille retenue par la théorie du projet
- * d'origine pour le **spectrogramme d'affichage**, là où la lisibilité prime sur
+ * d'origine pour l'**analyse d'affichage**, là où la lisibilité prime sur
  * l'exactitude et où personne ne lit le niveau exact de la bande à 20 Hz.
  *
  * L'entrée est le signal **déjà pondéré A**. Le spectre brut d'une scène réelle
@@ -103,8 +103,15 @@ class BandAnalyzer(
          */
         const val POWER_SCALE = 2.0 / 0.375
 
-        /** Carré moyen d'une bande → dB SPL, avec la même convention que le niveau. */
+        /**
+         * Carré moyen d'une bande → dB SPL, avec la même convention que le niveau.
+         *
+         * Le repli porte la calibration comme le reste — il la sautait, si bien
+         * qu'une bande vide sortait à −200 quand le niveau large bande sortait à
+         * −80 pour la même absence de signal. Deux sentinelles pour une seule
+         * situation, et celle de [NoiseFloor] devait connaître les deux.
+         */
         fun bandDb(msq: Double, calibrationK: Double): Double =
-            if (msq <= 1e-20) FLOOR_DBFS else 10 * log10(msq) + calibrationK
+            if (msq <= 1e-20) FLOOR_DBFS + calibrationK else 10 * log10(msq) + calibrationK
     }
 }

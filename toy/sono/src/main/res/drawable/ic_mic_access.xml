@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    L'icône de la tuile : un micro en pixels, et rien d'autre.
+
+    Elle portait la couronne de Haloglyph avec un micro au centre. À 24 dp dans
+    le volet, entre le Bluetooth et la lampe, les seize rayons ne se lisaient
+    plus comme une couronne mais comme du bruit autour d'une forme — et une
+    tuile de réglages rapides n'a pas à signer, elle a à se faire reconnaître
+    d'un coup d'œil. Le micro reste, la couronne part.
+
+    ## La grille
+
+    Douze cases de deux unités dans un carré de 24. Chaque pixel est un carré de
+    1,5 centré dans sa case : il reste une gouttière de 0,5 unité entre deux
+    voisins, soit 0,5 dp — assez pour que la grille se voie à la densité du
+    Phone (3), assez peu pour que la silhouette tienne.
+
+    Le dessin occupe les colonnes 2 à 9 et les lignes 1 à 10 : centré
+    horizontalement, une case de marge en haut et en bas. La capsule fait 4 × 5,
+    les deux bras du berceau sont écartés d'une colonne vide de chaque côté —
+    c'est ce vide qui fait lire un berceau plutôt qu'un bloc.
+
+    Monochrome, et pas par sobriété : une tuile teinte son icône elle-même selon
+    l'état allumé ou éteint, et aucune couleur n'y survivrait.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?android:attr/colorControlNormal">
+
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M8.25,2.25 H9.75 V3.75 H8.25 Z M10.25,2.25 H11.75 V3.75 H10.25 Z M12.25,2.25 H13.75 V3.75 H12.25 Z M14.25,2.25 H15.75 V3.75 H14.25 Z M8.25,4.25 H9.75 V5.75 H8.25 Z M10.25,4.25 H11.75 V5.75 H10.25 Z M12.25,4.25 H13.75 V5.75 H12.25 Z M14.25,4.25 H15.75 V5.75 H14.25 Z M8.25,6.25 H9.75 V7.75 H8.25 Z M10.25,6.25 H11.75 V7.75 H10.25 Z M12.25,6.25 H13.75 V7.75 H12.25 Z M14.25,6.25 H15.75 V7.75 H14.25 Z M4.25,8.25 H5.75 V9.75 H4.25 Z M8.25,8.25 H9.75 V9.75 H8.25 Z M10.25,8.25 H11.75 V9.75 H10.25 Z M12.25,8.25 H13.75 V9.75 H12.25 Z M14.25,8.25 H15.75 V9.75 H14.25 Z M18.25,8.25 H19.75 V9.75 H18.25 Z M4.25,10.25 H5.75 V11.75 H4.25 Z M8.25,10.25 H9.75 V11.75 H8.25 Z M10.25,10.25 H11.75 V11.75 H10.25 Z M12.25,10.25 H13.75 V11.75 H12.25 Z M14.25,10.25 H15.75 V11.75 H14.25 Z M18.25,10.25 H19.75 V11.75 H18.25 Z M4.25,12.25 H5.75 V13.75 H4.25 Z M18.25,12.25 H19.75 V13.75 H18.25 Z M6.25,14.25 H7.75 V15.75 H6.25 Z M8.25,14.25 H9.75 V15.75 H8.25 Z M10.25,14.25 H11.75 V15.75 H10.25 Z M12.25,14.25 H13.75 V15.75 H12.25 Z M14.25,14.25 H15.75 V15.75 H14.25 Z M16.25,14.25 H17.75 V15.75 H16.25 Z M10.25,16.25 H11.75 V17.75 H10.25 Z M12.25,16.25 H13.75 V17.75 H12.25 Z M10.25,18.25 H11.75 V19.75 H10.25 Z M12.25,18.25 H13.75 V19.75 H12.25 Z M6.25,20.25 H7.75 V21.75 H6.25 Z M8.25,20.25 H9.75 V21.75 H8.25 Z M10.25,20.25 H11.75 V21.75 H10.25 Z M12.25,20.25 H13.75 V21.75 H12.25 Z M14.25,20.25 H15.75 V21.75 H14.25 Z M16.25,20.25 H17.75 V21.75 H16.25 Z" />
+</vector>

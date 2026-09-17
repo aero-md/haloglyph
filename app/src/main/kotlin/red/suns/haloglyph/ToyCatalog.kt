@@ -12,17 +12,27 @@ import red.suns.haloglyph.dice.engine.T_END
 import red.suns.haloglyph.dice.engine.drawValue
 import red.suns.haloglyph.dice.render.DiceRenderer
 import red.suns.haloglyph.dice.toy.DiceToyService
-import red.suns.haloglyph.dice.widget.DiceWidget
+import red.suns.haloglyph.gforce.GForceConfig
+import red.suns.haloglyph.gforce.engine.GForceDemo
+import red.suns.haloglyph.gforce.engine.GForceMode
+import red.suns.haloglyph.gforce.render.GForceRenderer
+import red.suns.haloglyph.gforce.toy.GForceToyService
 import red.suns.haloglyph.lapse.LapseConfig
 import red.suns.haloglyph.lapse.engine.LapseEngine
 import red.suns.haloglyph.lapse.render.LapseRenderer
 import red.suns.haloglyph.lapse.render.MatrixLabels
 import red.suns.haloglyph.lapse.settings.LapseSettingsActivity
 import red.suns.haloglyph.lapse.toy.LapseToyService
-import red.suns.haloglyph.lapse.widget.LapseWidget
+import red.suns.haloglyph.plumb.PlumbConfig
+import red.suns.haloglyph.plumb.engine.PlumbDemo
+import red.suns.haloglyph.plumb.engine.PlumbMode
+import red.suns.haloglyph.plumb.render.PlumbRenderer
+import red.suns.haloglyph.plumb.toy.PlumbToyService
 import red.suns.haloglyph.sono.MicPermission
 import red.suns.haloglyph.sono.SonoConfig
 import red.suns.haloglyph.sono.engine.SonoDemo
+import red.suns.haloglyph.sono.engine.SonoMode
+import red.suns.haloglyph.sono.mic.SonoMicTile
 import red.suns.haloglyph.sono.render.SonoRenderer
 import red.suns.haloglyph.sono.settings.SonoSettingsActivity
 import red.suns.haloglyph.sono.toy.SonoToyService
@@ -52,7 +62,7 @@ object ToyCatalog {
             nameRes = red.suns.haloglyph.lapse.R.string.toy_lapse_name,
             summaryRes = red.suns.haloglyph.lapse.R.string.toy_lapse_summary,
             glyphService = LapseToyService::class.java,
-            widgetProvider = LapseWidget::class.java,
+            widgetProviders = HALO_WIDGETS,
             preview = LapsePreview(context),
             settingsActivity = LapseSettingsActivity::class.java,
         ),
@@ -61,11 +71,12 @@ object ToyCatalog {
             nameRes = red.suns.haloglyph.dice.R.string.toy_dice_name,
             summaryRes = red.suns.haloglyph.dice.R.string.toy_dice_summary,
             glyphService = DiceToyService::class.java,
-            widgetProvider = DiceWidget::class.java,
+            widgetProviders = HALO_WIDGETS,
             preview = DicePreview(context),
-            // Pas de `settingsActivity` : ce toy n'a rien à régler. La ligne du
-            // hub n'est donc pas cliquable, et n'affiche pas de chevron — ce qui
-            // est exact, il n'y a nulle part où aller.
+            // Pas d'écran de réglages : supprimé le 2026-09-16. Le solide se
+            // change à l'appui long sur la matrice, et par hublot dans les
+            // réglages du hublot lui-même (`WidgetConfig`) — voir
+            // `DiceWidgetToy`. L'écran ne portait rien d'autre.
         ),
         // Sonoglyph exposait « Spectre » et « Aiguille » comme deux toys ; ils
         // n'en font plus qu'un, à trois modes, cyclés à l'appui long. Une seule
@@ -76,13 +87,61 @@ object ToyCatalog {
             nameRes = red.suns.haloglyph.sono.R.string.toy_sono_name,
             summaryRes = red.suns.haloglyph.sono.R.string.toy_sono_summary,
             glyphService = SonoToyService::class.java,
-            // Pas de `widgetProvider` : un widget qui écoute le micro en
-            // permanence est indéfendable, et un widget qui ne l'écoute pas
-            // n'aurait rien à afficher.
-            preview = SonoPreview(context),
+            // Sono a fini par avoir un widget, après l'avoir refusé longtemps :
+            // le hublot n'ouvre le micro que pendant les cinq secondes qui
+            // suivent un tap, pastille Android allumée, et montre `---` le reste
+            // du temps. Voir `SonoWidgetToy`.
+            widgetProviders = HALO_WIDGETS,
+            preview = SonoPreview(),
             settingsActivity = SonoSettingsActivity::class.java,
             requiredPermission = MicPermission.NAME,
         ),
+        // Le seul toy du pack qui ait deux instruments **et** un hublot : sur la
+        // matrice, l'appui long passe du niveau à la boussole ; dans un hublot,
+        // le choix descend dans les réglages du hublot, ce qui permet d'en poser
+        // un de chaque côté. Voir `PlumbWidgetToy`.
+        //
+        // Pas d'écran de réglages : supprimé le 2026-09-16, avec la portée
+        // qu'il portait seul. Reste fixe à `PlumbRange.DEFAULT`.
+        ToyEntry(
+            id = PlumbConfig.TOY_ID,
+            nameRes = red.suns.haloglyph.plumb.R.string.toy_plumb_name,
+            summaryRes = red.suns.haloglyph.plumb.R.string.toy_plumb_summary,
+            glyphService = PlumbToyService::class.java,
+            widgetProviders = HALO_WIDGETS,
+            preview = PlumbPreview(context),
+        ),
+        // Le premier toy du pack dont la **matrice n'est pas la surface
+        // principale** : dans un support de voiture, le téléphone regarde le
+        // conducteur, donc la matrice regarde la route. C'est le hublot qu'on lit
+        // en roulant, et de préférence en boucle continue — une rafale de trente
+        // secondes ne couvre pas un trajet.
+        ToyEntry(
+            id = GForceConfig.TOY_ID,
+            nameRes = red.suns.haloglyph.gforce.R.string.toy_gforce_name,
+            summaryRes = red.suns.haloglyph.gforce.R.string.toy_gforce_summary,
+            glyphService = GForceToyService::class.java,
+            widgetProviders = HALO_WIDGETS,
+            preview = GForcePreview(),
+            // Pas d'écran de réglages : supprimé le 2026-09-16. La face se
+            // change au geste, et le rappel de support n'était qu'un texte.
+        ),
+    )
+
+    /**
+     * Les tuiles de réglages rapides du pack.
+     *
+     * Elles ne vivent que devant une Glyph Matrix — armer le micro avant de
+     * retourner le téléphone. Sur un téléphone qui n'en a pas, elles
+     * proposeraient d'allumer ce qui n'existe pas, et le hub les retire dès que
+     * la sonde a répondu. Voir `GlyphTiles`.
+     *
+     * Elles ne sont pas dans [ToyEntry] : une tuile n'est pas une surface de toy
+     * au même titre que les autres — elle porte le nom de l'application, elle
+     * vit dans le volet, et un seul toy en a une.
+     */
+    val TILES: List<Class<*>> = listOf(
+        SonoMicTile::class.java,
     )
 }
 
@@ -156,23 +215,95 @@ private const val DICE_PERIOD = T_END + 1.4
 /**
  * L'aperçu de Sono dans le hub : le vrai renderer, sur une scène **inventée**.
  *
- * C'est la seule vignette du pack qui n'exécute pas le toy de bout en bout, et
- * c'est délibéré : **ouvrir le hub ne doit pas allumer le micro**. Un aperçu
- * branché sur la capture ferait apparaître la pastille micro d'Android à chaque
- * passage dans la liste, pour une vignette de 72 dp. Le mode montré est celui
- * qui est réellement réglé — ça, ce n'est pas simulé.
+ * L'une des deux vignettes du pack qui n'exécutent pas le toy de bout en bout,
+ * et c'est délibéré : **ouvrir le hub ne doit pas allumer le micro**.
  *
- * L'histoire du spectrogramme n'est pas alimentée ici : la vignette n'est
- * composée que par intermittence, et une histoire trouée serait pire que pas
- * d'histoire. Le renderer la remplit tout seul à partir de la scène simulée.
+ * L'histoire de l'onde se remplit toute seule, à partir de la scène simulée : le
+ * renderer la nourrit à chaque image, quel que soit le mode affiché.
+ *
+ * **Le mode alterne**, depuis le 2026-09-16, plutôt que de montrer celui
+ * réellement réglé : la vignette est l'endroit où l'on voit ce qu'un toy sait
+ * faire, pas un miroir d'un réglage qu'on ne choisit plus jamais deux fois. Un
+ * palier par mode, dans l'ordre de la rotation — spectre, aiguille, onde.
  */
-private class SonoPreview(context: Context) : ToyPreviewRenderer {
+private class SonoPreview : ToyPreviewRenderer {
 
-    private val prefs = SonoConfig.prefs(context.applicationContext)
     private val demo = SonoDemo()
     private val renderer = SonoRenderer()
 
     override fun render(frame: Frame, elapsedSeconds: Double) {
-        renderer.render(frame, demo.snapshotAt(elapsedSeconds), SonoConfig.mode(prefs))
+        val modes = SonoMode.entries
+        val mode = modes[((elapsedSeconds / MODE_PERIOD).toLong() % modes.size).toInt()]
+        renderer.render(frame, demo.snapshotAt(elapsedSeconds), mode)
+    }
+
+    private companion object {
+        /** Le temps de lire un mode avant de passer au suivant. */
+        const val MODE_PERIOD = 6.0
+    }
+}
+
+/**
+ * L'aperçu de Float dans le hub : le vrai renderer, sur une pose **inventée**.
+ *
+ * L'autre vignette simulée, et pour une raison de même nature que celle de Sono :
+ * elle vit dans une liste qu'on fait défiler, sans aucun endroit où rendre ce
+ * qu'elle aurait pris. Un aperçu branché sur l'accéléromètre laisserait un
+ * écouteur derrière lui à chaque passage.
+ *
+ * Ce qui est simulé est la **pose du téléphone**, rien d'autre : l'échelle, la
+ * couronne, la tolérance et le miroir sont ceux du toy — la portée est celle du
+ * réglage, `PlumbRange.DEFAULT` depuis que rien ne la change plus.
+ *
+ * **L'instrument alterne**, depuis le 2026-09-16 : niveau, puis boussole, calé
+ * sur le cycle de [PlumbDemo] pour changer entre deux poses plutôt qu'en pleine
+ * inclinaison.
+ *
+ * Le miroir est celui d'un hublot et non celui de la matrice : une vignette se
+ * regarde sur un écran, donc de face. Voir `PlumbRenderer`.
+ */
+private class PlumbPreview(context: Context) : ToyPreviewRenderer {
+
+    private val prefs = PlumbConfig.prefs(context.applicationContext)
+    private val renderer = PlumbRenderer(fromBack = false)
+
+    override fun render(frame: Frame, elapsedSeconds: Double) {
+        val range = PlumbConfig.range(prefs)
+        val cycle = (elapsedSeconds / PlumbDemo.PERIOD).toLong()
+        val mode = if (cycle % 2 == 0L) PlumbMode.NIVEAU else PlumbMode.BOUSSOLE
+        renderer.render(
+            frame,
+            PlumbDemo.at(elapsedSeconds, range),
+            mode,
+            range,
+            elapsedSeconds,
+        )
+    }
+}
+
+/**
+ * L'aperçu de G-Forces dans le hub : le vrai renderer, sur un trajet **inventé**.
+ *
+ * La troisième vignette simulée, et celle dont la raison est la plus simple : la
+ * mesure n'existe qu'en voiture. Une vignette branchée sur l'accéléromètre
+ * montrerait un cadran plat pendant qu'on fait défiler une liste, ce qui est à la
+ * fois vrai et parfaitement inutile — on ne saurait pas à quoi ressemble le toy.
+ *
+ * Elle rejoue donc un tour abrégé, quinze secondes, voir `GForceDemo`. Ce qui est
+ * simulé est la **conduite**, rien d'autre : l'échelle, les graduations et le
+ * miroir sont ceux du toy.
+ *
+ * **La face alterne**, depuis le 2026-09-16 : la bille, puis les pics, un tour
+ * de [GForceDemo] chacune — la vignette montre le cadran en roulant, puis ce
+ * qu'on y lirait à l'arrêt.
+ */
+private class GForcePreview : ToyPreviewRenderer {
+
+    private val renderer = GForceRenderer(fromBack = false)
+
+    override fun render(frame: Frame, elapsedSeconds: Double) {
+        val cycle = (elapsedSeconds / GForceDemo.PERIOD).toLong()
+        val mode = if (cycle % 2 == 0L) GForceMode.VIF else GForceMode.PICS
+        renderer.render(frame, GForceDemo.at(elapsedSeconds), mode)
     }
 }

@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="toy_sono_summary">El micrófono en la matriz: espectro, aguja VU, espectrograma. Pulsación larga para cambiar de modo.</string>
+    <string name="toy_sono_summary">El micrófono en la matriz: espectro, aguja VU, forma de onda. Pulsación larga para cambiar de modo.</string>
 
     <string name="sono_mic_channel">Micrófono en uso</string>
     <string name="sono_mic_notice">Sono está escuchando en la Glyph Matrix</string>
+
+    <string name="sono_mic_armed_title">Sono está escuchando</string>
+    <string name="sono_mic_armed_text">La matriz sigue mostrando el sonido con la pantalla apagada.</string>
+    <string name="sono_mic_disarm">Detener</string>
+
+    <string name="sono_tile_label">Acceso al micro de Haloglyph</string>
+    <string name="sono_tile_listening">Escuchando</string>
+    <string name="sono_tile_off">Apagado</string>
 
     <string name="sono_section_display">Visualización</string>
     <string name="sono_mode">Modo</string>
     <string name="sono_mode_hint">Pulsación larga en el Glyph Button para cambiar</string>
     <string name="sono_mode_spectrum">Espectro</string>
     <string name="sono_mode_needle">Aguja VU</string>
-    <string name="sono_mode_spectrogram">Espectrograma</string>
+    <string name="sono_mode_wave">Forma de onda</string>
 
     <string name="sono_preview_simulated">Vista previa simulada — el micro sigue apagado</string>
 
@@ -22,5 +30,11 @@
     <string name="sono_permission_action">Permitir</string>
     <string name="sono_permission_note">El audio se analiza al vuelo, nunca se graba ni se envía.</string>
     <string name="sono_permission_missing">Sin él, Sono no tiene nada que mostrar.</string>
+
+    <string name="sono_mic_arm_action">Activar</string>
+
+    <string name="sono_mic_shortcut_text">Activa el micro antes de dejar el teléfono.</string>
+    <string name="sono_notice_add">Acceso directo en el panel</string>
+    <string name="sono_notice_add_note">Un botón Activar entre las notificaciones. A diferencia del mosaico, no cierra el panel.</string>
 
 </resources>

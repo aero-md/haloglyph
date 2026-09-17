@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_tab_look">Aspetto</string>
+
+    <string name="widget_rotation_note">Doppio tocco → toy successivo</string>
+
+    <string name="widget_render">Resa dei LED</string>
+    <string name="widget_style">Stile</string>
+    <string name="widget_style_realistic">Realistico</string>
+    <string name="widget_style_minimal">Minimalista</string>
+
+    <string name="widget_burst_channel">Animazione del widget</string>
+    <string name="widget_motion">Animazione</string>
+    <string name="widget_motion_tap">Al tocco</string>
+    <string name="widget_motion_loop">In continuo</string>
+    <string name="widget_limit">Limitato a %1$d widget Haloglyph</string>
+</resources>

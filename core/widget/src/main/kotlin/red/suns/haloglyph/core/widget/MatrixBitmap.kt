@@ -3,39 +3,60 @@ package red.suns.haloglyph.core.widget
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
-import red.suns.haloglyph.core.matrix.MatrixLook
+import android.graphics.PorterDuff
+import red.suns.haloglyph.core.look.MatrixPainter
 import red.suns.haloglyph.core.matrix.MatrixSpec
-import kotlin.math.min
 
 /**
  * Rendu d'une frame en bitmap : la matrice, dessinée pour un widget.
  *
- * Même géométrie et mêmes couleurs que l'aperçu Compose des réglages — les deux
- * lisent [MatrixLook]. C'est ce qui rend vérifiable la promesse du produit :
- * mêmes moteurs, mêmes renderers, même dessin. Des LEDs **carrées** au tiers de
- * gouttière, sur un champ circulaire ; le masque laisse les coins vides, et la
- * silhouette de la matrice apparaît d'elle-même.
+ * Le dessin est celui de [MatrixPainter], donc **exactement** celui de l'aperçu
+ * de l'app — même hublot, mêmes LEDs carrées, même halo, même biseau de verre.
+ * C'est ce qui rend vérifiable la promesse du produit : mêmes moteurs, mêmes
+ * renderers, même dessin. Ce fichier ne décide plus que du support.
+ *
+ * ### Un widget rond, et donc transparent
+ *
+ * Le widget n'a **aucun fond** : il *est* le hublot. Hors du disque la bitmap
+ * est transparente, et le fond d'écran passe au travers — d'où `ARGB_8888`, qui
+ * n'était pas nécessaire tant que les coins étaient peints en noir.
  *
  * ### Le budget, qui n'est pas négociable
  *
- * Un widget communique par `RemoteViews`, transmises par binder. Au-delà d'environ
- * **500 Ko** par mise à jour, `TransactionTooLargeException` — et ce n'est pas le
- * widget qui tombe, c'est le **launcher**. D'où :
+ * Un widget communique par `RemoteViews`, transmises par binder. Au-delà
+ * d'environ **500 Ko** par mise à jour, `TransactionTooLargeException` — et ce
+ * n'est pas le widget qui tombe, c'est le **launcher**. Le passage en ARGB_8888
+ * double le poids du pixel : [MAX_SIDE_PX] est descendu de 480 à 288 quand le
+ * widget est devenu rond, ce qui ne coûtait rien puisqu'il fait deux cellules et
+ * n'a jamais eu de quoi afficher 480 pixels.
  *
- * - `RGB_565` (2 octets/pixel) et non `ARGB_8888` (4) : la matrice est
- *   monochrome, la moitié du budget suffit. Corollaire : pas de canal alpha, donc
- *   les opacités de [MatrixLook] sont mélangées à la main sur le champ ;
- * - la taille réelle du widget, jamais une taille fixe généreuse ;
- * - [MAX_SIDE_PX] comme garde-fou dur, quoi que demande l'appelant.
+ * C'est aussi, et surtout, ce qui décide de la fluidité : chaque image d'une
+ * animation traverse le binder **en entier**. D'où le second palier, de 288 à
+ * 256 — voir [MAX_SIDE_PX].
  */
 object MatrixBitmap {
 
     /**
-     * Côté maximum autorisé. 480×480 en RGB_565 ≈ 460 Ko : sous le budget, avec
-     * la marge de ce qui entoure la bitmap dans la transaction.
+     * Côté maximum autorisé. 256 donne un hublot de 255 px, soit ≈ 260 Ko en
+     * ARGB_8888 : sous le budget, avec la marge de ce qui entoure la bitmap dans
+     * la transaction.
+     *
+     * ### Pourquoi 256 et pas 288
+     *
+     * La rafale rendait plus petit que le repos, pour alléger ses transactions.
+     * C'était une fausse économie : la cellule est **entière**, donc changer de
+     * définition change le pas de la trame, la part du halo, la largeur du cerne
+     * — bref les proportions du hublot, qui se voyaient sauter à chaque tap.
+     * Aucun réglage de la définition de rafale ne règle ça ; seule une définition
+     * unique le règle, parce que la géométrie devient alors la même par
+     * construction.
+     *
+     * Il fallait donc que **la définition de repos soit tenable en rafale**.
+     * 288 pesait 318 Ko par image, seize fois par seconde ; 256 en pèse 260, et
+     * la différence ne se voit pas sur une bitmap que l'`ImageView` agrandit de
+     * toute façon.
      */
-    const val MAX_SIDE_PX = 480
+    const val MAX_SIDE_PX = 256
 
     /** Côté minimum : en dessous, une LED ferait moins d'un pixel. */
     const val MIN_SIDE_PX = 50
@@ -43,75 +64,48 @@ object MatrixBitmap {
     /** Taille effective retenue pour une taille demandée. */
     fun clampSide(requestedPx: Int): Int = requestedPx.coerceIn(MIN_SIDE_PX, MAX_SIDE_PX)
 
-    /** Poids en octets d'une bitmap RGB_565 de ce côté — pour vérifier le budget. */
-    fun byteSize(sidePx: Int): Int = sidePx * sidePx * 2
+    /** Poids en octets d'une bitmap ARGB_8888 de ce côté — pour vérifier le budget. */
+    fun byteSize(sidePx: Int): Int = sidePx * sidePx * 4
 
     /**
      * @param brightness `spec.cellCount` valeurs 0..255.
-     * @param reuse bitmap à réutiliser si sa taille correspond — un widget se
-     * redessine souvent, et une allocation de 460 Ko par frame en rafale se
-     * remarque.
+     * @param painter le peintre du fournisseur — il garde en cache le hublot au
+     * repos et les halos, qui ne dépendent que de la taille. En créer un par
+     * image reviendrait à refaire ce cache trente fois par seconde.
+     * @param reuse bitmap à réutiliser si sa taille correspond. Un widget se
+     * redessine souvent, et un quart de mégaoctet jeté par image en rafale se
+     * remarque — c'est même ce qui se remarquait le plus.
      */
     fun render(
         brightness: IntArray,
         spec: MatrixSpec,
         requestedSidePx: Int,
-        litArgb: Int = MatrixLook.LIT_ARGB,
-        fieldArgb: Int = MatrixLook.FIELD_ARGB,
+        painter: MatrixPainter,
         reuse: Bitmap? = null,
     ): Bitmap {
         require(brightness.size == spec.cellCount) {
             "frame de ${brightness.size} valeurs, ${spec.cellCount} attendues"
         }
         val side = clampSide(requestedSidePx)
+        // La bitmap fait exactement le diamètre du hublot, et non la taille
+        // demandée : elle *est* le hublot, sans marge transparente autour. Comme
+        // l'`ImageView` la remet à l'échelle, une marge variable d'une définition
+        // à l'autre faisait changer le widget de taille — voir
+        // `MatrixPainter.paintDisc`.
+        val disc = painter.discSize(side)
         val bitmap = if (reuse != null && !reuse.isRecycled &&
-            reuse.width == side && reuse.height == side && reuse.isMutable
+            reuse.width == disc && reuse.height == disc && reuse.isMutable
         ) {
             reuse
         } else {
-            Bitmap.createBitmap(side, side, Bitmap.Config.RGB_565)
+            Bitmap.createBitmap(disc, disc, Bitmap.Config.ARGB_8888)
         }
 
         val canvas = Canvas(bitmap)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-        // Hors du disque, du noir franc : le launcher pose la bitmap sur le
-        // fond d'écran, et un carré gris trahirait la silhouette.
-        canvas.drawColor(Color.BLACK)
-        paint.color = fieldArgb
-        canvas.drawCircle(side / 2f, side / 2f, side / 2f, paint)
-
-        val pitch = side.toFloat() / spec.size
-        val led = MatrixLook.ledSize(pitch)
-        val inset = MatrixLook.inset(pitch)
-
-        // Pas d'alpha en RGB_565 : les deux niveaux sont mélangés au champ.
-        val offColor = blend(fieldArgb, litArgb, MatrixLook.OFF_ALPHA)
-
-        for (index in spec.leds) {
-            val left = spec.xOf(index) * pitch + inset
-            val top = spec.yOf(index) * pitch + inset
-            val value = min(255, brightness[index])
-
-            // `perceived` et non `value / 255f` : la frame porte des rapports
-            // cycliques, l'écran compose en linéaire. Voir MatrixLook.perceived.
-            paint.color = if (value > MatrixLook.MIN_VISIBLE) {
-                blend(fieldArgb, litArgb, MatrixLook.perceived(value))
-            } else {
-                offColor
-            }
-            canvas.drawRect(left, top, left + led, top + led, paint)
-        }
+        // Une bitmap réutilisée porte encore l'image précédente : sans effacement
+        // franc, le halo de la frame d'avant resterait sous celui de la nouvelle.
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+        painter.paintDisc(canvas, brightness, side)
         return bitmap
-    }
-
-    private fun blend(from: Int, to: Int, ratio: Float): Int {
-        val r = ratio.coerceIn(0f, 1f)
-        fun mix(a: Int, b: Int) = (a + (b - a) * r).toInt().coerceIn(0, 255)
-        return Color.rgb(
-            mix(Color.red(from), Color.red(to)),
-            mix(Color.green(from), Color.green(to)),
-            mix(Color.blue(from), Color.blue(to)),
-        )
     }
 }

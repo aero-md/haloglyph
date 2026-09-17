@@ -1,8 +1,6 @@
 package red.suns.haloglyph.sono.toy
 
 import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.ServiceInfo
@@ -18,32 +16,41 @@ import red.suns.haloglyph.core.glyph.MatrixToyService
 import red.suns.haloglyph.core.matrix.Frame
 import red.suns.haloglyph.sono.R
 import red.suns.haloglyph.sono.SonoConfig
-import red.suns.haloglyph.sono.audio.MicSource
-import red.suns.haloglyph.sono.engine.SonoEngine
+import red.suns.haloglyph.sono.audio.SonoMic
 import red.suns.haloglyph.sono.engine.SonoMode
+import red.suns.haloglyph.sono.mic.MicNotice
 import red.suns.haloglyph.sono.render.SonoRenderer
 
 /**
  * Glyph Toy « Sono » : le micro, montré de trois façons.
  *
- * **Appui long = mode suivant** — spectre, aiguille, spectrogramme — comme Dice
- * change de solide. Un seul toy dans Glyph Interface là où Sonoglyph en
- * exposait deux : ils ouvraient le même micro et faisaient tourner la même FFT
- * pour ne différer que par le dernier étage du rendu.
+ * **Appui long = mode suivant** — spectre, aiguille, onde — comme Dice change de
+ * solide. Un seul toy dans Glyph Interface là où Sonoglyph en exposait deux :
+ * ils ouvraient le même micro et faisaient tourner la même FFT pour ne différer
+ * que par le dernier étage du rendu.
  *
  * ## Le point dur : capter le micro depuis un toy
  *
  * Un Glyph Toy est un service **lié** par Glyph Interface. Le process est donc
- * en arrière-plan, et depuis Android 11 le micro y est coupé — sans erreur : le
- * flux arrive, rempli de zéros exacts. Un toy qui se contenterait d'ouvrir un
- * `AudioRecord` afficherait un silence parfait et parfaitement faux.
+ * en arrière-plan, et le micro y est coupé — sans erreur : le flux arrive,
+ * rempli de zéros exacts. Un toy qui se contenterait d'ouvrir un `AudioRecord`
+ * afficherait un silence parfait et parfaitement faux.
  *
- * La seule sortie est de se promouvoir en service de premier plan de type
- * `microphone` le temps de la mesure, d'où la notification permanente. Cette
- * promotion peut être refusée (`ForegroundServiceStartNotAllowedException`)
- * selon l'état de l'app au moment du bind : on ne la suppose donc pas acquise.
- * Elle est tentée, l'échec est journalisé, et le moteur détecte le cas des zéros
- * exacts pour afficher `---` plutôt qu'un faux 30 dB.
+ * Se promouvoir en service de premier plan de type `microphone` ne suffit plus
+ * depuis Android 14 : une promotion **obtenue depuis l'arrière-plan** ne donne
+ * pas les permissions « pendant l'utilisation ». La notification s'affiche, la
+ * capture s'ouvre, et elle ne rend que des zéros. C'est le cas nominal du toy —
+ * on retourne le téléphone, donc l'app n'est pas visible, donc trop tard.
+ *
+ * D'où le micro armé : [SonoMic] est ouvert par
+ * [red.suns.haloglyph.sono.mic.SonoMicService], démarré depuis la tuile de
+ * réglages rapides ou l'écran de réglages, et **il survit au verrouillage**. Le
+ * toy se contente alors de le tenir et de lire le moteur.
+ *
+ * Quand rien n'est armé, il tente quand même sa chance — l'app au premier plan,
+ * ça marche encore, et c'est le chemin qu'on prend en développement. L'échec est
+ * journalisé, et le moteur détecte les zéros exacts pour afficher `---` plutôt
+ * qu'un faux 30 dB.
  *
  * ## Cadence
  *
@@ -53,8 +60,6 @@ import red.suns.haloglyph.sono.render.SonoRenderer
  */
 class SonoToyService : MatrixToyService(TAG) {
 
-    private val engine = SonoEngine()
-    private val mic = MicSource(engine)
     private val renderer by lazy { SonoRenderer(spec) }
 
     private lateinit var prefs: SharedPreferences
@@ -62,6 +67,7 @@ class SonoToyService : MatrixToyService(TAG) {
 
     private var mode: SonoMode = SonoMode.DEFAULT
     private var foreground = false
+    private var holding = false
 
     private val vibrator: Vibrator by lazy {
         (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
@@ -73,17 +79,25 @@ class SonoToyService : MatrixToyService(TAG) {
         prefs = SonoConfig.prefs(context)
         mode = SonoConfig.mode(prefs)
         watcher = PrefsWatcher(prefs) { onPrefsChanged() }.also { it.start() }
-        goForeground()
-        mic.start(context)
+        // Rien à promouvoir si le micro est déjà armé : le service qui le tient
+        // porte déjà sa notification, et une seconde ne dirait rien de plus.
+        if (!SonoMic.armed) goForeground()
+        SonoMic.hold(context)
+        holding = true
         super.onGlyphConnected(context, manager)
     }
 
     override fun onGlyphDisconnected(context: Context) {
         watcher?.stop()
         watcher = null
-        // Le micro s'arrête **avant** la boucle : mieux vaut une dernière image
+        // Le jeton se rend **avant** la boucle : mieux vaut une dernière image
         // sans mesure qu'une seconde de capture sans personne pour la regarder.
-        mic.stop()
+        // Si le micro est armé, il ne se ferme pas pour autant — ce n'est plus
+        // la matrice qui décide.
+        if (holding) {
+            SonoMic.release()
+            holding = false
+        }
         renderer.clearHistory()
         leaveForeground()
         super.onGlyphDisconnected(context)
@@ -102,7 +116,7 @@ class SonoToyService : MatrixToyService(TAG) {
         // n'a pas de mode Always-On à distinguer, parce qu'il n'en déclare pas.
         // Un micro ouvert écran éteint pour une image à la minute serait un
         // mauvais marché — pour la batterie comme pour l'indicateur micro.
-        renderer.render(frame, engine.snapshot(now()), mode)
+        renderer.render(frame, SonoMic.engine.snapshot(now()), mode)
     }
 
     private fun now(): Double = System.nanoTime() / 1e9
@@ -115,24 +129,17 @@ class SonoToyService : MatrixToyService(TAG) {
     private fun setMode(next: SonoMode) {
         mode = next
         tick()
-        // L'histoire n'est pas effacée : les cinq dernières secondes valent
-        // autant vues en spectrogramme qu'elles valaient en spectre, et un
-        // écran qui se repeuple lentement donnerait l'impression d'un démarrage.
+        // L'histoire n'est pas effacée : la dernière seconde et demie de son a
+        // été enregistrée quel que soit le mode affiché, et arriver sur l'onde
+        // pour la regarder se repeupler donnerait l'impression d'un démarrage.
         renderNow()
     }
 
     // ---------- premier plan ----------
 
     private fun goForeground() {
-        val nm = getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(
-            NotificationChannel(
-                CHANNEL,
-                getString(R.string.sono_mic_channel),
-                NotificationManager.IMPORTANCE_LOW,
-            ).apply { setShowBadge(false) },
-        )
-        val notification: Notification = NotificationCompat.Builder(this, CHANNEL)
+        MicNotice.ensureChannel(this)
+        val notification: Notification = NotificationCompat.Builder(this, MicNotice.CHANNEL)
             .setSmallIcon(android.R.drawable.ic_btn_speak_now)
             .setContentTitle(getString(R.string.sono_mic_notice))
             .setOngoing(true)
@@ -174,7 +181,6 @@ class SonoToyService : MatrixToyService(TAG) {
         /** ~30 fps. Le son ne se repose pas, la boucle non plus. */
         const val FRAME_MS = 33L
 
-        const val CHANNEL = "haloglyph-sono-mic"
         const val NOTIF_ID = 4201
     }
 }

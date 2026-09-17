@@ -53,25 +53,19 @@
                 android:value="1" />
         </service>
 
-        <!-- Surface 2 : l'émulation, sur n'importe quel Android. Non exporté :
-             seul le système lui parle, via un composant explicite. -->
-        <receiver
-            android:name="red.suns.haloglyph.dice.widget.DiceWidget"
-            android:enabled="true"
-            android:exported="false"
-            android:label="@string/toy_dice_name">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/dice_widget_info" />
-        </receiver>
+        <!-- Surface 2 : l'émulation, sur n'importe quel Android. Elle n'est plus
+             déclarée ici. Le pack ne pose plus qu'un **hublot générique**, qui
+             porte tous les toys et se change au double tap : son receiver et son
+             service vivent dans `app`, le seul module qui sache ce qu'il
+             embarque. Ce que ce toy apporte au hublot est du Kotlin et rien
+             d'autre — voir `DiceWidgetToy`. -->
 
-        <!-- Pas de surface 3. Ce toy n'a pas d'écran de réglages parce qu'il n'a
-             rien à régler : le solide se change à l'appui long, la face se tire
-             en secouant. Un écran n'y ajouterait qu'un endroit de plus où
-             refaire ce que le geste fait déjà. -->
+        <!-- Pas d'écran de réglages : supprimé le 2026-09-16. Il ne portait que
+             l'aperçu et le choix du solide, et ce choix vit ailleurs — sur la
+             matrice à l'appui long, et par hublot dans les réglages du hublot
+             lui-même (`WidgetConfig`, voir `DiceWidgetToy`). L'écran ne
+             changeait rien de ce que ces deux chemins ne changeaient déjà ; il
+             n'était qu'une vitrine. Voir PRODUIT.md, § « Menus retirés ». -->
 
     </application>
 

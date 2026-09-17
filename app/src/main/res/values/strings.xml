@@ -7,46 +7,19 @@
 <resources>
     <string name="app_name" translatable="false">Haloglyph</string>
 
-    <!-- ============ Hub ============ -->
+    <!-- ============ Onglets d'application ============
+         Icônes seules dans la barre du bas ; ces libellés ne servent qu'à
+         l'accessibilité. -->
+    <string name="nav_toys">Toys</string>
+    <string name="nav_cast" translatable="false">Cast</string>
+    <string name="nav_params">Settings</string>
 
-    <!-- Section « matériel » : la mention de droite dit l'état de la sonde. -->
-    <string name="hub_section_hardware">Hardware</string>
-    <string name="hub_probe_running">probing</string>
-    <string name="hub_probe_done">probed</string>
+    <!-- ============ Onglet toys ============ -->
 
-    <!-- Tuiles appariées : les deux endroits où un toy peut s'afficher. -->
-    <string name="hub_tile_matrix" translatable="false">Glyph Matrix</string>
-    <string name="hub_tile_widgets">Widgets</string>
-
-    <string name="hub_chip_matrix_connected">Connected</string>
-    <string name="hub_chip_matrix_absent">Absent</string>
-    <string name="hub_chip_matrix_probing">Probing…</string>
-    <!-- Nombre de LEDs de la matrice cible. -->
-    <string name="hub_chip_leds">%1$d LEDs</string>
-    <string name="hub_chip_emulation">Emulation</string>
-    <plurals name="hub_chip_widgets_placed">
-        <item quantity="one">%d placed</item>
-        <item quantity="other">%d placed</item>
-    </plurals>
-
-    <!-- Les deux écrans Glyph du système. Côte à côte sur une seule ligne :
-         garder ces libellés courts, une pilule ne coupe pas son texte. -->
-    <string name="hub_active_toys">Active toys</string>
-    <string name="hub_manage_toys">Manage all</string>
-    <!-- Repli quand le téléphone n'expose aucun des deux. -->
-    <string name="hub_open_settings">Settings</string>
-
-    <!-- Liste des toys. La mention de droite est « embarqués / total ». -->
-    <string name="hub_section_toys">Bundled toys</string>
-    <string name="hub_toys_count" translatable="false">%1$d / %2$d</string>
-
-    <string name="hub_chip_in_glyph">In Glyph Interface</string>
-    <string name="hub_chip_not_in_glyph">Not in Glyph Interface</string>
-    <plurals name="hub_chip_widgets">
-        <item quantity="one">%d widget</item>
-        <item quantity="other">%d widgets</item>
-    </plurals>
-    <string name="hub_chip_no_widget">No widget</string>
+    <!-- Titre en tête de l'onglet, nom propre non traduit — comme
+         `hub_glyph_toys` juste en dessous, qui désigne autre chose (l'écran
+         système), mais partage le même nom de scène. -->
+    <string name="title_toys" translatable="false">Glyph toys</string>
     <string name="hub_chip_soon">Coming</string>
     <!-- Toy présent et déclaré, mais privé de l'autorisation dont il vit. Dire
          « pas dans Glyph Interface » serait faux et enverrait chercher au
@@ -54,20 +27,41 @@
     <string name="hub_chip_mic_denied">Microphone denied</string>
     <string name="hub_chip_fix_here">Open to fix</string>
 
-    <!-- Section de bas de hub : l'étage au-dessus des toys. -->
-    <string name="hub_section_app">Application</string>
+    <!-- Les deux écrans Glyph du système, dans l'onglet paramètres. Noms
+         propres, non traduits : ce sont ceux que porte Nothing OS lui-même.
+         Côte à côte sur une seule ligne : garder ces libellés courts, une
+         pilule ne coupe pas son texte. -->
+    <string name="hub_glyph_matrix" translatable="false">Glyph matrix</string>
+    <string name="hub_glyph_toys" translatable="false">Glyph toys</string>
 
-    <!-- ============ Réglages de l'application ============
+    <!-- ============ Onglet cast ============
+         Rien derrière pour l'instant (PRODUIT §6, « Envisagé après »). -->
+    <string name="title_cast" translatable="false">Glyphcast</string>
+    <string name="cast_soon">Coming soon</string>
+
+    <!-- ============ Onglet paramètres ============
          Un seul réglage à date, et c'est voulu : est global ce qui a la même
-         valeur pour tous les toys (PRODUIT §5.4). -->
-    <string name="settings_title">Settings</string>
+         valeur pour tous les toys (PRODUIT §5.4). Les deux boutons Glyph du
+         système, eux, ne sont pas un réglage mais une sortie — d'où leur
+         section à part. -->
+    <string name="title_params">Settings</string>
     <string name="settings_section_app">Application</string>
     <string name="settings_language">Language</string>
     <!-- Suivre la langue du téléphone, plutôt qu'en forcer une. -->
     <string name="language_system">System</string>
+    <string name="settings_section_glyph" translatable="false">Glyph Interface</string>
 
     <!-- Plus aucun toy annoncé : les trois du pack sont écrits, et chacun porte
          ses chaînes dans son module. « Sono — Spectre » et « Sono — Aiguille »
          ont disparu d'ici en même temps qu'ils ont fusionné en un seul toy à
          trois modes. -->
+
+    <!-- ============ Le hublot d'écran d'accueil ============
+         Un seul widget pour tout le pack, donc ces chaînes vivent ici, dans le
+         module qui l'assemble, et non dans un toy. Les libellés de format sont
+         ceux du sélecteur de widgets : ils ne se traduisent pas, comme ne se
+         traduisaient pas « Dice · 2×2 » et ses pareils. -->
+    <string name="widget_halo_large" translatable="false">Haloglyph · 2×2</string>
+    <string name="widget_halo_small" translatable="false">Haloglyph · 1×1</string>
+    <string name="widget_halo_summary">The Glyph Matrix on your home screen. Tap to interact, double tap to switch toy.</string>
 </resources>

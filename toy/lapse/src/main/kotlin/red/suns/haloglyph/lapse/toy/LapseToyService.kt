@@ -15,7 +15,6 @@ import red.suns.haloglyph.lapse.engine.LapseEngine
 import red.suns.haloglyph.lapse.render.LapseRenderer
 import red.suns.haloglyph.lapse.render.LapseSlide
 import red.suns.haloglyph.lapse.render.MatrixLabels
-import red.suns.haloglyph.lapse.widget.LapseWidget
 import java.time.ZoneId
 
 /**
@@ -168,7 +167,7 @@ class LapseToyService : MatrixToyService(TAG) {
         }
         // Le widget lit les mêmes préférences mais ne les écoute pas : c'est un
         // receiver, il n'existe qu'entre deux diffusions. On le réveille.
-        MatrixWidgetRefresh.requestUpdate(this, LapseWidget::class.java)
+        MatrixWidgetRefresh.requestUpdateAll(this)
     }
 
     /**

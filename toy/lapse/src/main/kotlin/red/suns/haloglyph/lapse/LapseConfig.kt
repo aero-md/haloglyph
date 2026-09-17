@@ -132,8 +132,19 @@ object LapseConfig {
     }
 
     /** Applique le lapse actif à l'engine (idempotent, sans transition). */
-    fun applyActive(prefs: SharedPreferences, engine: LapseEngine, zone: ZoneId) {
-        val cfg = readLapse(prefs, activeIndex(prefs), zone)
+    fun applyActive(prefs: SharedPreferences, engine: LapseEngine, zone: ZoneId) =
+        applyAt(prefs, engine, zone, activeIndex(prefs))
+
+    /**
+     * Applique **un lapse nommé** à l'engine, idempotent et sans transition.
+     *
+     * Le même travail que [applyActive], pour qui sait déjà lequel il veut. Les
+     * hublots d'écran d'accueil en sont là : chacun tient son propre index —
+     * deux hublots côte à côte affichent deux lapses différents — et l'index
+     * actif de la matrice ne leur sert que de valeur de départ.
+     */
+    fun applyAt(prefs: SharedPreferences, engine: LapseEngine, zone: ZoneId, index: Int) {
+        val cfg = readLapse(prefs, index.coerceIn(0, lapseCount(prefs) - 1), zone)
         if (cfg.ref != engine.refMillis) engine.setRef(cfg.ref)
         if (cfg.format != engine.format) engine.setFormatQuiet(cfg.format)
         engine.secondsMode = cfg.seconds

@@ -1,48 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
-    <string name="hub_section_hardware">Hardware</string>
-    <string name="hub_probe_running">buscando…</string>
-    <string name="hub_probe_done">comprobado</string>
+    <string name="nav_toys">Toys</string>
+    <string name="nav_params">Ajustes</string>
+    <string name="title_params">Ajustes</string>
 
-    <string name="hub_tile_widgets">Widgets</string>
-
-    <string name="hub_chip_matrix_connected">Conectada</string>
-    <string name="hub_chip_matrix_absent">Ausente</string>
-    <string name="hub_chip_matrix_probing">Buscando…</string>
-    <string name="hub_chip_leds">%1$d LED</string>
-    <string name="hub_chip_emulation">Emulación</string>
-    <plurals name="hub_chip_widgets_placed">
-        <item quantity="one">%d colocado</item>
-        <item quantity="many">%d colocados</item>
-        <item quantity="other">%d colocados</item>
-    </plurals>
-
-    <string name="hub_active_toys">Toys activos</string>
-    <string name="hub_manage_toys">Gestionar</string>
-    <string name="hub_open_settings">Ajustes</string>
-
-    <string name="hub_section_toys">Toys incluidos</string>
-
-    <!-- « Glyph Interface » est le nom du réglage Nothing, pas une locution :
-         il ne se traduit pas, en espagnol pas plus qu'ailleurs. -->
-    <string name="hub_chip_in_glyph" tools:ignore="Typos">En Glyph Interface</string>
-    <string name="hub_chip_not_in_glyph" tools:ignore="Typos">Fuera de Glyph Interface</string>
-    <plurals name="hub_chip_widgets">
-        <item quantity="one">%d widget</item>
-        <item quantity="many">%d widgets</item>
-        <item quantity="other">%d widgets</item>
-    </plurals>
-    <string name="hub_chip_no_widget">Ningún widget</string>
     <string name="hub_chip_soon">Próximamente</string>
     <string name="hub_chip_mic_denied">Micrófono denegado</string>
     <string name="hub_chip_fix_here">Abrir para corregir</string>
 
-    <string name="hub_section_app">Aplicación</string>
+    <string name="cast_soon">Próximamente</string>
 
-    <string name="settings_title">Ajustes</string>
     <string name="settings_section_app">Aplicación</string>
     <string name="settings_language">Idioma</string>
     <string name="language_system">Sistema</string>
 
+    <string name="widget_halo_summary">La Glyph Matrix en tu pantalla de inicio. Toca para interactuar, toca dos veces para cambiar de toy.</string>
 </resources>

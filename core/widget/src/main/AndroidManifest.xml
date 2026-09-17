@@ -1,2 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" />
+<!--
+  Le module n'apportait rien au manifeste tant que les widgets n'avaient rien à
+  régler. Il apporte maintenant l'écran qui les règle — un seul, partagé par tous
+  les toys, parce qu'il ne parle que du hublot.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- La boucle d'un hublot tourne dans un service de premier plan
+         (`WidgetBurstService`). Le **type** est déclaré par `app`, seul module à
+         savoir quels toys sont embarqués ; la permission de base, elle, est au
+         module qui porte le service. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application>
+
+        <!--
+          `exported` doit valoir `true` : c'est le launcher, depuis son propre
+          processus, qui lance une activité de configuration de widget. L'activité
+          le sait et vérifie l'identifiant qu'on lui donne — voir la classe.
+
+          Pas de `label` : elle n'apparaît nulle part dans un lanceur d'apps.
+        -->
+        <activity
+            android:name="red.suns.haloglyph.core.widget.WidgetConfigActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:theme="@style/Theme.Haloglyph.WidgetConfig">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

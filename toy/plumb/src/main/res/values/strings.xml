@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Langue par défaut : l'anglais, et non le français dans lequel l'app a été
+    écrite. C'est ce dossier non qualifié que le système sert à quiconque n'a
+    aucune des cinq langues, et l'anglais est ce que comprend le plus grand
+    nombre d'entre eux. Le français a son `values-fr/`, comme les autres.
+-->
+<resources>
+
+    <!-- Renommé le 2026-09-16 : « Plumb » disait l'instrument (un fil à plomb),
+         pas ce qu'on en voit. « Float » dit l'image commune aux deux — la bulle
+         qui flotte vers le haut, l'aiguille qui flotte sur la boussole — et pas
+         seulement au niveau. -->
+    <string name="toy_plumb_name" translatable="false">Float</string>
+
+    <!-- Affiché par le système dans Glyph Interface → Glyph Toys, et sous le
+         widget dans le sélecteur. Les deux commandes du toy y tiennent, parce
+         qu'il n'y a aucun autre endroit où les apprendre. -->
+    <string name="toy_plumb_summary">Bubble level on a logarithmic scale: the nearer level, the finer it reads. Compass as a second instrument. Long press to switch.</string>
+
+</resources>

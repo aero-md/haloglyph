@@ -3,10 +3,35 @@
   Manifeste d'assemblage, et il doit le rester.
 
   Les permissions Glyph et le bloc <queries> viennent de `core:glyph`, les
-  services de toy et leurs widgets viendront des modules `toy:*`. AGP fusionne.
-  Ajouter un toy ne touche pas ce fichier.
+  services de toy viennent des modules `toy:*`. AGP fusionne. Ajouter un toy ne
+  touche pas ce fichier.
+
+  Le **hublot** d'écran d'accueil, lui, est ici, et c'est la seule chose de ce
+  manifeste qui ne soit pas de l'assemblage pur. Il ne peut pas être ailleurs :
+  il n'y en a qu'un pour tout le pack, il porte tous les toys, et le service qui
+  l'anime doit déclarer les types de premier plan que ces toys réclament — ce que
+  `core:widget`, qui ne sait pas lesquels sont embarqués, ne peut pas faire.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+      La boucle continue d'un hublot. `specialUse` est le seul type qui convienne
+      — ce n'est ni une lecture, ni une synchronisation, ni un suivi de position,
+      c'est un rendu — et c'est celui que Glyph Museum déclare pour la même chose.
+      Il se paie d'une justification lue par la revue Play, ci-dessous, et d'une
+      contrainte qu'on se donne en plus : la boucle se suspend dès que l'écran
+      s'éteint. Aucun intérêt à repeindre un widget que personne ne regarde.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!--
+      Uniquement pour rendre sa boucle à un hublot après un redémarrage. C'est la
+      seule fenêtre où l'on puisse promouvoir le service qui la porte : au
+      démarrage, `APPWIDGET_UPDATE` ne donne pas ce droit — l'exemption vaut pour
+      un tap sur le widget — alors que `BOOT_COMPLETED` en est une à part
+      entière. Voir `HaloBootReceiver`.
+    -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -33,12 +58,75 @@
             </intent-filter>
         </activity>
 
-        <!-- Réglages de l'application, au-dessus des toys (PRODUIT §5.4).
-             Ouverte par le hub et par lui seul : `exported` reste faux. -->
-        <activity
-            android:name=".AppSettingsActivity"
+        <!-- ============ Le hublot ============
+
+             Un seul widget pour tout le pack, en deux formats, donc deux
+             receivers : le système attache une taille à un fournisseur et non à
+             une instance posée. Non exportés — seul le système leur parle, par
+             un composant explicite. -->
+        <receiver
+            android:name=".HaloWidget"
+            android:enabled="true"
             android:exported="false"
-            android:label="@string/settings_title" />
+            android:label="@string/widget_halo_large">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/halo_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".HaloWidgetSmall"
+            android:enabled="true"
+            android:exported="false"
+            android:label="@string/widget_halo_small">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/halo_widget_small_info" />
+        </receiver>
+
+        <!-- L'animation. Elle tournait dans le receiver, sous `goAsync()`, et
+             bloquait la file de diffusions de l'app pendant cinq secondes : un
+             second hublot ne pouvait pas animer, et les taps qu'on lui donnait
+             se rejouaient tous à la suite. Voir WidgetBurstService.
+
+             `microphone` parce que Sono est dans la rotation, et qu'un tap sur un
+             widget est l'une des rares surfaces qui puissent légalement ouvrir le
+             micro depuis l'arrière-plan. La permission qui va avec vient du
+             module `toy:sono` : retirer ce toy la retire, et le service ne
+             demandera plus jamais ce type puisque plus personne ne le déclare.
+
+             `specialUse` pour la boucle continue d'un hublot : elle n'a pas de
+             fin, donc le service doit survivre à la pression mémoire, et aucun
+             autre type ne décrit « repeindre un widget ».
+
+             `shortService` est le repli des rafales, et il ne sert presque
+             jamais : pour un toy qui ne demande rien, le receiver démarre un
+             service **ordinaire**, sans type ni notification. On n'arrive ici que
+             si le système refuse ce démarrage-là. -->
+        <!-- Rend sa boucle à un hublot après un redémarrage, et rien d'autre. -->
+        <receiver
+            android:name=".HaloBootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".HaloBurstService"
+            android:exported="false"
+            android:foregroundServiceType="shortService|microphone|specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Animates user-placed home screen widgets that emulate the Glyph Matrix" />
+        </service>
     </application>
 
 </manifest>

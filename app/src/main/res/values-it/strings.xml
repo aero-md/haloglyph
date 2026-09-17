@@ -1,46 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hub_section_hardware">Hardware</string>
-    <string name="hub_probe_running">ricerca…</string>
-    <string name="hub_probe_done">verificato</string>
+    <string name="nav_toys">Toy</string>
+    <string name="nav_params">Impostazioni</string>
+    <string name="title_params">Impostazioni</string>
 
-    <string name="hub_tile_widgets">Widget</string>
-
-    <string name="hub_chip_matrix_connected">Collegata</string>
-    <string name="hub_chip_matrix_absent">Assente</string>
-    <string name="hub_chip_matrix_probing">Ricerca…</string>
-    <string name="hub_chip_leds">%1$d LED</string>
-    <string name="hub_chip_emulation">Emulazione</string>
-    <plurals name="hub_chip_widgets_placed">
-        <item quantity="one">%d posato</item>
-        <item quantity="many">%d posati</item>
-        <item quantity="other">%d posati</item>
-    </plurals>
-
-    <string name="hub_active_toys">Toy attivi</string>
-    <string name="hub_manage_toys">Gestisci</string>
-    <string name="hub_open_settings">Impostazioni</string>
-
-    <string name="hub_section_toys">Toy inclusi</string>
-
-    <string name="hub_chip_in_glyph">In Glyph Interface</string>
-    <string name="hub_chip_not_in_glyph">Fuori da Glyph Interface</string>
-    <plurals name="hub_chip_widgets">
-        <item quantity="one">%d widget</item>
-        <item quantity="many">%d widget</item>
-        <item quantity="other">%d widget</item>
-    </plurals>
-    <string name="hub_chip_no_widget">Nessun widget</string>
     <string name="hub_chip_soon">In arrivo</string>
     <string name="hub_chip_mic_denied">Microfono negato</string>
     <string name="hub_chip_fix_here">Apri per correggere</string>
 
-    <string name="hub_section_app">Applicazione</string>
+    <string name="cast_soon">In arrivo</string>
 
-    <string name="settings_title">Impostazioni</string>
     <string name="settings_section_app">Applicazione</string>
     <string name="settings_language">Lingua</string>
     <string name="language_system">Sistema</string>
 
+    <string name="widget_halo_summary">La Glyph Matrix sulla schermata home. Tocca per interagire, tocca due volte per cambiare toy.</string>
 </resources>

@@ -36,7 +36,7 @@ object MatrixWidgetRefresh {
     /** Plancher imposé par le système. Écrit ici pour qu'on arrête d'espérer. */
     const val MIN_INTERVAL_MINUTES = 15L
 
-    fun schedule(context: Context, provider: Class<out BaseMatrixWidgetProvider>) {
+    fun schedule(context: Context, provider: Class<out MatrixWidgetProvider>) {
         val request = PeriodicWorkRequestBuilder<RefreshWorker>(
             MIN_INTERVAL_MINUTES, TimeUnit.MINUTES,
         )
@@ -59,7 +59,7 @@ object MatrixWidgetRefresh {
         )
     }
 
-    fun cancel(context: Context, provider: Class<out BaseMatrixWidgetProvider>) {
+    fun cancel(context: Context, provider: Class<out MatrixWidgetProvider>) {
         WorkManager.getInstance(context).cancelUniqueWork(WORK_PREFIX + provider.name)
     }
 
@@ -71,14 +71,61 @@ object MatrixWidgetRefresh {
      * cette route est la même depuis un `Worker`, un écran de réglages ou un
      * service de toy.
      */
-    fun requestUpdate(context: Context, provider: Class<out BaseMatrixWidgetProvider>) {
+    fun requestUpdate(context: Context, vararg providers: Class<out MatrixWidgetProvider>) {
         val manager = AppWidgetManager.getInstance(context)
-        val ids = manager.getAppWidgetIds(ComponentName(context, provider))
-        if (ids.isEmpty()) return
-        val intent = Intent(context, provider)
-            .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
-            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-        context.sendBroadcast(intent)
+        for (provider in providers) {
+            val ids = manager.getAppWidgetIds(ComponentName(context, provider))
+            if (ids.isEmpty()) continue
+            val intent = Intent(context, provider)
+                .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+            context.sendBroadcast(intent)
+        }
+    }
+
+    /**
+     * Les widgets **nommés**, quel que soit leur fournisseur.
+     *
+     * C'est ce qu'il faut à l'écran de réglages : il tient un identifiant, pas
+     * une classe, et il n'a aucune raison de réveiller les voisins du même toy
+     * qui n'ont rien changé. Le fournisseur se retrouve par l'identifiant, et les
+     * widgets d'un même fournisseur partent dans une seule diffusion.
+     */
+    fun requestUpdate(context: Context, widgetIds: IntArray) {
+        val manager = AppWidgetManager.getInstance(context)
+        val byProvider = LinkedHashMap<ComponentName, MutableList<Int>>()
+        for (id in widgetIds) {
+            val provider = manager.getAppWidgetInfo(id)?.provider ?: continue
+            byProvider.getOrPut(provider) { mutableListOf() }.add(id)
+        }
+        for ((provider, ids) in byProvider) {
+            val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                .setComponent(provider)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids.toIntArray())
+            context.sendBroadcast(intent)
+        }
+    }
+
+    /**
+     * **Tous** les hublots du paquet, quels que soient leur format et leur toy.
+     *
+     * C'est ce qu'il faut après une interaction : relancer le dé depuis un grand
+     * hublot change la face que montrent tous les autres, petits compris, et le
+     * fournisseur qui a reçu le tap ne connaît pas ses formats frères. La liste
+     * vient du système plutôt que d'une constante à tenir à jour — ajouter un
+     * format n'oblige alors à rien.
+     */
+    fun requestUpdateAll(context: Context) {
+        val manager = AppWidgetManager.getInstance(context)
+        for (info in manager.installedProviders) {
+            if (info.provider.packageName != context.packageName) continue
+            val ids = manager.getAppWidgetIds(info.provider)
+            if (ids.isEmpty()) continue
+            val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                .setComponent(info.provider)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+            context.sendBroadcast(intent)
+        }
     }
 
     class RefreshWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
@@ -86,7 +133,7 @@ object MatrixWidgetRefresh {
             val name = inputData.getString(KEY_PROVIDER) ?: return Result.failure()
             val provider = runCatching {
                 @Suppress("UNCHECKED_CAST")
-                Class.forName(name) as Class<out BaseMatrixWidgetProvider>
+                Class.forName(name) as Class<out MatrixWidgetProvider>
             }.getOrNull() ?: return Result.failure()
 
             requestUpdate(applicationContext, provider)

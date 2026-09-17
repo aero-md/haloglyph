@@ -4,7 +4,9 @@
 -keep class com.nothing.ketchum.** { *; }
 -dontwarn com.nothing.ketchum.**
 
+-dontwarn com.nothing.thirdparty.**
+
 # Les services de toy sont instanciés par leur nom, écrit dans le manifeste.
 # AGP garde déjà les composants déclarés ; cette règle protège les sous-classes
-# intermédiaires (MatrixToyService et ses `open`) contre l'inlining agressif.
+# intermédiaires (le socle et ses `open`) contre l'inlining agressif.
 -keep class * extends red.suns.haloglyph.core.glyph.GlyphMatrixService { *; }

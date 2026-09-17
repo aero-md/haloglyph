@@ -12,7 +12,7 @@
 
     <!-- Affiché par le système dans Glyph Interface → Glyph Toys. La commande du
          toy y tient, parce qu'il n'y a aucun autre endroit où l'apprendre. -->
-    <string name="toy_sono_summary">Microphone on the matrix: spectrum, VU needle, spectrogram. Long press to switch mode.</string>
+    <string name="toy_sono_summary">Microphone on the matrix: spectrum, VU needle, waveform. Long press to switch mode.</string>
 
     <!-- Le nom de l'app, tel qu'il apparaît dans le fil d'Ariane. -->
     <string name="sono_settings_parent" translatable="false">Haloglyph</string>
@@ -23,12 +23,25 @@
     <string name="sono_mic_channel">Microphone in use</string>
     <string name="sono_mic_notice">Sono is listening on the Glyph Matrix</string>
 
+    <!-- Le micro armé : la notification du service qui survit au verrouillage,
+         et son action de sortie. -->
+    <string name="sono_mic_armed_title">Sono is listening</string>
+    <string name="sono_mic_armed_text">The matrix keeps showing sound with the screen off.</string>
+    <string name="sono_mic_disarm">Stop</string>
+
+    <!-- La tuile de réglages rapides. Elle porte le nom de l'application et non
+         celui du toy : dans le volet, entre le Bluetooth et la lampe, « Sono »
+         ne dit rien à personne. -->
+    <string name="sono_tile_label">Haloglyph mic access</string>
+    <string name="sono_tile_listening">Listening</string>
+    <string name="sono_tile_off">Off</string>
+
     <string name="sono_section_display">Display</string>
     <string name="sono_mode">Mode</string>
     <string name="sono_mode_hint">Long press the Glyph Button to switch</string>
     <string name="sono_mode_spectrum">Spectrum</string>
     <string name="sono_mode_needle">VU needle</string>
-    <string name="sono_mode_spectrogram">Spectrogram</string>
+    <string name="sono_mode_wave">Waveform</string>
 
     <!-- Dit à l'écran ce que le code fait : cet aperçu n'écoute rien. -->
     <string name="sono_preview_simulated">Simulated preview — the mic stays off</string>
@@ -40,5 +53,16 @@
     <string name="sono_permission_action">Allow</string>
     <string name="sono_permission_note">Audio is analysed on the fly, never recorded or sent.</string>
     <string name="sono_permission_missing">Without it, Sono has nothing to show.</string>
+
+    <!-- L'armement, vu depuis les réglages. La note explique la seule chose que
+         l'utilisateur ne peut pas deviner : pourquoi un geste est nécessaire. -->
+    <string name="sono_mic_arm_action">Arm</string>
+
+    <!-- Le raccourci du volet. C'est le seul geste qui arme sans rien refermer :
+         un bouton d'action de notification ne replie pas le volet, là où une
+         tuile n'a d'autre choix que de lancer une activité. -->
+    <string name="sono_mic_shortcut_text">Arm the mic before putting the phone down.</string>
+    <string name="sono_notice_add">Shade shortcut</string>
+    <string name="sono_notice_add_note">An Arm button among the notifications. Unlike the tile, it does not close the shade.</string>
 
 </resources>

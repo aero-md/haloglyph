@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="red.suns.haloglyph.core.widget.WidgetConfigActivity"
+    android:description="@string/widget_halo_summary"
+    android:initialLayout="@layout/haloglyph_matrix_widget"
+    android:minWidth="110dp"
+    android:minHeight="110dp"
+    android:previewImage="@drawable/halo_widget_preview"
+    android:resizeMode="none"
+    android:targetCellWidth="2"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable" />
+<!--
+  2 × 2, et pas redimensionnable : le widget est le hublot de la matrice, qui est
+  rond. Il n'y a rien à gagner à l'étirer, et un hublot ovale n'est plus un
+  hublot. 110 dp est la cote historique de deux cellules (70 × n − 30), gardée
+  pour les launchers qui ignorent targetCell*. La variante d'une cellule est
+  `halo_widget_small_info.xml`.
+
+  Un seul fournisseur par format pour tout le pack, là où il y en avait un par
+  toy : le hublot porte n'importe lequel des toys et se change au double tap. Le
+  sélecteur de widgets ne propose donc plus qu'une entrée par format, ce qui est
+  exactement ce qu'on y cherche — on pose un hublot, on décide après.
+
+  updatePeriodMillis="0" : un dé posé ne change pas tout seul. Le hublot se
+  rafraîchit au tap et sur demande d'un service (MatrixWidgetRefresh), jamais sur
+  minuterie — le mécanisme du manifeste est plafonné à 30 minutes et réveille
+  l'appareil pour redessiner exactement la même image.
+
+  Pas de `configuration_optional`, et ce n'est pas un oubli. Il y était : le
+  hublot marche avec ses valeurs par défaut — tous les toys dans la rotation,
+  trame de l'appareil, reflet — donc rien n'obligeait à ouvrir un écran avant de
+  le laisser se poser. Ce qui l'oblige maintenant est ailleurs : **une
+  application ne peut pas refuser un widget**, sauf depuis son activité de
+  configuration, en rendant `RESULT_CANCELED`. C'est le seul endroit d'où l'on
+  puisse dire non au-delà du troisième hublot — voir `MatrixWidgetProvider`.
+
+  `reconfigurable` reste, et pour la même raison qu'avant : c'est lui qui met les
+  réglages derrière l'appui long, là où on les cherche quand on les veut.
+-->

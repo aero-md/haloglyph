@@ -24,6 +24,7 @@ rootProject.name = "Haloglyph"
 include(":core:matrix")   // Kotlin pur — masque 489, polices, primitives, FrameSink
 include(":core:config")   // SharedPreferences partagées entre les trois surfaces
 include(":core:glyph")    // SEUL module qui connaît le SDK Nothing
+include(":core:look")     // le hublot peint sur un Canvas — aperçu ET widget
 include(":core:widget")   // émulation de la matrice en widget d'écran d'accueil
 include(":core:ui")       // thème + MatrixPreview Compose
 
@@ -36,6 +37,10 @@ include(":toy:dice")
 include(":toy:dice:engine")
 include(":toy:sono")
 include(":toy:sono:engine")
+include(":toy:plumb")
+include(":toy:plumb:engine")
+include(":toy:gforce")
+include(":toy:gforce:engine")
 
 // app/ : le hub, qui assemble les toys embarqués.
 include(":app")

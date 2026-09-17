@@ -4,14 +4,13 @@
   toy ne touche pas au manifeste de `app/`. Les permissions Glyph et le bloc
   <queries> viennent de `core:glyph`, dont ce module dépend.
 
-  Les deux surfaces système sont **ouvertes** : `android:enabled` vaut `true` sur
-  le service Glyph et sur le fournisseur de widget. Le toy apparaît donc dans
-  Glyph Interface → Glyph Toys et dans le sélecteur de widgets.
+  Le service Glyph est **ouvert** : `android:enabled` vaut `true`, donc le toy
+  apparaît dans Glyph Interface → Glyph Toys.
 
-  Elles ont porté `false` le temps du prototype du 06.09.2026, où l'app n'était
-  qu'un écran de réglages à regarder. L'attribut avait été préféré à un bloc
-  commenté précisément pour ça : le manifeste restait complet et relu par les
-  outils, et le rouvrir n'a été qu'un mot à changer deux fois.
+  Il a porté `false` le temps du prototype du 06.09.2026, où l'app n'était qu'un
+  écran de réglages à regarder. L'attribut avait été préféré à un bloc commenté
+  précisément pour ça : le manifeste restait complet et relu par les outils, et
+  le rouvrir n'a été qu'un mot à changer.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -49,20 +48,12 @@
                 android:value="1" />
         </service>
 
-        <!-- Surface 2 : l'émulation, sur n'importe quel Android. Non exporté :
-             seul le système lui parle, via un composant explicite. -->
-        <receiver
-            android:name="red.suns.haloglyph.lapse.widget.LapseWidget"
-            android:enabled="true"
-            android:exported="false"
-            android:label="@string/toy_lapse_name">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/lapse_widget_info" />
-        </receiver>
+        <!-- Surface 2 : l'émulation, sur n'importe quel Android. Elle n'est plus
+             déclarée ici. Le pack ne pose plus qu'un **hublot générique**, qui
+             porte tous les toys et se change au double tap : son receiver et son
+             service vivent dans `app`, le seul module qui sache ce qu'il
+             embarque. Ce que ce toy apporte au hublot est du Kotlin et rien
+             d'autre — voir `LapseWidgetToy`. -->
 
         <!-- Surface 3 : les réglages. Lancée par le hub, jamais par le système :
              `exported` reste faux, et il n'y a pas d'intent-filter à écrire. -->

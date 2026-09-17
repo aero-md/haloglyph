@@ -51,12 +51,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.roundToIntRect
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -64,6 +68,7 @@ import red.suns.haloglyph.core.matrix.Frame
 import red.suns.haloglyph.core.matrix.MatrixSpec
 import red.suns.haloglyph.core.ui.Breadcrumb
 import red.suns.haloglyph.core.ui.DashedAddRow
+import red.suns.haloglyph.core.ui.GearGlyph
 import red.suns.haloglyph.core.ui.HaloCard
 import red.suns.haloglyph.core.ui.HaloCardBg
 import red.suns.haloglyph.core.ui.HaloCardRadius
@@ -71,22 +76,24 @@ import red.suns.haloglyph.core.ui.HaloControlBg
 import red.suns.haloglyph.core.ui.HaloFaint
 import red.suns.haloglyph.core.ui.HaloField
 import red.suns.haloglyph.core.ui.HaloGutter
-import red.suns.haloglyph.core.ui.HaloHair
 import red.suns.haloglyph.core.ui.HaloMenu
-import red.suns.haloglyph.core.ui.HaloMenuItem
 import red.suns.haloglyph.core.ui.HaloMuted
-import red.suns.haloglyph.core.ui.HaloRed
+import red.suns.haloglyph.core.ui.HaloOption
 import red.suns.haloglyph.core.ui.HaloScreen
 import red.suns.haloglyph.core.ui.HaloSelect
 import red.suns.haloglyph.core.ui.HaloText
 import red.suns.haloglyph.core.ui.HaloglyphTheme
 import red.suns.haloglyph.core.ui.Legend
 import red.suns.haloglyph.core.ui.LinkedTiles
+import red.suns.haloglyph.core.ui.MATRIX_FRAME_NANOS
+import red.suns.haloglyph.core.ui.MatrixFrameState
 import red.suns.haloglyph.core.ui.MatrixPreview
 import red.suns.haloglyph.core.ui.MonoValue
 import red.suns.haloglyph.core.ui.PillButton
 import red.suns.haloglyph.core.ui.ScreenTitle
 import red.suns.haloglyph.core.ui.SelectChevron
+import red.suns.haloglyph.core.ui.haloMenuAnchor
+import red.suns.haloglyph.core.ui.rememberMatrixFrameState
 import red.suns.haloglyph.lapse.LapseConfig
 import red.suns.haloglyph.lapse.R
 import red.suns.haloglyph.lapse.engine.LapseEngine
@@ -180,7 +187,7 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    var brightness by remember { mutableStateOf(IntArray(spec.cellCount)) }
+    val preview = rememberMatrixFrameState(spec)
     var diff by remember { mutableStateOf<TimeBreakdown.Diff?>(null) }
 
     var savedDates by remember { mutableStateOf(LapseConfig.savedDates(prefs)) }
@@ -213,19 +220,26 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
      * préférences que le service Glyph. Cadencé par `withFrameNanos`, donc
      * arrêté de lui-même dès que l'écran s'éteint.
      *
-     * **Et arrêté aussi tant qu'un sélecteur est ouvert.** La boucle republie
-     * `brightness` à chaque vsync, ce qui recompose tout le corps de l'écran —
-     * dialogue compris. Un sélecteur d'heure encaissait ; le sélecteur de date,
-     * qui recompose une grille de 42 jours, sautait des images à chaque
-     * changement de mois. L'aperçu est de toute façon caché derrière le
-     * dialogue : le faire tourner ne servait qu'à ralentir ce qu'on regarde.
+     * **Et arrêté aussi tant qu'un sélecteur est ouvert.** L'aperçu est de toute
+     * façon caché derrière le dialogue : le faire tourner ne servait qu'à
+     * ralentir ce qu'on regarde — et le sélecteur de date, qui recompose une
+     * grille de 42 jours, sautait des images à chaque changement de mois.
+     *
+     * Ce que la boucle publie compte autant que sa cadence. Les pixels passent
+     * par un [MatrixFrameState], qui n'invalide que le dessin et seulement quand
+     * l'image change ; `diff` n'est réécrit que lorsqu'il change vraiment, soit
+     * au plus une fois par seconde. La boucle republiait l'un et l'autre à chaque
+     * vsync, ce qui recomposait tout le corps de l'écran — dialogue compris.
      */
     val pickerOpen = showDate || showTime || showAddDate || showAddTime
     LaunchedEffect(pickerOpen) {
         if (pickerOpen) return@LaunchedEffect
         val frame = Frame(spec)
+        var lastAt = 0L
         while (true) {
-            withFrameNanos { }
+            val now = withFrameNanos { it }
+            if (now - lastAt < MATRIX_FRAME_NANOS) continue
+            lastAt = now
             renderer.labels = MatrixLabels.current()
             val cfg = lapses[selected]
             if (engine.refMillis != cfg.ref) engine.setRef(cfg.ref)
@@ -235,8 +249,8 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
             val snap = engine.update(System.currentTimeMillis(), System.nanoTime() / 1e9)
             frame.clear()
             renderer.render(frame, snap)
-            brightness = frame.toBrightness().copyOf()
-            diff = snap.diff
+            frame.pushTo(preview.sink)
+            if (snap.diff != diff) diff = snap.diff
         }
     }
 
@@ -252,29 +266,34 @@ private fun LapseSettingsScreen(onBack: () -> Unit) {
             listOf(stringResource(R.string.lapse_settings_parent), stringResource(R.string.toy_lapse_name)),
             onBack = onBack,
         )
-        LapseTitle(
-            lapses = lapses,
-            selected = selected,
-            onSelect = { select(it) },
-            onManage = { context.startActivity(Intent(context, LapseManageActivity::class.java)) },
-        )
-
-        // ---------- l'aperçu, en tête ----------
+        // ---------- l'aperçu, et le lapse qu'il montre ----------
+        //
+        // Le titre est **sous** la matrice, pas au-dessus. C'est un sélecteur
+        // avant d'être un titre, et un sélecteur se place là où le pouce arrive
+        // — pas en haut d'un téléphone de six pouces, où il fallait rattraper
+        // l'appareil pour changer de lapse. Au milieu de l'écran, entre l'aperçu
+        // et la lecture, il nomme les deux et se tient à portée.
 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 6.dp, bottom = 2.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(9.dp),
         ) {
-            MatrixPreview(brightness = brightness, modifier = Modifier.size(252.dp), spec = spec)
-            DiffReadout(current.ref, diff, zone)
+            MatrixPreview(state = preview, modifier = Modifier.size(252.dp))
+            Spacer(Modifier.height(10.dp))
+            LapseTitle(
+                lapses = lapses,
+                selected = selected,
+                onSelect = { select(it) },
+                onManage = { context.startActivity(Intent(context, LapseManageActivity::class.java)) },
+            )
+            DiffReadout(diff)
         }
 
-        // Pas de label de section entre la lecture et les réglages : le titre de
-        // l'écran nomme déjà le lapse, et « ACTIF » redisait ce que le point
-        // rouge du quick switch dit mieux. Il ne reste que la respiration.
+        // Pas de label de section entre la lecture et les réglages : le titre
+        // nomme déjà le lapse et le quick switch dit lequel est actif. Il ne
+        // reste que la respiration.
         Spacer(Modifier.height(18.dp))
 
         // ---------- appariées : les deux décident de ce que la matrice montre ----------
@@ -526,8 +545,20 @@ private fun HaloTimePicker(
  *
  * Remplace le rail de sabliers — plus de sens à un rail une fois le nombre de
  * lapse variable. Un tap ouvre un quick switch **de sélection seule** : choisir
- * y rend un lapse actif sur la matrice, rien de plus. Sa dernière ligne, seule
- * à porter l'accent, mène à [LapseManageActivity] pour tout le reste.
+ * y rend un lapse actif sur la matrice, rien de plus. Sa dernière section, sous
+ * le filet et marquée d'un engrenage, mène à [LapseManageActivity] pour tout le
+ * reste.
+ *
+ * Cette pop-in est celle de n'importe quel sélecteur de l'app, sans exception :
+ * le lapse actif s'y marque en accent comme une option choisie ailleurs, et la
+ * sortie vers la gestion se marque par sa section et son signe, pas par une
+ * couleur qui voudrait dire deux choses.
+ *
+ * **Centré**, et non aligné à gauche comme un titre d'écran : il n'est plus en
+ * tête de page, il est au milieu, entre l'aperçu et sa lecture. Le fil d'ariane
+ * dit déjà où l'on est ; ce qui reste ici est un contrôle, et un contrôle posé
+ * seul sur la largeur se centre. Le rembourrage l'entoure de tous les côtés,
+ * pour que la zone de touche déborde du texte partout pareil.
  */
 @Composable
 private fun LapseTitle(
@@ -537,54 +568,39 @@ private fun LapseTitle(
     onManage: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)) {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .clickable { expanded = true }
-                .padding(end = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(9.dp),
-        ) {
-            ScreenTitle(lapses[selected].name, small = true)
-            // Le même triangle que les sélecteurs des cartes, à l'échelle d'un
-            // titre. Décalé vers le bas : il s'aligne sur la ligne de base du
-            // texte, pas sur le milieu de sa boîte, qui inclut les jambages.
-            SelectChevron(
-                color = HaloFaint,
-                width = 14.dp,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-        }
-        HaloMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            lapses.forEachIndexed { index, lapse ->
-                HaloMenuItem(
-                    label = lapse.name,
-                    size = MENU_TITLE_SIZE,
-                    leading = {
-                        // La pastille garde sa place même vide : les noms
-                        // s'alignent, actif ou non.
-                        if (index == selected) {
-                            Canvas(Modifier.size(6.dp)) { drawCircle(HaloRed, size.minDimension / 2f) }
-                        } else {
-                            Spacer(Modifier.size(6.dp))
-                        }
-                    },
-                ) { onSelect(index); expanded = false }
-            }
-            Box(Modifier.fillMaxWidth().height(1.dp).padding(horizontal = 10.dp).background(HaloHair))
-            HaloMenuItem(
-                label = stringResource(R.string.lapse_manage_title),
-                size = MENU_TITLE_SIZE,
-                color = HaloRed,
-                leading = { Spacer(Modifier.size(6.dp)) },
-            ) { expanded = false; onManage() }
-        }
+    var anchor by remember { mutableStateOf(IntRect.Zero) }
+    val manage = stringResource(R.string.lapse_manage_title)
+    Row(
+        modifier = Modifier
+            .onGloballyPositioned { anchor = it.boundsInRoot().roundToIntRect() }
+            .clip(RoundedCornerShape(8.dp))
+            .haloMenuAnchor({ expanded }) { expanded = it }
+            .padding(horizontal = 10.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(9.dp),
+    ) {
+        ScreenTitle(lapses[selected].name, small = true)
+        // Le même triangle que les sélecteurs des cartes, à l'échelle d'un
+        // titre. Décalé vers le bas : il s'aligne sur la ligne de base du
+        // texte, pas sur le milieu de sa boîte, qui inclut les jambages.
+        SelectChevron(
+            color = HaloFaint,
+            width = 14.dp,
+            modifier = Modifier.padding(top = 8.dp),
+        )
     }
+    HaloMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        anchor = anchor,
+        sections = listOf(
+            lapses.mapIndexed { index, lapse ->
+                HaloOption(label = lapse.name, selected = index == selected) { onSelect(index) }
+            },
+            listOf(HaloOption(label = manage, icon = { color -> GearGlyph(color) }) { onManage() }),
+        ),
+    )
 }
-
-/** Les options du titre se lisent à la taille d'un titre, pas d'un réglage. */
-private val MENU_TITLE_SIZE = 16.sp
 
 /**
  * Une date favorite : la ligne entière applique, la croix supprime.
@@ -646,18 +662,18 @@ private fun SavedDateRow(
 }
 
 /**
- * La lecture sous l'aperçu : la date de référence, puis le delta en toutes
- * lettres. C'est le seul endroit de l'écran où la matrice est traduite en texte
- * — et c'est ce qui permet de vérifier que ce qu'elle abrège est juste.
+ * La lecture sous le titre : le delta en toutes lettres. C'est le seul endroit
+ * de l'écran où la matrice est traduite en texte — et c'est ce qui permet de
+ * vérifier que ce qu'elle abrège est juste.
+ *
+ * Le rappel rouge de la date de référence qui la surmontait a sauté. Il redisait
+ * en petit, en accent et en capitales ce que la carte « date » affiche deux
+ * blocs plus bas, en grand et modifiable — et une couleur qui n'a plus rien à
+ * signaler finit par ne plus rien signaler du tout.
  */
 @Composable
-private fun DiffReadout(refMillis: Long, diff: TimeBreakdown.Diff?, zone: ZoneId) {
+private fun DiffReadout(diff: TimeBreakdown.Diff?) {
     if (diff == null) return
-    val ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(refMillis), zone)
-    val head = stringResource(
-        if (diff.direction == TimeBreakdown.Direction.SINCE) R.string.diff_since
-        else R.string.diff_until
-    )
 
     /* Les six unités sont lues sans condition, avant d'être triées :
        `pluralStringResource` est un composable, et un appel sous `if` dans une
@@ -680,20 +696,10 @@ private fun DiffReadout(refMillis: Long, diff: TimeBreakdown.Diff?, zone: ZoneId
         add("${diff.seconds} $s")
     }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            "$head ${dateLabel(ldt)} ${ldt.format(TIME_FMT)}".uppercase(),
-            color = HaloRed,
-            fontSize = 11.sp,
-            letterSpacing = 0.9.sp,
-            fontFamily = FontFamily.Monospace,
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            parts.joinToString(" "),
-            color = HaloMuted,
-            fontSize = 11.sp,
-            fontFamily = FontFamily.Monospace,
-        )
-    }
+    Text(
+        parts.joinToString(" "),
+        color = HaloMuted,
+        fontSize = 11.sp,
+        fontFamily = FontFamily.Monospace,
+    )
 }

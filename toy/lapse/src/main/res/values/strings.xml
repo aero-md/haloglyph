@@ -19,6 +19,10 @@
     <!-- Affiché par le système dans Glyph Interface → Glyph Toys. -->
     <string name="toy_lapse_summary">Time elapsed since / remaining until a date — long press to switch format</string>
 
+    <!-- Les deux formats de widget, dans le sélecteur. Non traduites : un nom
+         propre et deux nombres. Le format est dans le libellé parce que c'est la
+         seule chose qui les distingue à l'œil dans la liste. -->
+
     <!-- Écran de réglages. Le nom du hub est répété ici plutôt que lu dans
          `app` : un module de toy ne dépend pas de l'application qui l'embarque,
          et c'est un nom propre, donc invariable. -->

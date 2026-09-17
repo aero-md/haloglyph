@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Premier plan de l'icone adaptative : la couronne solaire seule, sur
-     transparent. La couronne « dense » a ses pointes a r=142 sur un
+     transparent. La couronne « 12 rayons » a ses pointes a r=146 sur un
      viewport de 512 (soit 256 de rayon). Le groupe est reduit a 76 % pour
      laisser une marge visible autour du dessin dans le cadre du launcher :
      la zone sure adaptative va jusqu'a r=156 (cercle 66/108), mais la
      remplir a ras (comme au 110 % precedent) donnait une icone qui touchait
      le bord et paraissait trop grande une fois masquee par le launcher.
-     A 76 %, les pointes sont a r=107.9 : l'icone respire dans la pastille du
+     A 76 %, les pointes sont a r=111 : l'icone respire dans la pastille du
      launcher au lieu de la remplir, et tient la comparaison avec les icones
      Nothing du tiroir, qui sont toutes tres en retrait de leur masque.
      Sert aussi de calque `monochrome` : le launcher le teinte lui-meme.
@@ -23,14 +23,14 @@
         android:pivotY="256"
         android:scaleX="0.76"
         android:scaleY="0.76">
-        <!-- couronne : 12 rayons noirs -->
+        <!-- couronne : 9 rayons noirs -->
         <path
             android:fillColor="#000000"
-            android:pathData="M245,188 L245,159 A11,11 0 0 1 267,159 L267,188 Z M323.03,271.86 L381.24,295.97 A11,11 0 0 1 372.82,316.29 L314.61,292.19 Z M311.86,296.31 L332.37,316.81 A11,11 0 0 1 316.81,332.37 L296.31,311.86 Z M292.19,314.61 L316.29,372.82 A11,11 0 0 1 295.97,381.24 L271.86,323.03 Z M267,324 L267,353 A11,11 0 0 1 245,353 L245,324 Z M240.14,323.03 L216.03,381.24 A11,11 0 0 1 195.71,372.82 L219.81,314.61 Z M215.69,311.86 L195.19,332.37 A11,11 0 0 1 179.63,316.81 L200.14,296.31 Z M197.39,292.19 L139.18,316.29 A11,11 0 0 1 130.76,295.97 L188.97,271.86 Z M188,267 L159,267 A11,11 0 0 1 159,245 L188,245 Z M188.97,240.14 L130.76,216.03 A11,11 0 0 1 139.18,195.71 L197.39,219.81 Z M200.14,215.69 L179.63,195.19 A11,11 0 0 1 195.19,179.63 L215.69,200.14 Z M219.81,197.39 L195.71,139.18 A11,11 0 0 1 216.03,130.76 L240.14,188.97 Z" />
+            android:pathData="M271,188 L271,159 A15,15 0 0 0 241,159 L241,188 Z M307.39,302.99 L332.50,317.49 A15,15 0 0 0 347.50,291.51 L322.39,277.01 Z M277.01,322.39 L308.51,376.95 A15,15 0 0 0 334.49,361.95 L302.99,307.39 Z M241,324 L241,353 A15,15 0 0 0 271,353 L271,324 Z M209.01,307.39 L177.51,361.95 A15,15 0 0 0 203.49,376.95 L234.99,322.39 Z M189.61,277.01 L164.50,291.51 A15,15 0 0 0 179.50,317.49 L204.61,302.99 Z M188,241 L125,241 A15,15 0 0 0 125,271 L188,271 Z M204.61,209.01 L179.50,194.51 A15,15 0 0 0 164.50,220.49 L189.61,234.99 Z M234.99,189.61 L203.49,135.05 A15,15 0 0 0 177.51,150.05 L209.01,204.61 Z" />
 
-        <!-- quart superieur droit : 4 rayons rouges -->
+        <!-- quart superieur droit : 3 rayons rouges -->
         <path
             android:fillColor="#D11A11"
-            android:pathData="M271.86,188.97 L295.97,130.76 A11,11 0 0 1 316.29,139.18 L292.19,197.39 Z M296.31,200.14 L316.81,179.63 A11,11 0 0 1 332.37,195.19 L311.86,215.69 Z M314.61,219.81 L372.82,195.71 A11,11 0 0 1 381.24,216.03 L323.03,240.14 Z M324,245 L353,245 A11,11 0 0 1 353,267 L324,267 Z" />
+            android:pathData="M302.99,204.61 L334.49,150.05 A15,15 0 0 0 308.51,135.05 L277.01,189.61 Z M322.39,234.99 L347.50,220.49 A15,15 0 0 0 332.50,194.51 L307.39,209.01 Z M324,271 L387,271 A15,15 0 0 0 387,241 L324,241 Z" />
     </group>
 </vector>

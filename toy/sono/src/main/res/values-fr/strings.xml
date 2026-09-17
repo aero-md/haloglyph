@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="toy_sono_summary">Le micro sur la matrice : spectre, aiguille, spectrogramme. Appui long pour changer de mode.</string>
+    <string name="toy_sono_summary">Le micro sur la matrice : spectre, aiguille, onde. Appui long pour changer de mode.</string>
 
     <string name="sono_mic_channel">Micro en cours d\'utilisation</string>
     <string name="sono_mic_notice">Sono écoute sur la Glyph Matrix</string>
+
+    <string name="sono_mic_armed_title">Sono écoute</string>
+    <string name="sono_mic_armed_text">La matrice continue d\'afficher le son, écran éteint.</string>
+    <string name="sono_mic_disarm">Couper</string>
+
+    <string name="sono_tile_label">Accès micro Haloglyph</string>
+    <string name="sono_tile_listening">À l\'écoute</string>
+    <string name="sono_tile_off">Éteint</string>
 
     <string name="sono_section_display">Affichage</string>
     <string name="sono_mode">Mode</string>
     <string name="sono_mode_hint">Appui long sur le Glyph Button pour changer</string>
     <string name="sono_mode_spectrum">Spectre</string>
     <string name="sono_mode_needle">Aiguille</string>
-    <string name="sono_mode_spectrogram">Spectrogramme</string>
+    <string name="sono_mode_wave">Onde</string>
 
     <string name="sono_preview_simulated">Aperçu simulé — le micro reste éteint</string>
 
@@ -22,5 +30,14 @@
     <string name="sono_permission_action">Autoriser</string>
     <string name="sono_permission_note">Le son est analysé au vol, jamais enregistré ni transmis.</string>
     <string name="sono_permission_missing">Sans elle, Sono n\'a rien à afficher.</string>
+
+    <!-- Le seul texte de ce groupe qui reste utilisé : le bouton d'action de la
+         notification du volet (`MicNotice`). Les cartes « Micro armé » et
+         « Ajouter la tuile » sont parties le 2026-09-16 ; voir PRODUIT.md. -->
+    <string name="sono_mic_arm_action">Armer</string>
+
+    <string name="sono_mic_shortcut_text">Arme le micro avant de poser le téléphone.</string>
+    <string name="sono_notice_add">Raccourci dans le volet</string>
+    <string name="sono_notice_add_note">Un bouton Armer parmi les notifications. Contrairement à la tuile, il ne referme pas le volet.</string>
 
 </resources>

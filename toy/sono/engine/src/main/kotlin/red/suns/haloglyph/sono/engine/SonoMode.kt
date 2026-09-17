@@ -12,17 +12,24 @@ package red.suns.haloglyph.sono.engine
  *
  * L'ordre est celui de la rotation, et il n'est pas indifférent : on part de ce
  * qui se regarde ([SPECTRE]), on passe par ce qui se lit ([AIGUILLE]), on finit
- * par ce qui se relit ([SPECTROGRAMME], qui porte les cinq dernières secondes).
+ * par ce qui défile ([ONDE]).
  */
 enum class SonoMode {
-    /** Barres symétriques autour de l'axe médian. */
+    /** Barres symétriques autour de l'axe médian, une par bande de fréquence. */
     SPECTRE,
 
     /** VU-mètre à aiguille, niveau chiffré en dessous. */
     AIGUILLE,
 
-    /** Le spectre en fonction du temps : fréquence en abscisse, temps qui descend. */
-    SPECTROGRAMME;
+    /**
+     * La forme d'onde qui défile de droite à gauche.
+     *
+     * Le même dessin que [SPECTRE] — des barres symétriques autour de l'axe —
+     * mais l'abscisse y est le **temps** et non la fréquence : la colonne de
+     * droite est l'instant présent, chaque colonne glisse d'un cran vers la
+     * gauche, et ce qui sort par le bord a une seconde et demie.
+     */
+    ONDE;
 
     val next: SonoMode get() = entries[(ordinal + 1) % entries.size]
 

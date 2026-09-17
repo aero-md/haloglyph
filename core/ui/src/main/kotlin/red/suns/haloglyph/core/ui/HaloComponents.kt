@@ -4,6 +4,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,12 +24,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,10 +46,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.roundToIntRect
 import androidx.compose.ui.unit.sp
 
 /**
@@ -70,6 +83,9 @@ import androidx.compose.ui.unit.sp
  * - **Deux tuiles ne se retrouvent côte à côte que si elles sont liées par le
  *   sens.** [LinkedTiles] le dit à l'œil avec son pont ; s'en servir pour
  *   remplir une ligne serait un mensonge de mise en page.
+ * - **Toutes les listes d'options sont la même liste.** Une seule taille de
+ *   texte, un seul signe de sélection — l'accent sur le libellé —, un seul filet
+ *   pour séparer une section. Voir [HaloMenu] et [HaloOption].
  */
 
 /** Gouttière unique entre deux blocs, tuiles comprises. */
@@ -274,6 +290,29 @@ fun MonoValue(
 // ---------------------------------------------------------------- contrôles
 
 /**
+ * Une entrée de liste déroulante : un libellé, ce qu'elle fait, et deux choses
+ * facultatives — l'état sélectionné et une icône.
+ *
+ * Il n'y a **qu'une façon de dire « c'est celle-ci »** : le libellé passe en
+ * accent. La pastille rouge à gauche que portait le quick switch des lapses
+ * disait la même chose d'une deuxième manière, dans une seule liste de l'app ;
+ * deux vocabulaires pour un seul état, c'est un vocabulaire de trop.
+ *
+ * [icon] reçoit la couleur de la ligne pour que le signe suive le libellé sans
+ * que l'appelant ait à connaître la règle de l'accent.
+ *
+ * [onClick] ne dit **que** ce que l'entrée fait : refermer la pop-in est l'affaire
+ * de la pop-in, et le moment où elle le fait compte trop pour être laissé à
+ * l'appelant — voir [HaloMenu].
+ */
+class HaloOption(
+    val label: String,
+    val selected: Boolean = false,
+    val icon: (@Composable (Color) -> Unit)? = null,
+    val onClick: () -> Unit,
+)
+
+/**
  * La liste déroulante d'un sélecteur — la « pop-in ».
  *
  * Une **carte qui s'ouvre par-dessus les autres** : même rayon ([HaloCardRadius])
@@ -282,26 +321,155 @@ fun MonoValue(
  * angles à 4 dp et son gris tonal, qui n'appartiennent à rien d'autre dans
  * l'app.
  *
- * Ce composant n'est qu'une enveloppe : ce sont [HaloMenuItem] et le sélecteur
- * qui décident du contenu.
+ * ## Des sections, et un filet entre elles
+ *
+ * [sections] est une liste de groupes, séparés par un filet. C'est ce qui permet
+ * à une liste de choix de porter en plus une **sortie** — « gérer les lapses »,
+ * qui n'est pas une valeur mais un écran. Le filet dit que la dernière entrée ne
+ * se choisit pas comme les autres ; c'est le seul signal dont elle a besoin, et
+ * c'est pour ça qu'elle n'est plus en accent : le rouge est réservé à ce qui est
+ * sélectionné.
+ *
+ * ## Pas de gouttière d'icône
+ *
+ * Une entrée sans icône commence au bord, point. Réserver la place de l'icône sur
+ * toute la liste aurait aligné les libellés, mais au prix d'un décalage que rien
+ * n'explique à l'œil : une colonne vide devant des noms qui n'ont pas de signe.
+ * Les entrées à icône sont de toute façon dans leur propre section, séparées par
+ * un filet — elles n'ont pas à s'aligner sur les autres, elles ne se lisent pas
+ * avec elles.
+ *
+ * ## Elle apparaît et disparaît d'un coup
+ *
+ * Pas de transition, ni à l'ouverture ni à la fermeture, et **pas de fenêtre** :
+ * ce n'est ni un `DropdownMenu` ni un `Popup`, mais un simple dépôt dans l'étage
+ * du dessus de l'écran — voir [HaloOverlayHost], qui explique ce que coûtait la
+ * fenêtre et pourquoi ça se voyait.
+ *
+ * Le tap ferme la liste et agit dans la **même image** que le contrôle ; l'ouvrir
+ * l'affiche dans la même image que l'allumage de sa bordure. Il n'y a plus rien à
+ * regarder entre les deux, donc plus rien à désynchroniser. Une liste d'options
+ * n'a de toute façon pas à s'annoncer — elle est là ou elle n'y est pas.
+ *
+ * [anchor] est le contrôle qui l'ouvre, en coordonnées de la racine : il donne à
+ * la fois la position de la liste et sa largeur minimale. L'appelant le relève
+ * avec `onGloballyPositioned` — c'est tout ce qu'il a à faire.
+ *
+ * Ce composant **n'émet rien** là où il est appelé. Il peut donc être posé
+ * n'importe où dans l'arbre du contrôle sans en changer la mise en page.
  */
 @Composable
 fun HaloMenu(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit,
+    sections: List<List<HaloOption>>,
+    anchor: IntRect,
 ) {
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest,
-        modifier = modifier,
-        shape = RoundedCornerShape(HaloCardRadius),
-        containerColor = HaloControlBg,
-        tonalElevation = 0.dp,
-        shadowElevation = 0.dp,
-        content = content,
-    )
+    val host = LocalHaloOverlay.current ?: return
+    val id = remember { Any() }
+    // Écrit **pendant** la composition, et non dans un `SideEffect` : l'hôte lit
+    // `menu` après nous dans la même passe, donc le contrôle et sa liste sont
+    // composés ensemble. Publier après coup coûtait une image pleine — voir
+    // [HaloMenuSlot], qui explique pourquoi le sens de lecture compte.
+    if (expanded) host.show(id, HaloMenuRequest(anchor, sections, onDismissRequest))
+    else host.hide(id)
+
+    DisposableEffect(Unit) { onDispose { host.hide(id) } }
+}
+
+/**
+ * Le contrôle qui ouvre une liste : il bascule **à l'appui du doigt**, pas au
+ * relâchement.
+ *
+ * La mesure est sans appel : entre le doigt qui se pose et le `onClick` d'un
+ * `clickable`, il s'écoule cinquante à soixante-dix millisecondes — la durée du
+ * tap lui-même. C'était, et de loin, le plus gros poste du délai ressenti à
+ * l'ouverture d'une liste, devant tout ce qui relève du rendu. Un contrôle qui
+ * réagit à l'appui économise ce temps-là sans rien accélérer : il arrête
+ * simplement d'attendre.
+ *
+ * Le prix, et il est réel : un doigt qui se pose pour **faire défiler** la page
+ * ouvre la liste avant de partir. On la retire dès que le geste dépasse le seuil
+ * de glissement du système, donc au bout d'une image ou deux. C'est le seul cas
+ * où ce choix se voit, et c'est le compromis assumé de l'immédiateté.
+ *
+ * Pas de `clickable`, donc pas d'ondulation : la bordure qui s'allume **en même
+ * temps que la liste** est déjà la réponse au doigt, et elle arrive maintenant à
+ * l'appui. L'accessibilité, elle, est déclarée à la main — un lecteur d'écran
+ * active le contrôle par la sémantique, pas par le toucher.
+ *
+ * [expanded] est une lambda et non un booléen : le détecteur de geste est monté
+ * une fois pour toutes et doit lire l'état **au moment du geste**. Le passer par
+ * valeur obligerait à remonter le détecteur à chaque ouverture, ce qui annulerait
+ * le geste en cours et avec lui l'abandon au défilement.
+ */
+fun Modifier.haloMenuAnchor(
+    expanded: () -> Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+): Modifier = this
+    .semantics(mergeDescendants = true) {
+        role = Role.DropdownList
+        onClick {
+            onExpandedChange(!expanded())
+            true
+        }
+    }
+    .pointerInput(Unit) {
+        val slop = viewConfiguration.touchSlop
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false)
+            val wasOpen = expanded()
+            onExpandedChange(!wasOpen)
+            // On refermait : plus rien à surveiller.
+            if (wasOpen) return@awaitEachGesture
+            while (true) {
+                val change = awaitPointerEvent().changes.firstOrNull { it.id == down.id } ?: break
+                if (!change.pressed) break
+                if ((change.position - down.position).getDistance() > slop) {
+                    onExpandedChange(false)
+                    break
+                }
+            }
+        }
+    }
+
+/**
+ * La liste elle-même : la carte, ses sections, ses entrées.
+ *
+ * Séparée de [HaloMenu] parce qu'elle est dessinée ailleurs que là où elle est
+ * demandée — [HaloOverlayHost] la pose au-dessus de l'écran.
+ *
+ * La largeur minimale n'est pas ici : elle arrive par les contraintes de mesure
+ * que l'étage du dessus impose, et `width(IntrinsicSize.Max)` s'y coerce.
+ */
+@Composable
+internal fun HaloMenuSurface(request: HaloMenuRequest) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(HaloCardRadius))
+            .background(HaloControlBg)
+            // Absorbe le toucher : sans ça, presser le rembourrage de la carte
+            // tomberait sur le voile qui referme.
+            .pointerInput(Unit) { detectTapGestures { } }
+            .padding(vertical = 6.dp)
+            .width(IntrinsicSize.Max)
+            .verticalScroll(rememberScrollState()),
+    ) {
+        request.sections.forEachIndexed { index, section ->
+            if (index > 0) {
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .height(1.dp)
+                        .background(HaloHair),
+                )
+            }
+            section.forEach { option ->
+                HaloMenuItem(option) { request.onDismiss(); option.onClick() }
+            }
+        }
+    }
 }
 
 /**
@@ -312,35 +480,38 @@ fun HaloMenu(
  * La famille n'est pas nommée — celle du thème est déjà la bonne, et l'imposer
  * ferait diverger cette ligne du reste des phrases de l'app.
  *
- * [size] vient du sélecteur qui ouvre la liste : les options d'un réglage de
- * carte se lisent à la taille de sa valeur, celles d'un titre à la taille d'un
- * titre. Le rembourrage suit, pour qu'une petite liste reste dense et qu'une
- * grande ne colle pas.
+ * La taille est **fixe** ([MENU_ITEM_SIZE]) et non celle du contrôle qui ouvre la
+ * liste. Elle en dépendait, et le résultat était qu'un même choix se lisait en 13
+ * dans une carte et en 16 sous un titre : deux pop-in qui ne sont pas du même
+ * monde alors qu'elles font le même travail. Une liste d'options est une liste
+ * d'options, quelle que soit la typographie de ce qui l'a ouverte.
  */
 @Composable
-fun HaloMenuItem(
-    label: String,
-    modifier: Modifier = Modifier,
-    size: androidx.compose.ui.unit.TextUnit = 13.sp,
-    color: Color = HaloText,
-    leading: (@Composable () -> Unit)? = null,
-    onClick: () -> Unit,
-) {
+private fun HaloMenuItem(option: HaloOption, onClick: () -> Unit) {
+    val color = if (option.selected) HaloRed else HaloText
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = MENU_ITEM_PADDING),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(9.dp),
     ) {
-        leading?.invoke()
-        Text(label, color = color, fontSize = size, maxLines = 1)
+        option.icon?.let { icon ->
+            Box(Modifier.size(MENU_ICON_SIZE), contentAlignment = Alignment.Center) { icon(color) }
+        }
+        Text(option.label, color = color, fontSize = MENU_ITEM_SIZE, maxLines = 1)
     }
 }
 
 /** Serré : la liste doit se lire d'un coup d'œil, pas se parcourir au pouce. */
 private val MENU_ITEM_PADDING = 8.dp
+
+/** La taille de référence : celle qu'avait le quick switch des lapses. */
+private val MENU_ITEM_SIZE = 16.sp
+
+/** La gouttière d'icône, dimensionnée sur [GearGlyph]. */
+private val MENU_ICON_SIZE = 14.dp
 
 /**
  * Sélecteur : rectangle arrondi bordé, valeur à gauche, triangle à droite.
@@ -351,42 +522,197 @@ private val MENU_ITEM_PADDING = 8.dp
  *
  * La valeur affichée est en linéale, comme les options qu'elle ouvre : c'est le
  * même texte, il change juste de place quand on choisit.
+ *
+ * [extra] est une section supplémentaire, sous le filet : des entrées qui ne sont
+ * pas des valeurs de [T] et ne seront donc jamais sélectionnées — une sortie vers
+ * un écran, typiquement.
  */
 @Composable
 fun <T> HaloSelect(
     options: List<Pair<T, String>>,
     selected: T,
     modifier: Modifier = Modifier,
-    textSize: androidx.compose.ui.unit.TextUnit = 13.sp,
+    extra: List<HaloOption> = emptyList(),
     onSelect: (T) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    var anchor by remember { mutableStateOf(IntRect.Zero) }
     val label = options.firstOrNull { it.first == selected }?.second.orEmpty()
     Box(modifier) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .onGloballyPositioned { anchor = it.boundsInRoot().roundToIntRect() }
                 .clip(RoundedCornerShape(FieldRadius))
-                .border(1.5.dp, if (expanded) HaloText else HaloHair2, RoundedCornerShape(FieldRadius))
-                .clickable { expanded = true }
+                .border(FieldStroke, if (expanded) HaloText else HaloHair2, RoundedCornerShape(FieldRadius))
+                .haloMenuAnchor({ expanded }) { expanded = it }
                 .padding(horizontal = 12.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(label, color = HaloText, fontSize = textSize, maxLines = 1)
+            Text(label, color = HaloText, fontSize = SELECT_LABEL_SIZE, maxLines = 1)
             SelectChevron(color = HaloText, width = 9.dp)
         }
-        HaloMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            options.forEach { (value, text) ->
-                HaloMenuItem(
-                    label = text,
-                    size = textSize,
-                    color = if (value == selected) HaloRed else HaloText,
-                ) { onSelect(value); expanded = false }
+        HaloMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            anchor = anchor,
+            sections = buildList {
+                add(options.map { (value, text) ->
+                    HaloOption(label = text, selected = value == selected) { onSelect(value) }
+                })
+                if (extra.isNotEmpty()) add(extra)
+            },
+        )
+    }
+}
+
+/**
+ * La valeur lue dans un sélecteur fermé.
+ *
+ * Un cran sous ses options : la liste ouverte est ce qu'on compare, le contrôle
+ * fermé n'est qu'un rappel de ce qui a été choisi.
+ */
+private val SELECT_LABEL_SIZE = 15.sp
+
+/**
+ * Le contour d'un contrôle porteur de valeur.
+ *
+ * Un trait, pas un cadre : le sélecteur n'a pas de fond à lui, sa bordure sert à
+ * délimiter la zone cliquable et rien de plus. À 1,5 dp elle pesait autant que le
+ * pointillé d'ajout, qui lui a vraiment quelque chose à dire.
+ */
+private val FieldStroke = 1.dp
+
+/**
+ * Une rangée de segments dans une gouttière, un seul allumé.
+ *
+ * Ce n'est ni un sélecteur ni une pilule, et c'est assumé : ni l'un ni l'autre ne
+ * portent un choix qu'on refait sans arrêt, à l'aller comme au retour. Le segment
+ * allumé prend le fond d'un contrôle, les autres restent dans le creux — la même
+ * grammaire que le pont de [LinkedTiles], où c'est le creux qui se voit.
+ *
+ * ## Quand s'en servir plutôt que d'un [HaloSelect]
+ *
+ * Quand les choix sont **peu nombreux et se comparent d'un coup d'œil** : un
+ * sélecteur cache les options derrière un geste, ce qui est exactement ce qu'on
+ * veut pour une valeur qu'on règle une fois, et exactement ce qu'on ne veut pas
+ * pour un réglage qu'on parcourt. Les toys d'un hublot sont dans le second cas —
+ * on vient voir ce qui est allumé, pas ouvrir trois listes pour l'apprendre.
+ *
+ * [options] fait la largeur : chaque segment prend sa part, pas sa place. Au-delà
+ * de cinq ou six, les libellés se rognent et c'est le sélecteur qu'il faut.
+ */
+@Composable
+fun <T> HaloSegments(
+    options: List<Pair<T, String>>,
+    selected: T,
+    modifier: Modifier = Modifier,
+    onSelect: (T) -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(SEGMENT_RADIUS))
+            .background(HaloScreen)
+            .padding(SEGMENT_GUTTER),
+        horizontalArrangement = Arrangement.spacedBy(SEGMENT_GUTTER),
+    ) {
+        for ((value, label) in options) {
+            val on = value == selected
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(SEGMENT_RADIUS - SEGMENT_GUTTER))
+                    .background(if (on) HaloControlBg else Color.Transparent)
+                    .clickable { onSelect(value) }
+                    .padding(vertical = SEGMENT_PADDING),
+                contentAlignment = Alignment.Center,
+            ) {
+                MonoValue(label, color = if (on) HaloText else HaloMuted, size = 13.sp)
             }
         }
     }
 }
+
+private val SEGMENT_RADIUS = 12.dp
+
+/** L'épaisseur du creux autour du segment allumé. C'est elle qu'on voit. */
+private val SEGMENT_GUTTER = 4.dp
+
+/**
+ * La hauteur d'un segment, et elle est courte exprès.
+ *
+ * Une carte de réglages de hublot en empile six, trois par onglet. À onze points
+ * de rembourrage la colonne dépassait la carte avant d'avoir tout dit ; à sept,
+ * la rangée reste plus haute que son texte sans prétendre au poids d'un bouton —
+ * un segment n'est pas une action, c'est une valeur parmi trois autres.
+ */
+private val SEGMENT_PADDING = 7.dp
+
+/**
+ * Onglets : une rangée de libellés sur un filet, celui de la page allumé.
+ *
+ * Le seul endroit de l'app qui en ait besoin est l'écran de réglages d'un widget,
+ * et il en a besoin pour une raison précise : il règle **deux choses qui ne se
+ * comparent pas** — ce que le hublot affiche, et à quoi il ressemble. Les empiler
+ * dans une même colonne aurait fait une liste où le premier réglage explique le
+ * troisième et pas le deuxième. Un onglet dit qu'on change de sujet, pas qu'on
+ * descend dans le même.
+ *
+ * ## Pourquoi ce n'est pas un [HaloSegments]
+ *
+ * Ça l'a été, et c'était l'erreur : au-dessus d'une colonne de segments, la barre
+ * d'onglets devenait le premier segment d'une liste de segments. Or elle ne
+ * choisit **pas une valeur**, elle choisit la page — rien de ce qu'elle allume ne
+ * sera enregistré nulle part. Deux rôles qui ne se ressemblent en rien portaient
+ * le même dessin, et c'est le genre de confusion qu'on paie à chaque ouverture.
+ *
+ * D'où le filet, qui est le vocabulaire de la navigation et de rien d'autre dans
+ * l'app : pas de creux, pas de fond, pas d'angle arrondi — un trait continu sous
+ * toute la rangée, et le morceau qui passe en accent sous la page où l'on est.
+ * L'accent est ici à sa place, c'est la même règle que dans une liste d'options :
+ * une seule façon de dire « c'est celle-ci ».
+ */
+@Composable
+fun HaloTabs(
+    labels: List<String>,
+    selected: Int,
+    modifier: Modifier = Modifier,
+    onSelect: (Int) -> Unit,
+) {
+    Row(modifier.fillMaxWidth()) {
+        labels.forEachIndexed { index, label ->
+            val on = index == selected
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onSelect(index) },
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                MonoValue(
+                    label,
+                    modifier = Modifier.padding(top = 2.dp, bottom = 10.dp),
+                    color = if (on) HaloText else HaloMuted,
+                    size = 13.sp,
+                )
+                Box(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(TAB_RULE)
+                        .background(if (on) HaloRed else HaloHair),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Le filet des onglets : plus épais que celui d'une [SectionLabel], parce qu'il
+ * porte l'accent et qu'un cheveu rouge de moins d'un point se lit comme un défaut
+ * d'affichage plutôt que comme un état.
+ */
+private val TAB_RULE = 2.dp
 
 /**
  * Champ : la même famille que le sélecteur et les dates sauvegardées — un

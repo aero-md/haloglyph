@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Le toy porte ses propres composants. AGP les fusionne dans l'app : ajouter un
+  toy ne touche pas au manifeste de `app/`. Les permissions Glyph et le bloc
+  <queries> viennent de `core:glyph`, dont ce module dépend.
+
+  Aucune permission d'exécution : l'accéléromètre, la gravité fusionnée et
+  l'accélération linéaire sont des capteurs **ordinaires**, lisibles sans rien
+  demander. Ni localisation ni activité physique — ce toy ne sait pas où il est et
+  n'a pas à le savoir.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Retour haptique : le changement de face, et lui seul. Pas de vibration
+         sur un nouveau pic — en conduite normale on en bat un toutes les dix
+         secondes, et un toy qui réclame l'attention au volant est un défaut. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- `required="false"`, comme pour Plumb : le pack embarque cinq toys et
+         trois n'ont besoin d'aucun capteur de pose. Les exiger retirerait Lapse,
+         Dice et Sono du Play Store sur les appareils concernés, pour un toy
+         qu'ils n'auraient pas utilisé.
+
+         Le gyroscope n'est pas exigé non plus, alors qu'il rend la mesure bien
+         meilleure : sans lui la plateforme n'expose ni gravité fusionnée ni
+         accélération linéaire, le toy retombe sur son repli, et il le dit en
+         n'affichant pas de bille plutôt qu'en en inventant une. -->
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.sensor.gyroscope"
+        android:required="false" />
+
+    <application>
+
+        <!-- Surface 1 : la matrice. Glyph Interface liste par service, pas par
+             paquet — c'est ce qui permet à une app d'exposer plusieurs toys.
+
+             Ce n'est pas la surface principale de ce toy-ci : dans un support, le
+             téléphone regarde le conducteur, donc la matrice regarde la route.
+             Voir `GForceWidgetToy`. -->
+        <service
+            android:name="red.suns.haloglyph.gforce.toy.GForceToyService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.nothing.glyph.TOY" />
+            </intent-filter>
+            <meta-data
+                android:name="com.nothing.glyph.toy.name"
+                android:resource="@string/toy_gforce_name" />
+            <meta-data
+                android:name="com.nothing.glyph.toy.image"
+                android:resource="@drawable/gforce_toy_preview" />
+            <meta-data
+                android:name="com.nothing.glyph.toy.summary"
+                android:resource="@string/toy_gforce_summary" />
+            <!-- Appui long = l'autre face du cadran : bille ↔ pics -->
+            <meta-data
+                android:name="com.nothing.glyph.toy.longpress"
+                android:value="1" />
+            <!-- Pas d'`aod_support`, délibérément. L'Always-On ne redemande une
+                 image qu'à la minute : un accéléromètre qui affiche le virage
+                 d'il y a cinquante secondes n'est pas lent, il est faux. Même
+                 raisonnement que Plumb. -->
+        </service>
+
+        <!-- Surface 2 : le hublot d'écran d'accueil, et c'est **celle-là** qu'on
+             lit en roulant. Il n'est pas déclaré ici — le pack ne pose qu'un
+             hublot générique, qui porte tous les toys et vit dans `app`. Ce que
+             ce toy lui apporte est du Kotlin : voir `GForceWidgetToy`. -->
+
+        <!-- Pas d'écran de réglages : supprimé le 2026-09-16. La face se change
+             au geste (appui long, tap de hublot), et le rappel de support
+             n'était qu'un texte d'aide. Voir PRODUIT.md, § « Menus retirés ». -->
+
+    </application>
+
+</manifest>

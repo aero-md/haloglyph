@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Le thème de la pop-in de réglages d'un widget.
+
+  Une fenêtre **transparente et plein écran**, pas un dialogue système. Le
+  dialogue de la plateforme apporte son propre fond, ses propres marges et sa
+  propre ombre, qui ne sont celles d'aucune surface de l'app ; ici la carte est
+  dessinée en Compose comme toutes les autres, et la fenêtre ne fait que la
+  laisser passer.
+
+  `windowIsTranslucent` conserve l'écran d'accueil visible derrière — c'est tout
+  l'intérêt, on ne quitte pas son fond d'écran pour régler un widget. Le voile
+  sombre est peint par la vue et non par `backgroundDimEnabled`, qui ne s'applique
+  qu'aux fenêtres flottantes.
+
+  Aucune animation : la même règle que les listes d'options de l'app. Un réglage
+  atteint depuis un appui long est déjà le second geste ; le faire attendre une
+  transition d'activité serait le troisième.
+-->
+<resources>
+
+    <style name="Theme.Haloglyph.WidgetConfig" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
+</resources>

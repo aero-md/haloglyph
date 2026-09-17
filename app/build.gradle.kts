@@ -31,4 +31,6 @@ dependencies {
     implementation(project(":toy:lapse"))
     implementation(project(":toy:dice"))
     implementation(project(":toy:sono"))
+    implementation(project(":toy:plumb"))
+    implementation(project(":toy:gforce"))
 }

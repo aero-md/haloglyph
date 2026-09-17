@@ -9,7 +9,6 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Messenger
 import android.util.Log
-import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphMatrixManager
 import com.nothing.ketchum.GlyphToy
 
@@ -26,6 +25,14 @@ import com.nothing.ketchum.GlyphToy
  * partent dans l'autre sens, par [GlyphMatrixManager], via un binding séparé et
  * explicite vers `com.nothing.thirdparty`. Aucun canal ne permet de lire la
  * frame d'un toy — ni du sien, ni de celui d'un autre éditeur.
+ *
+ * ## Ce que `register` répond ne veut rien dire
+ *
+ * Il rend un booléen, et sur un Phone (3) il rend **faux** tout en fonctionnant :
+ * le SDK compare la chaîne d'appareil et prévient « You are targeting A024 as
+ * your device » — l'avertissement qu'on lit dans tous les logs où la matrice
+ * s'allume. S'y fier a déjà coûté un toy entièrement noir, carrousel compris. Ce
+ * qui fait foi, c'est `onServiceConnected`.
  */
 abstract class GlyphMatrixService(private val tag: String) : Service() {
 
@@ -50,7 +57,7 @@ abstract class GlyphMatrixService(private val tag: String) : Service() {
         manager = gm
         gm.init(object : GlyphMatrixManager.Callback {
             override fun onServiceConnected(name: ComponentName) {
-                gm.register(DEVICE)
+                gm.register(GLYPH_DEVICE)
                 onGlyphConnected(applicationContext, gm)
             }
 
@@ -92,9 +99,4 @@ abstract class GlyphMatrixService(private val tag: String) : Service() {
 
     /** Le système demande une frame Always-On : rendu statique, sans animation. */
     protected open fun onAodUpdate() {}
-
-    private companion object {
-        /** Nothing Phone (3). La seule matrice ciblée en V1. */
-        val DEVICE = Glyph.DEVICE_23112
-    }
 }

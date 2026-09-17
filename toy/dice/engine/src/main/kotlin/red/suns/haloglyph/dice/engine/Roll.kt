@@ -197,11 +197,18 @@ fun revealAt(z: Double): Double = when {
  * Les contacts avec la table, en secondes depuis le jet. Le premier est le
  * lancer lui-même. Les intervalles se resserrent et les hauteurs s'écrasent,
  * comme n'importe quoi qui rebondit.
+ *
+ * Il y en a eu un de plus, culminant à 0,02 unité de dé. Sur vingt-cinq LEDs,
+ * deux centièmes de dé ne valent **pas une cellule** : ce dernier saut ne se
+ * voyait pas, il ne faisait qu'ajouter cent trente millisecondes d'attente avant
+ * le roulé. Le retirer ne raccourcit pas la culbute, il retire ce qui n'en
+ * faisait pas partie — et [T_LAND] descend d'autant, pour que le roulé garde
+ * exactement la durée qu'il avait.
  */
-private val CONTACT = doubleArrayOf(0.0, 0.42, 0.78, 1.06, 1.28, 1.45, 1.58)
+private val CONTACT = doubleArrayOf(0.0, 0.42, 0.78, 1.06, 1.28, 1.45)
 
 /** Sommet de chaque vol, en unités de dé (le dé fait 2 de côté). */
-private val PEAK = doubleArrayOf(0.38, 0.21, 0.12, 0.07, 0.04, 0.02)
+private val PEAK = doubleArrayOf(0.38, 0.21, 0.12, 0.07, 0.04)
 
 /** Fin de l'impulsion : la caméra a fini de reculer, le dé est en l'air. */
 const val T_TOSS = 0.35
@@ -209,8 +216,8 @@ const val T_TOSS = 0.35
 /** Dernier rebond — au-delà, le dé roule et ne saute plus. */
 val T_BRAKE = CONTACT[CONTACT.size - 1]
 
-/** Le dé est posé. */
-const val T_LAND = 2.55
+/** Le dé est posé. Un rebond de moins : voir [CONTACT]. */
+const val T_LAND = 2.42
 
 /** Durée du gros plan de révélation. */
 const val T_ZOOM = 0.6

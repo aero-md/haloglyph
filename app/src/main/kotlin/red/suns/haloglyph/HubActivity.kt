@@ -14,11 +14,10 @@ import red.suns.haloglyph.core.ui.HaloglyphTheme
 import red.suns.haloglyph.sono.MicPermission
 
 /**
- * Le hub : l'écran d'accueil de l'app de réglages.
+ * Le point d'entrée de l'app : le socle à onglets ([AppShell]).
  *
- * Il montre l'état du matériel et la liste des toys embarqués ; ouvrir un toy
- * ouvre son écran de réglages, qui vit dans le module du toy. Le hub ne sait
- * rien de ce que fait Lapse, seulement qu'il existe et où sont ses réglages.
+ * Toys, cast, paramètres — trois écrans, une seule activité. Aucun n'a de
+ * raison d'être une tâche à part : voir [AppShell].
  *
  * C'est aussi le seul endroit d'où l'autorisation micro de Sono peut être
  * demandée la première fois — voir [askForMicrophoneOnce].
@@ -32,7 +31,7 @@ class HubActivity : ComponentActivity() {
             HaloglyphTheme {
                 val context = LocalContext.current
                 AskForMicrophoneOnce()
-                HubScreen(toys = remember(context) { ToyCatalog.of(context) })
+                AppShell(toys = remember(context) { ToyCatalog.of(context) })
             }
         }
     }

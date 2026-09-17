@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import com.nothing.ketchum.Glyph
 import com.nothing.ketchum.GlyphMatrixManager
 
 /**
@@ -60,7 +59,11 @@ object GlyphAvailability {
             handler.post { onResult(available) }
         }
 
-        val manager = runCatching { GlyphMatrixManager.getInstance(app) }.getOrNull()
+        // Sa propre connexion, et pas le singleton : la sonde se termine par un
+        // `unInit`, qui délierait aussi le Glyph Toy en train de s'afficher si
+        // les deux partageaient l'instance. Ouvrir le hub éteindrait la matrice.
+        // Voir [GlyphConnection].
+        val manager = runCatching { GlyphConnection.own(app) }.getOrNull()
         if (manager == null) {
             Log.d(TAG, "GlyphMatrixManager indisponible")
             settle(false, null)
@@ -73,7 +76,7 @@ object GlyphAvailability {
             manager.init(object : GlyphMatrixManager.Callback {
                 override fun onServiceConnected(name: ComponentName) {
                     // `register` peut lever si l'appareil n'est pas celui qu'on croit.
-                    settle(runCatching { manager.register(Glyph.DEVICE_23112) }.isSuccess, manager)
+                    settle(runCatching { manager.register(GLYPH_DEVICE) }.isSuccess, manager)
                 }
 
                 override fun onServiceDisconnected(name: ComponentName) {

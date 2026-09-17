@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Langue par défaut : l'anglais, et non le français dans lequel l'app a été
+    écrite. C'est ce dossier non qualifié que le système sert à quiconque n'a
+    aucune des cinq langues, et l'anglais est ce que comprend le plus grand
+    nombre d'entre eux. Le français a son `values-fr/`, comme les autres.
+-->
+<resources>
+
+    <!-- Le nom reste le nom, et il ne se traduit nulle part : « g » est une unité
+         internationale et le pluriel anglais est passé dans l'usage automobile de
+         toutes les langues visées. -->
+    <string name="toy_gforce_name" translatable="false">G-Forces</string>
+
+    <!-- Affiché par le système dans Glyph Interface → Glyph Toys, et sous le
+         widget dans le sélecteur. Le geste y tient, parce qu'il n'y a aucun autre
+         endroit où l'apprendre. -->
+    <string name="toy_gforce_summary">In-car accelerometer: a ball for what you feel now, and the four peaks of the trip. Long press to switch.</string>
+
+</resources>

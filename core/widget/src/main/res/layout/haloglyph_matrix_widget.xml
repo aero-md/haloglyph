@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Layout minimal, et c'est voulu : tout ce qui est dessiné l'est dans la bitmap,
-  par le même renderer que la matrice physique. Une hiérarchie de vues qui
-  imiterait la grille serait plus lourde à transmettre et ne partagerait aucun
-  code avec le toy.
+  Layout minimal, et c'est voulu deux fois.
+
+  D'abord parce que tout ce qui est dessiné l'est dans la bitmap, par le même
+  peintre que l'aperçu de l'app. Une hiérarchie de vues qui imiterait la grille
+  serait plus lourde à transmettre et ne partagerait aucun code avec le toy.
+
+  Ensuite parce que le widget **n'a pas de fond**. Pas de carte, pas de couleur,
+  pas de coins arrondis à négocier avec le launcher : la bitmap est transparente
+  hors du disque, et ce qu'on voit est le hublot, seul, posé sur le fond d'écran.
+  Poser ici le moindre `background` remettrait le carré qu'on cherche à ne pas
+  avoir.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
 
     <ImageView
         android:id="@+id/haloglyph_matrix_image"

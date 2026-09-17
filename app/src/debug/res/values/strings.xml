@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Variante debug seulement : pas de traduction, ces chaînes ne sortent pas d'ici. -->
-    <string name="self_test_widget_label" translatable="false">Haloglyph — mire</string>
-    <string name="self_test_widget_description" translatable="false">Vérification de la plomberie : masque 489 LEDs, anneau de bord, rafale au tap.</string>
-</resources>

@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="toy_sono_summary">Mikrofon auf der Matrix: Spektrum, VU-Zeiger, Spektrogramm. Lange drücken zum Wechseln.</string>
+    <string name="toy_sono_summary">Mikrofon auf der Matrix: Spektrum, VU-Zeiger, Wellenform. Lange drücken zum Wechseln.</string>
 
     <string name="sono_mic_channel">Mikrofon aktiv</string>
     <string name="sono_mic_notice">Sono hört auf der Glyph Matrix mit</string>
+
+    <string name="sono_mic_armed_title">Sono hört mit</string>
+    <string name="sono_mic_armed_text">Die Matrix zeigt den Ton weiter, auch bei ausgeschaltetem Bildschirm.</string>
+    <string name="sono_mic_disarm">Beenden</string>
+
+    <string name="sono_tile_label">Haloglyph-Mikrofonzugriff</string>
+    <string name="sono_tile_listening">Hört mit</string>
+    <string name="sono_tile_off">Aus</string>
 
     <string name="sono_section_display">Anzeige</string>
     <string name="sono_mode">Modus</string>
     <string name="sono_mode_hint">Glyph Button lange drücken zum Wechseln</string>
     <string name="sono_mode_spectrum">Spektrum</string>
     <string name="sono_mode_needle">VU-Zeiger</string>
-    <string name="sono_mode_spectrogram">Spektrogramm</string>
+    <string name="sono_mode_wave">Wellenform</string>
 
     <string name="sono_preview_simulated">Simulierte Vorschau — das Mikrofon bleibt aus</string>
 
@@ -22,5 +30,11 @@
     <string name="sono_permission_action">Erlauben</string>
     <string name="sono_permission_note">Der Ton wird sofort ausgewertet, nie aufgezeichnet oder gesendet.</string>
     <string name="sono_permission_missing">Ohne sie hat Sono nichts anzuzeigen.</string>
+
+    <string name="sono_mic_arm_action">Aktivieren</string>
+
+    <string name="sono_mic_shortcut_text">Mikrofon aktivieren, bevor das Telefon abgelegt wird.</string>
+    <string name="sono_notice_add">Verknüpfung im Menü</string>
+    <string name="sono_notice_add_note">Eine Schaltfläche „Aktivieren“ bei den Benachrichtigungen. Anders als die Kachel schließt sie das Menü nicht.</string>
 
 </resources>

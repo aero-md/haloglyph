@@ -9,6 +9,11 @@ android {
 
 dependencies {
     api(project(":core:matrix"))
+    api(project(":core:look"))
+
+    // Pour `BackHandler` : une liste déroulante se referme au retour système, et
+    // elle n'est plus une fenêtre qui le ferait toute seule. Voir HaloOverlay.
+    implementation(libs.androidx.activity.compose)
 
     api(platform(libs.compose.bom))
     api(libs.compose.ui)

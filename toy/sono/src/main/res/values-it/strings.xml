@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="toy_sono_summary">Il microfono sulla matrice: spettro, ago VU, spettrogramma. Pressione lunga per cambiare modo.</string>
+    <string name="toy_sono_summary">Il microfono sulla matrice: spettro, ago VU, forma d\'onda. Pressione lunga per cambiare modo.</string>
 
     <string name="sono_mic_channel">Microfono in uso</string>
     <string name="sono_mic_notice">Sono è in ascolto sulla Glyph Matrix</string>
+
+    <string name="sono_mic_armed_title">Sono è in ascolto</string>
+    <string name="sono_mic_armed_text">La matrice continua a mostrare il suono a schermo spento.</string>
+    <string name="sono_mic_disarm">Interrompi</string>
+
+    <string name="sono_tile_label">Accesso al microfono di Haloglyph</string>
+    <string name="sono_tile_listening">In ascolto</string>
+    <string name="sono_tile_off">Spento</string>
 
     <string name="sono_section_display">Visualizzazione</string>
     <string name="sono_mode">Modo</string>
     <string name="sono_mode_hint">Pressione lunga sul Glyph Button per cambiare</string>
     <string name="sono_mode_spectrum">Spettro</string>
     <string name="sono_mode_needle">Ago VU</string>
-    <string name="sono_mode_spectrogram">Spettrogramma</string>
+    <string name="sono_mode_wave">Forma d\'onda</string>
 
     <string name="sono_preview_simulated">Anteprima simulata — il microfono resta spento</string>
 
@@ -22,5 +30,11 @@
     <string name="sono_permission_action">Consenti</string>
     <string name="sono_permission_note">L\'audio è analizzato al volo, mai registrato né trasmesso.</string>
     <string name="sono_permission_missing">Senza di essa, Sono non ha nulla da mostrare.</string>
+
+    <string name="sono_mic_arm_action">Attiva</string>
+
+    <string name="sono_mic_shortcut_text">Attiva il microfono prima di posare il telefono.</string>
+    <string name="sono_notice_add">Scorciatoia nel pannello</string>
+    <string name="sono_notice_add_note">Un pulsante Attiva tra le notifiche. A differenza del riquadro, non chiude il pannello.</string>
 
 </resources>

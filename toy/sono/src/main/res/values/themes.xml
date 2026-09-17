@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+        Le thème de l'activité qui n'affiche rien.
+
+        `MicArmActivity` existe pour être *visible* au sens du système — c'est ce
+        qui donne au service micro le droit de s'ouvrir — et invisible au sens de
+        l'utilisateur. D'où une fenêtre transparente, sans titre, sans fond et
+        sans animation : entre la tuile et la matrice, il ne doit rien y avoir à
+        regarder.
+    -->
+    <style name="Theme.Haloglyph.Invisible" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+</resources>

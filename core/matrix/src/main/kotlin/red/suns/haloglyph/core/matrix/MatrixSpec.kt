@@ -55,6 +55,17 @@ class MatrixSpec internal constructor(
     val ledCount: Int get() = leds.size
 
     /**
+     * Distance au centre de la LED la plus excentrée.
+     *
+     * Un peu en deçà de [radius], parce que le masque teste le **centre** des
+     * cellules. C'est de là que se déduit le cerne minimal d'un hublot dessiné :
+     * le coin de cette LED est encore une demi-diagonale plus loin, et en deçà
+     * de `maxDistance − size/2 + √2/2` largeurs de LED il sortirait de la
+     * découpe. Voir `MatrixLook.RING`.
+     */
+    val maxDistance: Float
+
+    /**
      * Contour du disque, trié dans le sens horaire depuis midi.
      *
      * Définition : une LED présente dont l'un des quatre voisins directs est
@@ -81,6 +92,7 @@ class MatrixSpec internal constructor(
             }
         }
         leds = present0.toIntArray()
+        maxDistance = leds.maxOf { distance[it] }
 
         edgeRing = clockwise(
             leds.filter { i ->

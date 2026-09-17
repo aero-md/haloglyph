@@ -1,6 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Langue par défaut : l'anglais, comme partout dans le pack. C'est ce dossier
+    non qualifié que le système sert à quiconque n'a aucune des cinq langues.
+-->
 <resources>
     <!-- Accessibilité : la bitmap n'a aucun texte, c'est la seule description
-         que TalkBack peut lire. Traduite comme le reste (de·en·es·fr·it). -->
-    <string name="haloglyph_widget_matrix_description">Glyph Matrix</string>
+         que TalkBack peut lire. -->
+    <string name="haloglyph_widget_matrix_description" translatable="false">Glyph Matrix</string>
+
+    <!-- ============ Réglages d'un widget posé ============ -->
+
+    <!-- Les deux onglets : ce que le hublot montre, et à quoi il ressemble. Deux
+         sujets qui ne se comparent pas, d'où l'onglet plutôt que l'empilement. -->
+    <string name="widget_tab_toys" translatable="false">Toys</string>
+    <string name="widget_tab_look">Look</string>
+
+    <!-- Onglet des toys : les deux bouts de la rangée de segments d'un toy qui
+         n'a qu'une forme. Non traduits, comme « Sharp » et « Soft » : ce sont
+         des valeurs de contrôle, pas des phrases, et elles partagent la rangée
+         du dé avec des nombres — « Désactivé » ne tiendrait pas dans un segment
+         de cinq. -->
+    <string name="widget_toy_on" translatable="false">ON</string>
+    <string name="widget_toy_off" translatable="false">OFF</string>
+    <!-- Le geste, et le seul endroit où on puisse l'apprendre. Ce n'est pas une
+         glose sous un réglage : c'est ce que fait le widget. Réduit à sa plus
+         simple expression — une flèche dit « ensuite » mieux qu'une phrase. -->
+    <string name="widget_rotation_note">Double tap → next toy</string>
+
+    <!-- Le libellé vient du portail, qui règle la même chose sous ce nom. Les
+         deux valeurs, elles, ne se traduisent nulle part dans l'écosystème :
+         « Sharp » et « Soft » sont les noms des deux rendus, pas des adjectifs. -->
+    <string name="widget_render">LED rendering</string>
+    <string name="widget_render_sharp" translatable="false">Sharp</string>
+    <string name="widget_render_soft" translatable="false">Soft</string>
+
+    <!-- Le reflet du verre : ce qui fait du hublot un objet posé sur le fond
+         d'écran plutôt qu'un disque noir troué de points. -->
+    <string name="widget_style">Style</string>
+    <string name="widget_style_realistic">Realistic</string>
+    <string name="widget_style_minimal">Minimal</string>
+
+    <!-- Ce hublot anime-t-il seulement quand on le touche, ou sans fin ? Dans
+         l'onglet de l'apparence et non dans celui des toys : ça ne dit rien de
+         *ce qui* est affiché, seulement de la façon dont ce hublot-là se
+         comporte. -->
+    <string name="widget_motion">Animation</string>
+    <string name="widget_motion_tap">On tap</string>
+    <string name="widget_motion_loop">Continuous</string>
+
+    <!-- Le canal de la notification du service d'animation. Elle n'est jamais
+         vue — canal d'importance minimale, visibilité secrète — mais elle est
+         obligatoire dès que le service passe au premier plan, et un canal se
+         nomme même quand personne ne le voit. -->
+    <string name="widget_burst_channel">Widget animation</string>
+    <string name="widget_limit">Limited to %1$d Haloglyph widgets</string>
 </resources>

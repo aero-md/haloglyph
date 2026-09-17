@@ -19,5 +19,4 @@
          widget dans le sélecteur. Les deux commandes du toy y tiennent, parce
          qu'il n'y a aucun autre endroit où les apprendre. -->
     <string name="toy_dice_summary">d6 / d10 / d12 / d20 die, 3D solids tracked as quaternions. Shake to roll, long press to switch solid.</string>
-
 </resources>

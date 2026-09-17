@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="toy_dice_summary">Dado d6 / d10 / d12 / d20, sólidos 3D seguidos por cuaterniones. Agita para tirar, mantén pulsado para cambiar de sólido.</string>
+
 </resources>

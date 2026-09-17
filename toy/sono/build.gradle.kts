@@ -15,9 +15,12 @@ dependencies {
     implementation(project(":core:config"))
     implementation(project(":core:glyph"))
 
-    // Pas de `core:widget`. Un widget qui écoute le micro en permanence est
-    // indéfendable — batterie, vie privée, et l'indicateur micro d'Android
-    // allumé en continu sur l'écran d'accueil. Sono reste sur la surface Glyph.
+    // Le hublot d'écran d'accueil. Il a longtemps été refusé, et pour une bonne
+    // raison : un widget qui écoute le micro en permanence est indéfendable.
+    // Celui-ci n'écoute que pendant les cinq secondes qui suivent un tap, et le
+    // tap sur un widget est justement l'une des rares surfaces qui puissent
+    // légalement ouvrir le micro. Voir `SonoWidgetToy`.
+    implementation(project(":core:widget"))
 
     // L'écran de réglages : le mode courant, et l'autorisation micro.
     implementation(project(":core:ui"))

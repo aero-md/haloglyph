@@ -9,7 +9,7 @@ import red.suns.haloglyph.core.matrix.Frame
  * Un toy porte ses trois surfaces dans son propre module ; le hub n'a besoin de
  * savoir que ceci : comment le nommer, comment le décrire en une ligne, comment
  * le dessiner sur la matrice en petit, et quel écran de réglages ouvrir. Les
- * classes de service et de widget sont passées en `Class<*>` — le hub s'en sert
+ * classes de service et de widgets sont passées en `Class<*>` — le hub s'en sert
  * pour compter les widgets posés et pour dire si le toy est déclaré à Glyph
  * Interface, jamais pour les instancier.
  *
@@ -24,8 +24,16 @@ data class ToyEntry(
     @StringRes val summaryRes: Int,
     /** Le service exposé à Glyph Interface, `null` si le toy est widget seulement. */
     val glyphService: Class<*>? = null,
-    /** Le fournisseur de widget, `null` si le toy n'en propose pas. */
-    val widgetProvider: Class<*>? = null,
+    /**
+     * Les fournisseurs de widget du toy — un par **format** (2 × 2, 1 × 1), vide
+     * si le toy n'en propose pas.
+     *
+     * Une liste et non une classe : le système attache une taille à un
+     * fournisseur, donc proposer deux formats oblige à déclarer deux receivers.
+     * Le hub les compte ensemble — un widget posé est un widget posé, sa taille
+     * ne regarde que celui qui l'a posé.
+     */
+    val widgetProviders: List<Class<*>> = emptyList(),
     /** Aperçu animé pour la fiche du hub : la même signature que le rendu du toy. */
     val preview: ToyPreviewRenderer? = null,
     /**

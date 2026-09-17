@@ -60,7 +60,17 @@ private val HaloColors = darkColorScheme(
     onSurfaceVariant = HaloMuted,
 )
 
+/**
+ * Le thème, et l'étage du dessus qui va avec.
+ *
+ * [HaloOverlay] est posé ici et pas dans chaque écran : une liste déroulante se
+ * dessine par-dessus le sien ([HaloOverlayHost] dit pourquoi), et aucun écran ne
+ * doit avoir à le savoir. Un toy qui ouvre son activité de réglages dans ce thème
+ * a donc ses sélecteurs qui marchent, sans une ligne de plus.
+ */
 @Composable
 fun HaloglyphTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colorScheme = HaloColors, content = content)
+    MaterialTheme(colorScheme = HaloColors) {
+        HaloOverlay(content)
+    }
 }

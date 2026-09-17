@@ -1,8 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- Icone de marque Haloglyph — couronne solaire, 16 rayons capsule de
-       longueur alternee, coupes net sur un noyau vide (r=68). Le quadrant
-       haut-droit (4 rayons) porte l'accent rouge #D11A11, le reste en noir
-       plein #000000. Variante « dense », retenue comme icone officielle.
+  <!-- Icone de marque Haloglyph — couronne solaire, 12 rayons capsule de
+       longueur alternee (court 68->97, long 68->131), coupes net sur un
+       noyau vide (r=68). 30 degres entre rayons. Le quadrant haut-droit (3
+       rayons, 30/60/90 degres) porte l'accent rouge #D11A11, le reste en
+       noir plein #000000. Variante « 12 rayons », choisie pour son epaisseur
+       (hw=15, contre 11 sur la variante a 16 rayons) a nombre de rayons
+       reduit.
        Miroir de app/src/main/res/drawable/ic_launcher_foreground.xml (sans
        le fond, et sans le facteur d'agrandissement propre a la zone sure
        adaptative). -->
@@ -11,23 +14,19 @@
   <rect width="512" height="512" rx="112" fill="#FFFFFF"/>
 
   <g fill="#000000">
-    <path d="M245 188L245 159A11 11 0 0 1 267 159L267 188Z"/>
-    <path d="M323.03 271.86L381.24 295.97A11 11 0 0 1 372.82 316.29L314.61 292.19Z"/>
-    <path d="M311.86 296.31L332.37 316.81A11 11 0 0 1 316.81 332.37L296.31 311.86Z"/>
-    <path d="M292.19 314.61L316.29 372.82A11 11 0 0 1 295.97 381.24L271.86 323.03Z"/>
-    <path d="M267 324L267 353A11 11 0 0 1 245 353L245 324Z"/>
-    <path d="M240.14 323.03L216.03 381.24A11 11 0 0 1 195.71 372.82L219.81 314.61Z"/>
-    <path d="M215.69 311.86L195.19 332.37A11 11 0 0 1 179.63 316.81L200.14 296.31Z"/>
-    <path d="M197.39 292.19L139.18 316.29A11 11 0 0 1 130.76 295.97L188.97 271.86Z"/>
-    <path d="M188 267L159 267A11 11 0 0 1 159 245L188 245Z"/>
-    <path d="M188.97 240.14L130.76 216.03A11 11 0 0 1 139.18 195.71L197.39 219.81Z"/>
-    <path d="M200.14 215.69L179.63 195.19A11 11 0 0 1 195.19 179.63L215.69 200.14Z"/>
-    <path d="M219.81 197.39L195.71 139.18A11 11 0 0 1 216.03 130.76L240.14 188.97Z"/>
+    <path d="M271 188L271 159A15 15 0 0 0 241 159L241 188Z"/>
+    <path d="M307.39 302.99L332.50 317.49A15 15 0 0 0 347.50 291.51L322.39 277.01Z"/>
+    <path d="M277.01 322.39L308.51 376.95A15 15 0 0 0 334.49 361.95L302.99 307.39Z"/>
+    <path d="M241 324L241 353A15 15 0 0 0 271 353L271 324Z"/>
+    <path d="M209.01 307.39L177.51 361.95A15 15 0 0 0 203.49 376.95L234.99 322.39Z"/>
+    <path d="M189.61 277.01L164.50 291.51A15 15 0 0 0 179.50 317.49L204.61 302.99Z"/>
+    <path d="M188 241L125 241A15 15 0 0 0 125 271L188 271Z"/>
+    <path d="M204.61 209.01L179.50 194.51A15 15 0 0 0 164.50 220.49L189.61 234.99Z"/>
+    <path d="M234.99 189.61L203.49 135.05A15 15 0 0 0 177.51 150.05L209.01 204.61Z"/>
   </g>
   <g fill="#D11A11">
-    <path d="M271.86 188.97L295.97 130.76A11 11 0 0 1 316.29 139.18L292.19 197.39Z"/>
-    <path d="M296.31 200.14L316.81 179.63A11 11 0 0 1 332.37 195.19L311.86 215.69Z"/>
-    <path d="M314.61 219.81L372.82 195.71A11 11 0 0 1 381.24 216.03L323.03 240.14Z"/>
-    <path d="M324 245L353 245A11 11 0 0 1 353 267L324 267Z"/>
+    <path d="M302.99 204.61L334.49 150.05A15 15 0 0 0 308.51 135.05L277.01 189.61Z"/>
+    <path d="M322.39 234.99L347.50 220.49A15 15 0 0 0 332.50 194.51L307.39 209.01Z"/>
+    <path d="M324 271L387 271A15 15 0 0 0 387 241L324 241Z"/>
   </g>
 </svg>

@@ -16,19 +16,25 @@ import kotlin.math.sqrt
  * moyenne glissante sinon : sans ça un téléphone posé mesure déjà 9,81 et
  * n'importe quel seuil utile serait franchi en permanence.
  *
- * ### Le capteur réveillant, et pourquoi il change tout ici
+ * ### Le capteur réveillant : demandé, et absent
  *
  * Un Glyph Toy s'utilise **téléphone retourné, écran éteint**. Or un capteur
- * ordinaire ne réveille pas le processeur d'application : les mesures
- * s'accumulent dans le FIFO du capteur et arrivent en paquet au prochain réveil,
- * ce qui donne un dé qui se lance trente secondes après le geste, ou pas du
- * tout. Le [Sensor.TYPE_ACCELEROMETER] **réveillant** existe exactement pour ce
- * cas, il est déclaré par le matériel et ne demande aucune permission — ni
- * `WAKE_LOCK`, ni service au premier plan.
+ * ordinaire ne réveille pas le processeur d'application : les mesures peuvent
+ * s'accumuler dans le FIFO du capteur et arriver en paquet au prochain réveil,
+ * ce qui donnerait un dé qui se lance trente secondes après le geste. Le
+ * [Sensor.TYPE_ACCELEROMETER] **réveillant** existe dans l'API exactement pour
+ * ce cas et ne demande aucune permission — ni `WAKE_LOCK`, ni service au premier
+ * plan. On le demande donc d'abord.
  *
- * On le demande donc d'abord, et on retombe sur l'ordinaire s'il n'existe pas.
- * Le repli reste utile : sur un appareil sans variante réveillante, le toy
- * marche écran allumé, ce qui est le cas de la vignette et des essais.
+ * **Le Phone (3) n'en a pas.** Mesuré au `dumpsys sensorservice` le 14.09.2026 :
+ * le HAL n'expose que `lsm6dsv Accelerometer Non-wakeup` et sa variante non
+ * calibrée. `getDefaultSensor(…, true)` rend donc `null`, et c'est le repli qui
+ * a toujours tourné.
+ *
+ * Si le dé part quand même, c'est pour une autre raison : pendant qu'un toy est
+ * affiché, Glyph Interface **tient le service lié** et la session ouverte, donc
+ * le processus reste éveillé. La demande réveillante est gardée parce qu'elle
+ * coûte une ligne et qu'un autre appareil peut la servir.
  */
 class Shaker(context: Context, private val onShake: () -> Unit) : SensorEventListener {
 

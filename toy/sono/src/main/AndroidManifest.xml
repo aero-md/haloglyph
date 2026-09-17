@@ -54,7 +54,7 @@
             <meta-data
                 android:name="com.nothing.glyph.toy.summary"
                 android:resource="@string/toy_sono_summary" />
-            <!-- Appui long = mode suivant : spectre → aiguille → spectrogramme -->
+            <!-- Appui long = mode suivant : spectre → aiguille → onde -->
             <meta-data
                 android:name="com.nothing.glyph.toy.longpress"
                 android:value="1" />
@@ -64,9 +64,57 @@
                  micro allumé en permanence sur un écran éteint. -->
         </service>
 
+        <!-- Le micro **armé**. Un service de premier plan démarré depuis
+             l'arrière-plan n'obtient pas les permissions « pendant
+             l'utilisation » : celui-ci démarre pendant qu'une surface de l'app
+             est visible, et garde alors le micro au-delà du verrouillage. C'est
+             ce qui rend le toy utilisable téléphone posé écran contre la table.
+             Interne : on ne l'arme que depuis nos propres surfaces. -->
+        <service
+            android:name="red.suns.haloglyph.sono.mic.SonoMicService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
+
+        <!-- Surface 3 : la tuile de réglages rapides. Le geste qui arme le micro
+             deux secondes avant de retourner le téléphone.
+
+             Elle porte le nom de l'**application**, pas celui du toy : dans le
+             volet, à côté du Bluetooth et de la lampe, « Sono » ne dirait rien
+             à personne. C'est la seule surface du pack dans ce cas, et c'est
+             pour ça qu'elle vit quand même dans le module qui ouvre le micro. -->
+        <service
+            android:name="red.suns.haloglyph.sono.mic.SonoMicTile"
+            android:enabled="true"
+            android:exported="true"
+            android:icon="@drawable/ic_mic_access"
+            android:label="@string/sono_tile_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <!-- Interrupteur, pas raccourci : elle a un état allumé et un état
+                 éteint, et le volet doit l'annoncer comme tel. -->
+            <meta-data
+                android:name="android.service.quicksettings.TOGGLEABLE_TILE"
+                android:value="true" />
+        </service>
+
+        <!-- L'activité qui ne montre rien : elle existe pour qu'au moment où le
+             service micro démarre, le système voie une surface de l'app au
+             premier plan. Sans elle, la tuile armerait une capture muette. -->
+        <activity
+            android:name="red.suns.haloglyph.sono.mic.MicArmActivity"
+            android:enabled="true"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Haloglyph.Invisible" />
+
         <!-- Pas de widget. Un widget qui écoute le micro en permanence est
              indéfendable, et un widget qui ne l'écoute pas n'aurait rien à
-             afficher. Sono est le seul toy du pack sans seconde surface, et
+             afficher. Sono est le seul toy du pack sans surface d'accueil, et
              c'est une conséquence de ce qu'il fait. -->
 
         <!-- Surface 2 : l'écran de réglages. Il porte le mode courant et, seul

@@ -94,6 +94,35 @@ class SonoEngineTest {
         assertTrue("crête bloquée en haut", s.peak < held.peak - 20)
     }
 
+    /**
+     * La crête instantanée est bien la crête du **signal** et non un niveau
+     * intégré : sur un sinus, elle doit tomber exactement un facteur de crête
+     * au-dessus du RMS, soit 3,01 dB. C'est ce qui distingue une forme d'onde
+     * d'une colline.
+     */
+    @Test
+    fun `la crete instantanee est au facteur de crete du sinus`() {
+        val e = engine()
+        val t = feedSine(e, 0.5, 2.0)
+        val s = e.snapshot(t)
+        assertEquals(3.01, s.lpeak - s.laf, 0.3)
+    }
+
+    /**
+     * Lire la crête la consomme : sa fenêtre est celle entre deux instantanés,
+     * sans quoi une colonne de forme d'onde garderait celle de la précédente.
+     */
+    @Test
+    fun `la crete instantanee est consommee a la lecture`() {
+        val e = engine()
+        val t = feedSine(e, 0.5, 2.0)
+        assertTrue(e.snapshot(t).lpeak > Calibration.MAX_DB - 10)
+        assertTrue(
+            "la crête aurait dû repartir de zéro",
+            e.snapshot(t + 0.033).lpeak < Calibration.MIN_DB,
+        )
+    }
+
     @Test
     fun `le reset efface maximum, crete et integration`() {
         val e = engine()
@@ -117,18 +146,36 @@ class SonoEngineTest {
     }
 
     /**
-     * Les bandes et le niveau large bande partagent la même scène sonore : c'est
-     * ce que fait [Calibration.SPREAD], et c'est ce qui permet de passer d'un
-     * mode à l'autre sans que « fort » change de sens.
+     * Les bandes et le niveau large bande décrivent la même scène sonore, à
+     * [Calibration.SPREAD] près : l'énergie d'un signal répartie sur 25 bandes
+     * en laisse ~14 dB de moins à chacune.
      */
     @Test
     fun `l'echelle des bandes est decalee de SPREAD`() {
-        assertEquals(0f, Calibration.bandPosition(Calibration.BAND_MIN), 1e-6f)
-        assertEquals(1f, Calibration.bandPosition(Calibration.BAND_MAX), 1e-6f)
+        assertEquals(Calibration.MIN_DB - Calibration.SPREAD, Calibration.BAND_MIN, 1e-9)
+        assertEquals(Calibration.MAX_DB - Calibration.SPREAD, Calibration.BAND_MAX, 1e-9)
         assertEquals(
-            Calibration.position(70.0).toFloat(),
-            Calibration.bandPosition(70.0 - Calibration.SPREAD),
-            1e-6f,
+            Calibration.MAX_DB - Calibration.MIN_DB,
+            Calibration.BAND_MAX - Calibration.BAND_MIN,
+            1e-9,
+        )
+    }
+
+    /**
+     * Un banc de 25 bandes alimenté par un sinus pur ne met qu'**une** bande en
+     * évidence : c'est ce que le spectre normalisé doit pouvoir montrer, et ce
+     * qu'une échelle absolue noyait sous le fond de la pièce.
+     */
+    @Test
+    fun `un sinus pur ne charge qu'une poignee de bandes`() {
+        val e = engine()
+        val t = feedSine(e, 0.3, 2.0)
+        val bands = e.snapshot(t).bands
+        val loudest = bands.indices.maxBy { bands[it] }
+        val others = bands.indices.filter { it != loudest }
+        assertTrue(
+            "la bande dominante ne se détache pas",
+            others.all { bands[it] < bands[loudest] - 10.0 },
         )
     }
 }

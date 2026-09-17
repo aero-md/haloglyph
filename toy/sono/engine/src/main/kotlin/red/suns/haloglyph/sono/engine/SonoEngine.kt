@@ -5,9 +5,12 @@ import red.suns.haloglyph.sono.dsp.Detector
 import red.suns.haloglyph.sono.dsp.Filter
 import red.suns.haloglyph.sono.dsp.Integrator
 import red.suns.haloglyph.sono.dsp.Weighting
+import red.suns.haloglyph.sono.dsp.FLOOR_DBFS
 import red.suns.haloglyph.sono.dsp.msqToDbfs
 import kotlin.math.abs
+import kotlin.math.exp
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 /**
  * Calibration dBFS → dB SPL.
@@ -30,21 +33,24 @@ object Calibration {
         ((db - MIN_DB) / (MAX_DB - MIN_DB)).coerceIn(0.0, 1.0)
 
     /**
-     * Plage d'une bande : celle du cadran, décalée vers le bas.
+     * Plage plausible d'une bande : celle du cadran, décalée vers le bas.
      *
      * Le décalage n'est pas un réglage au jugé. Une énergie répartie sur 25
      * bandes en laisse 10·log10(25) ≈ 14 dB de moins à chacune, si bien qu'un
-     * signal qui met l'aiguille en butée ne monterait qu'aux trois quarts du
-     * spectre avec la plage du cadran. Les trois modes couvrent ainsi la même
-     * scène sonore.
+     * signal qui met l'aiguille en butée ne monte qu'aux trois quarts de la plage
+     * du cadran une fois réparti sur le banc.
+     *
+     * **Plus aucun mode n'affiche de position absolue sur cette plage.** Le
+     * spectre et l'onde rapportent leur niveau au fond de la scène
+     * ([NoiseFloor]), parce qu'une échelle absolue laissait le bruit de fond
+     * d'une pièce ordinaire occuper le tiers du disque en permanence — et parce
+     * que la calibration qui la sous-tend est une estimation. Ce qui reste ici
+     * est la plage dans laquelle une valeur de bande *tombe*, ce dont
+     * [SonoDemo] a besoin pour fabriquer une scène plausible.
      */
     const val SPREAD = 14.0
     const val BAND_MIN = MIN_DB - SPREAD
     const val BAND_MAX = MAX_DB - SPREAD
-
-    /** Position 0..1 d'un niveau de bande sur l'échelle des bandes. */
-    fun bandPosition(db: Double): Float =
-        (((db - BAND_MIN) / (BAND_MAX - BAND_MIN)).coerceIn(0.0, 1.0)).toFloat()
 }
 
 /**
@@ -89,12 +95,41 @@ class SonoEngine(
         /** Marqueur de crête : tient [PEAK_HOLD] s puis redescend. */
         val peak: Double,
         /**
+         * Crête **instantanée** depuis l'instantané précédent, en dB SPL.
+         *
+         * Ni Fast ni Slow : aucune constante de temps du tout, juste le plus fort
+         * échantillon pondéré A du dernier trentième de seconde. Les autres modes
+         * montrent des niveaux, celui-ci montre le signal — une forme d'onde
+         * tirée du niveau Fast serait lissée sur 125 ms, donc une colline là où on
+         * attend une onde.
+         *
+         * C'est le maximum de [lpeaks], gardé pour qui veut une seule valeur.
+         */
+        val lpeak: Double,
+        /**
+         * Les crêtes **par tranche de [PEAK_SLICE_SECONDS]**, en dB SPL, de la
+         * plus ancienne à la plus récente ; la dernière se termine à [t]. Seules
+         * les [lpeakCount] premières valent quelque chose.
+         *
+         * C'est ce que lit la forme d'onde, et la raison d'être de ce découpage :
+         * une colonne par instantané, c'est une colonne par image de matrice, et
+         * la vitesse de défilement est alors bornée par la cadence d'affichage.
+         * Pour défiler plus vite il faudrait étirer la même valeur sur plusieurs
+         * colonnes — un escalier, pas une onde. Le son, lui, a toute la finesse
+         * qu'on veut : on la lui prend ici, à la source, et chaque colonne porte
+         * une mesure qui lui est propre.
+         *
+         * **Tableau réutilisé d'un instantané à l'autre**, comme [bands].
+         */
+        val lpeaks: DoubleArray = DoubleArray(0),
+        val lpeakCount: Int = 0,
+        /**
          * Niveau par bande, en dB SPL.
          *
          * **Tableau réutilisé d'une image à l'autre**, comme `Frame.toBrightness` :
          * on produit trente instantanés par seconde et on n'alloue pas dans la
          * boucle. Qui garde ces valeurs au-delà de l'image en cours doit les
-         * copier — c'est ce que fait [Spectrogram].
+         * copier.
          */
         val bands: DoubleArray,
         val overload: Boolean,
@@ -113,6 +148,13 @@ class SonoEngine(
     private val bandMsq = DoubleArray(bandCount)
     private val bandsDb = DoubleArray(bandCount) { Calibration.MIN_DB }
 
+    /**
+     * Moyenne glissante de la puissance par bande, et le drapeau qui dit qu'elle
+     * est amorcée. Voir [TAU_BAND].
+     */
+    private val bandAvg = DoubleArray(bandCount)
+    private var bandAvgSeeded = false
+
     private var lafmax = Calibration.MIN_DB
     private var peak = Calibration.MIN_DB
     private var peakAt = 0.0
@@ -121,6 +163,36 @@ class SonoEngine(
     private var overloadUntil = -1.0
     private var zeroRun = 0L
     private var muted = false
+
+    /**
+     * Les crêtes par tranche, entre le fil du micro qui les écrit et celui du
+     * rendu qui les vide.
+     *
+     * Le verrou n'est pris qu'une fois par tranche — quatre-vingts fois par
+     * seconde, pour recopier un nombre — et une fois par instantané. C'est
+     * assez peu pour qu'un fil audio n'ait rien à craindre, et assez pour ne pas
+     * avoir à raconter une course bénigne dans un commentaire.
+     */
+    private val peakLock = Any()
+    private val slicePeaks = DoubleArray(MAX_SLICES)
+    private var sliceCount = 0
+
+    /** Découpage en cours, sur le fil du micro seul. */
+    private var sliceAccum = 0.0
+    private var sliceSamples = 0
+
+    /**
+     * Longueur d'une tranche, **en échantillons**.
+     *
+     * Compter des échantillons plutôt que des secondes cale le découpage sur
+     * l'horloge du son, qui est la seule qui compte ici : une tranche vaut
+     * toujours la même durée de signal, que le fil de rendu soit en retard ou
+     * non.
+     */
+    private val slicePeriod = max(1, (fs * PEAK_SLICE_SECONDS).roundToInt())
+
+    /** Tampon de sortie, réutilisé — voir [Snapshot.lpeaks]. */
+    private val lpeaksDb = DoubleArray(MAX_SLICES)
 
     @Volatile
     var status: Status = Status.NO_MIC
@@ -136,6 +208,13 @@ class SonoEngine(
             // la surcharge se lit sur l'échantillon brut : une fois filtré, le
             // plafonnement n'est plus détectable
             val a = aFilter.process(x)
+            val magnitude = abs(a)
+            if (magnitude > sliceAccum) sliceAccum = magnitude
+            if (++sliceSamples >= slicePeriod) {
+                pushSlice()
+                sliceAccum = 0.0
+                sliceSamples = 0
+            }
             fast.process(a)
             slow.process(a)
             integrator.process(a)
@@ -146,6 +225,25 @@ class SonoEngine(
         muted = zeroRun > fs
         if (status != Status.NO_MIC) {
             status = if (muted) Status.MUTED else Status.OK
+        }
+    }
+
+    /**
+     * Clôt une tranche.
+     *
+     * Le tampon plein, c'est la **plus ancienne** qui saute : elle est déjà sortie
+     * de l'écran, et garder les récentes vaut mieux que garder les premières
+     * arrivées. Ça n'arrive que si le rendu décroche d'un demi-second — un
+     * ramasse-miettes, un service suspendu — auquel cas l'onde a de toute façon un
+     * trou à combler.
+     */
+    private fun pushSlice() {
+        synchronized(peakLock) {
+            if (sliceCount == MAX_SLICES) {
+                System.arraycopy(slicePeaks, 1, slicePeaks, 0, MAX_SLICES - 1)
+                sliceCount--
+            }
+            slicePeaks[sliceCount++] = sliceAccum
         }
     }
 
@@ -165,6 +263,11 @@ class SonoEngine(
         reset()
         zeroRun = 0L
         muted = false
+        bandAvg.fill(0.0)
+        bandAvgSeeded = false
+        synchronized(peakLock) { sliceCount = 0 }
+        sliceAccum = 0.0
+        sliceSamples = 0
     }
 
     fun snapshot(now: Double): Snapshot {
@@ -176,6 +279,21 @@ class SonoEngine(
         val laeq = if (integrator.isEmpty) Calibration.MIN_DB
         else msqToDbfs(integrator.meanSquare) + calibrationK
 
+        // Crêtes consommées : chacune est une colonne de forme d'onde, et lire
+        // vide le tampon. Converties hors du verrou — il ne tient que la recopie.
+        var count: Int
+        synchronized(peakLock) {
+            count = sliceCount
+            System.arraycopy(slicePeaks, 0, lpeaksDb, 0, count)
+            sliceCount = 0
+        }
+        var lpeak = FLOOR_DBFS + calibrationK
+        for (j in 0 until count) {
+            val db = msqToDbfs(lpeaksDb[j] * lpeaksDb[j]) + calibrationK
+            lpeaksDb[j] = db
+            if (db > lpeak) lpeak = db
+        }
+
         if (status == Status.OK) {
             if (laf > lafmax) lafmax = laf
             if (laf >= peak) {
@@ -186,8 +304,24 @@ class SonoEngine(
             }
 
             analyzer.analyze(bandMsq)
+            // Moyennage en **puissance**, comme le fait un analyseur de spectre,
+            // et pour la raison qui l'y oblige : l'estimation d'une bande est
+            // bruitée par construction. Une bande grave ne tient qu'un ou deux
+            // points de FFT, sa puissance suit donc une loi à deux degrés de
+            // liberté — dont l'écart-type vaut la moyenne, soit une oscillation
+            // de plus de dix décibels d'une image à l'autre sur un bruit pourtant
+            // parfaitement stable.
+            //
+            // C'est ce qui restait de la tache de bruit : le plancher suit le
+            // minimum de cette oscillation, si bien que l'image courante se
+            // trouvait en permanence dix à vingt décibels au-dessus de lui. Cinq
+            // images moyennées divisent l'écart-type par plus de deux, et le fond
+            // repasse sous la marge de NoiseFloor.GATE_DB.
+            val a = if (dt <= 0.0 || !bandAvgSeeded) 1.0 else 1.0 - exp(-dt / TAU_BAND)
+            bandAvgSeeded = true
             for (k in 0 until bandCount) {
-                bandsDb[k] = BandAnalyzer.bandDb(bandMsq[k], calibrationK)
+                bandAvg[k] += (bandMsq[k] - bandAvg[k]) * a
+                bandsDb[k] = BandAnalyzer.bandDb(bandAvg[k], calibrationK)
             }
         }
 
@@ -197,6 +331,9 @@ class SonoEngine(
             laeq = laeq,
             lafmax = lafmax,
             peak = peak,
+            lpeak = lpeak,
+            lpeaks = lpeaksDb,
+            lpeakCount = count,
             bands = bandsDb,
             overload = now < overloadUntil,
             status = status,
@@ -214,5 +351,37 @@ class SonoEngine(
 
         const val PEAK_HOLD = 1.2
         const val PEAK_FALL = 22.0 // dB/s
+
+        /**
+         * Durée d'une tranche de crête, en secondes — donc d'une colonne de
+         * forme d'onde.
+         *
+         * Soixante-deux colonnes par seconde : le disque en porte vingt-cinq,
+         * l'onde le traverse donc en quatre dixièmes de seconde.
+         *
+         * Ce qui compte n'est pas tant la valeur que le fait qu'elle reste
+         * nettement sous la durée d'une syllabe et au-dessus de la période d'une
+         * voix grave. En dessous, on mesurerait le timbre plutôt que le débit et
+         * l'onde se hacherait sans rien dire de plus ; au-dessus, deux colonnes
+         * se partagent la même crête et le défilement redevient un étirement.
+         */
+        const val PEAK_SLICE_SECONDS = 0.016
+
+        /**
+         * Tranches gardées entre deux instantanés.
+         *
+         * Trente-deux valent quatre dixièmes de seconde, soit plus que l'écran
+         * n'en montre : au-delà, ce qui attend est déjà périmé.
+         */
+        const val MAX_SLICES = 32
+
+        /**
+         * Constante du moyennage en puissance des bandes, en secondes.
+         *
+         * Deux dixièmes : de quoi moyenner cinq à six images sans que le spectre
+         * traîne derrière ce qu'on entend. C'est la plage qu'emploie n'importe
+         * quel analyseur en mode « fast average ».
+         */
+        const val TAU_BAND = 0.2
     }
 }

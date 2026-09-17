@@ -10,7 +10,6 @@
          d'avoir un retour haptique, donc c'est lui qui demande la permission —
          et lint le vérifie module par module. -->
 
-
     <!--
       Visibilité des paquets (Android 11+).
 

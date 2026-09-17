@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="red.suns.haloglyph.core.widget.WidgetConfigActivity"
+    android:description="@string/widget_halo_summary"
+    android:initialLayout="@layout/haloglyph_matrix_widget"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:previewImage="@drawable/halo_widget_preview"
+    android:resizeMode="none"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable" />
+<!--
+  Une cellule. Tout le reste est celui du format 2 × 2 — même fournisseur à une
+  sous-classe près, mêmes réglages, mêmes toys, même rotation.
+
+  40 dp est la cote d'une cellule (70 × 1 − 30), gardée pour les launchers qui
+  ignorent targetCell*. À cette taille la cellule de la trame tombe à trois ou
+  quatre pixels : c'est le plancher de MatrixGeometry, en dessous duquel une LED
+  et sa gouttière ne se distinguent plus. C'est aussi le format où un double tap
+  demande le plus de précision, et la raison pour laquelle la fenêtre du double
+  tap n'est pas plus courte que celle du système.
+-->
